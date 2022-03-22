@@ -1,15 +1,18 @@
 # Zero2Algo
-Starter kit for developing algorithmic trading strategies in the Go language.
 
-Companion code repository for the book __Zero2Algo__ (<https://github.com/thecolngroup/zero2algo-book>), helping you master Go whilst building a best practice based algorithmic trading strategy for crypto.
+_"Master the latest features of Go and learn how to design, validate and deploy algorithmic trading strategies."_
 
-## Whats included?
+Companion code repository for the book __Zero2Algo__.
 
-- Instructive tutorial on algo trading with examples in Go
+## What's included?
+
+A complete starter kit for developing algorithmic trading strategies in the Go language:
+
 - Trend-following and counter-trend (mean reversion) algos
 - Statisically sound algo design practices
 - Backtest engine and performance reports
 - Parameter optimization method
+- Realtime walk forward testing connected to a crypto DEX
 - Path to serverless production deployment in the cloud
 - Uses latest Go language (1.18) features, including generics
 - Idiomatic Go style using community accepted best practises
