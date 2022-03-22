@@ -10,3 +10,7 @@ type Kline struct {
 	C      Price
 	Volume float64
 }
+
+func ReadKlinesFromCSV(file string) ([]Kline, error) {
+	return nil, nil
+}

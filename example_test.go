@@ -1,18 +1,23 @@
 package zero2algo
 
 func Example() {
-	// New Backtest Dealer (sensible defaults)
+	// Create a special simulated dealer for backtesting
+	dealer := NewBacktestDealer()
 
-	// New Trendbot (sensible defaults)
+	// Create a new bot initialized with our dealer
+	// HodlBot implements a basic buy and hold algo
+	bot := NewHodlBot(dealer)
 
-	// Load .csv file of historical prices into a dataframe
+	// Read a .csv file of historical prices into a slice of klines (aka candlestick data)
+	prices, _ := ReadKlinesFromCSV("prices.csv")
 
-	// For each row
-	// New price bar from cols
-	// Dealer receive price bar
-	// Bot receive price bar
+	// Iterate prices sending each price interval to the backtest dealer and then to the bot
+	for _, price := range prices {
+		_ = dealer.Receive(price)
+		_ = bot.Receive(price)
+	}
 
-	// New backtest report from trades and portfoilo curve
-
-	// Print report summary to console
+	// Generate a performance report once all price data has been iterated
+	report := NewReport(dealer.ListTradeHistory(), dealer.ListEquityHistory())
+	PrintReportSummary(report)
 }
