@@ -8,8 +8,8 @@ Companion code repository for the book __Zero2Algo__.
 
 A complete starter kit for developing algorithmic trading strategies in the Go language:
 
-- Trend-following and counter-trend (mean reversion) algos
-- Statisically sound algo design practices
+- Example trend-following and counter-trend (mean reversion) algos
+- Statisically sound algo design validation
 - Backtest engine and performance reports
 - Parameter optimization method
 - Realtime walk forward testing connected to a crypto DEX
