@@ -1,3 +1,5 @@
 package zero2algo
 
-type Money float64
+import "github.com/shopspring/decimal"
+
+type Money decimal.Decimal
