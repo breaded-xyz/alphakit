@@ -12,6 +12,7 @@ func Example() {
 	prices, _ := ReadKlinesFromCSV("prices.csv")
 
 	// Iterate prices sending each price interval to the backtest dealer and then to the bot
+	// In the real world with the dealer connected to an exchange we would not be required to supply the price!
 	for _, price := range prices {
 		_ = dealer.ReceivePrice(price)
 		_ = bot.ReceivePrice(price)
