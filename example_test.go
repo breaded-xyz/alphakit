@@ -13,11 +13,11 @@ func Example() {
 
 	// Iterate prices sending each price interval to the backtest dealer and then to the bot
 	for _, price := range prices {
-		_ = dealer.Receive(price)
-		_ = bot.Receive(price)
+		_ = dealer.ReceivePrice(price)
+		_ = bot.ReceivePrice(price)
 	}
 
 	// Generate a performance report once all price data has been iterated
-	report := NewReport(dealer.ListTradeHistory(), dealer.ListEquityHistory())
+	report := NewReport(dealer.ListTrades(), dealer.ListEquityHistory())
 	PrintReportSummary(report)
 }

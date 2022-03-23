@@ -1,7 +1,11 @@
 package zero2algo
 
 type Dealer interface {
-	PriceReceiver
-	ListTradeHistory() []Trade
+	ListTrades() []Trade
 	ListEquityHistory() []Equity
+}
+
+type SimulatedDealer interface {
+	Dealer
+	PriceReceiver
 }
