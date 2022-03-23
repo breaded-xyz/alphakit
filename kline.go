@@ -1,6 +1,7 @@
 package zero2algo
 
 import (
+	"encoding/csv"
 	"time"
 
 	"github.com/shopspring/decimal"
@@ -15,6 +16,22 @@ type Kline struct {
 	Volume float64
 }
 
-func ReadKlinesFromCSV(file string) ([]Kline, error) {
+type KlineReader interface {
+	Read() (Kline, error)
+}
+
+func NewCSVKlineReader(csv *csv.Reader) KlineReader {
+	return nil
+}
+
+/*func (r *KlineReader) Read() (*Kline, error) {
 	return nil, nil
 }
+
+func (r *KlineReader) ReadAll() ([]Kline, error) {
+	return nil, nil
+}
+
+func ReadKlinesFromCSV(file string) ([]Kline, error) {
+	return nil, nil
+}*/
