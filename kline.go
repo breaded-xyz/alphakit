@@ -4,10 +4,10 @@ import "time"
 
 type Kline struct {
 	Start  time.Time
-	O      Price
-	H      Price
-	L      Price
-	C      Price
+	O      Money
+	H      Money
+	L      Money
+	C      Money
 	Volume float64
 }
 

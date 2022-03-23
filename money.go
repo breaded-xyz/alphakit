@@ -1,3 +1,3 @@
 package zero2algo
 
-type Price float64
+type Money float64
