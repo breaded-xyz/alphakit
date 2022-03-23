@@ -1,13 +1,17 @@
 package zero2algo
 
-import "time"
+import (
+	"time"
+
+	"github.com/shopspring/decimal"
+)
 
 type Kline struct {
 	Start  time.Time
-	O      Money
-	H      Money
-	L      Money
-	C      Money
+	O      decimal.Decimal
+	H      decimal.Decimal
+	L      decimal.Decimal
+	C      decimal.Decimal
 	Volume float64
 }
 

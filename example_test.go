@@ -19,6 +19,6 @@ func Example() {
 	}
 
 	// Generate a performance report once all price data has been iterated
-	report := NewReport(dealer.ListTrades(), dealer.ListEquityHistory())
+	report := NewReport(dealer.ListTrades(), dealer.EquityCurve())
 	PrintReportSummary(report)
 }

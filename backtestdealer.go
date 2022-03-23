@@ -14,7 +14,7 @@ func (d *BacktestDealer) ListTrades() []Trade {
 	return nil
 }
 
-func (d *BacktestDealer) ListEquityHistory() []Equity {
+func (d *BacktestDealer) EquityCurve() []Equity {
 	return nil
 }
 

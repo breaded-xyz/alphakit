@@ -1,8 +1,12 @@
 package zero2algo
 
-import "time"
+import (
+	"time"
+
+	"github.com/shopspring/decimal"
+)
 
 type Equity struct {
 	At     time.Time
-	Amount Money
+	Amount decimal.Decimal
 }
