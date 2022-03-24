@@ -22,7 +22,7 @@ func (d *Dealer) ListTrades(ctx context.Context, opts *net.ListOpts) ([]broker.T
 	return nil, nil, nil
 }
 
-func (d *Dealer) EquityCurve() []broker.Equity {
+func (d *Dealer) ListEquityHistory() []broker.Equity {
 	return nil
 }
 

@@ -42,6 +42,6 @@ func ExampleBacktest() {
 
 	// Generate a performance report from the dealer execution history
 	trades, _, _ := dealer.ListTrades(context.Background(), nil)
-	report := perf.NewReport(trades, dealer.EquityCurve())
+	report := perf.NewReport(trades, dealer.ListEquityHistory())
 	perf.PrintReportSummary(report)
 }

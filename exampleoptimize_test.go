@@ -61,7 +61,7 @@ func ExampleOptimize() {
 
 			// Generate a performance report for the test case and add it to the result set
 			trades, _, _ := dealer.ListTrades(context.Background(), nil)
-			results = append(results, perf.NewReport(trades, dealer.EquityCurve()))
+			results = append(results, perf.NewReport(trades, dealer.ListEquityHistory()))
 		}(c)
 	}
 	wg.Wait()

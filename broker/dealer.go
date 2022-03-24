@@ -14,5 +14,5 @@ type Dealer interface {
 type SimulatedDealer interface {
 	Dealer
 	pricing.Receiver
-	EquityCurve() []Equity
+	ListEquityHistory() []Equity
 }
