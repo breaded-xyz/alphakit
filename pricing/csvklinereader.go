@@ -3,6 +3,7 @@ package pricing
 import (
 	"encoding/csv"
 	"errors"
+	"io"
 	"strconv"
 	"time"
 
@@ -40,7 +41,19 @@ func (r *CSVKlineReader) Read() (Kline, error) {
 }
 
 func (r *CSVKlineReader) ReadAll() ([]Kline, error) {
-	return nil, nil
+	var ks []Kline
+	for {
+		k, err := r.Read()
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			return nil, err
+		}
+		ks = append(ks, k)
+	}
+
+	return ks, nil
 }
 
 func newKlineFromCSVRecord(record []string) (Kline, error) {

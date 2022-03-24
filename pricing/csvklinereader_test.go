@@ -86,3 +86,14 @@ func TestCSVKlineReader_Read(t *testing.T) {
 		})
 	}
 }
+
+func TestCSVKlineReader_ReadAll(t *testing.T) {
+	records := []string{
+		"1609459200000,28923.63000000,29031.34000000,28690.17000000,28995.13000000,2311.81144500",
+		"1609459300000,28928.63000000,30031.34000000,22690.17000000,28495.13000000,3000.00",
+	}
+	reader := NewCSVKlineReader(csv.NewReader(strings.NewReader(strings.Join(records, "\n"))))
+	klines, err := reader.ReadAll()
+	assert.NoError(t, err)
+	assert.Len(t, klines, 2)
+}
