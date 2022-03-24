@@ -1,5 +1,4 @@
-package price
-
+package pricing
 import (
 	"time"
 

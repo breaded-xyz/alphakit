@@ -1,6 +1,6 @@
 package broker
 
-import "github.com/colngroup/zero2algo/price"
+import "github.com/colngroup/zero2algo/pricing"
 
 type Dealer interface {
 	ListTrades() []Trade
@@ -8,6 +8,6 @@ type Dealer interface {
 
 type SimulatedDealer interface {
 	Dealer
-	price.Receiver
+	pricing.Receiver
 	EquityCurve() []Equity
 }

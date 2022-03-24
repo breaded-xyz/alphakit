@@ -7,7 +7,7 @@ import (
 
 	"github.com/colngroup/zero2algo/broker/backtest"
 	"github.com/colngroup/zero2algo/perf"
-	"github.com/colngroup/zero2algo/price"
+	"github.com/colngroup/zero2algo/pricing"
 	"github.com/colngroup/zero2algo/tradebot"
 )
 
@@ -24,7 +24,7 @@ func ExampleBacktest() {
 	// Read a .csv file of historical prices (aka candlestick data)
 	file, _ := os.Open("prices.csv")
 	defer file.Close()
-	reader := price.NewCSVKlineReader(csv.NewReader(file))
+	reader := pricing.NewCSVKlineReader(csv.NewReader(file))
 
 	// Iterate prices sending each price interval to the backtest dealer and then to the bot
 	// When connected to a live exchange we would not be required to supply the price to the dealer!

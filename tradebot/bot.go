@@ -1,9 +1,9 @@
 package tradebot
 
-import "github.com/colngroup/zero2algo/price"
+import "github.com/colngroup/zero2algo/pricing"
 
 type Bot interface {
-	price.Receiver
+	pricing.Receiver
 	Close()
 }
 

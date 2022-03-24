@@ -2,7 +2,7 @@ package backtest
 
 import (
 	"github.com/colngroup/zero2algo/broker"
-	"github.com/colngroup/zero2algo/price"
+	"github.com/colngroup/zero2algo/pricing"
 )
 
 // Enforce at compile time that the type implements the interface
@@ -23,6 +23,6 @@ func (d *Dealer) EquityCurve() []broker.Equity {
 	return nil
 }
 
-func (d *Dealer) ReceivePrice(price price.Kline) error {
+func (d *Dealer) ReceivePrice(price pricing.Kline) error {
 	return nil
 }
