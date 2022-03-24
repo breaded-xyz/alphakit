@@ -11,7 +11,7 @@ import (
 	"github.com/colngroup/zero2algo/tradebot"
 )
 
-func Example() {
+func ExampleBacktest() {
 	// Verbose error handling ommitted for brevity
 
 	// Create a special simulated dealer for backtesting
