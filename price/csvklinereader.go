@@ -39,6 +39,10 @@ func (r *CSVKlineReader) Read() (Kline, error) {
 	return newKlineFromCSVRecord(rec)
 }
 
+func (r *CSVKlineReader) ReadAll() ([]Kline, error) {
+	return nil, nil
+}
+
 func newKlineFromCSVRecord(record []string) (Kline, error) {
 	var k, empty Kline
 	var err error
