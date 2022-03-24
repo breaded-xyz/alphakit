@@ -1,6 +1,7 @@
 package zero2algo
 
 import (
+	"context"
 	"encoding/csv"
 	"os"
 	"sync"
@@ -52,14 +53,15 @@ func ExampleOptimize() {
 
 			// Iterate prices sending each price interval to the dealer and then to the bot
 			for _, price := range prices {
-				_ = dealer.ReceivePrice(price)
-				_ = bot.ReceivePrice(price)
+				_ = dealer.ReceivePrice(context.Background(), price)
+				_ = bot.ReceivePrice(context.Background(), price)
 			}
 			// Close the bot which will liquidate any open position resulting in a final trade
 			bot.Close()
 
 			// Generate a performance report for the test case and add it to the result set
-			results = append(results, perf.NewReport(dealer.ListTrades(), dealer.EquityCurve()))
+			trades, _, _ := dealer.ListTrades(context.Background(), nil)
+			results = append(results, perf.NewReport(trades, dealer.EquityCurve()))
 		}(c)
 	}
 	wg.Wait()

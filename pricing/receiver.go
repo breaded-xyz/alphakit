@@ -1,5 +1,7 @@
 package pricing
 
+import "context"
+
 type Receiver interface {
-	ReceivePrice(Kline) error
+	ReceivePrice(context.Context, Kline) error
 }

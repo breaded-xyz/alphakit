@@ -1,6 +1,7 @@
 package zero2algo
 
 import (
+	"context"
 	"encoding/csv"
 	"io"
 	"os"
@@ -33,13 +34,14 @@ func ExampleBacktest() {
 		if err == io.EOF {
 			break
 		}
-		_ = dealer.ReceivePrice(price)
-		_ = bot.ReceivePrice(price)
+		_ = dealer.ReceivePrice(context.Background(), price)
+		_ = bot.ReceivePrice(context.Background(), price)
 	}
 	// Close the bot which will liquidate the held position resulting in a trade
 	bot.Close()
 
 	// Generate a performance report from the dealer execution history
-	report := perf.NewReport(dealer.ListTrades(), dealer.EquityCurve())
+	trades, _, _ := dealer.ListTrades(context.Background(), nil)
+	report := perf.NewReport(trades, dealer.EquityCurve())
 	perf.PrintReportSummary(report)
 }
