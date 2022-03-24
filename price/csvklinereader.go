@@ -1,4 +1,4 @@
-package zero2algo
+package price
 
 import (
 	"encoding/csv"

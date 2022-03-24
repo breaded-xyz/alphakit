@@ -4,22 +4,27 @@ import (
 	"encoding/csv"
 	"io"
 	"os"
+
+	"github.com/colngroup/zero2algo/broker/backtest"
+	"github.com/colngroup/zero2algo/perf"
+	"github.com/colngroup/zero2algo/price"
+	"github.com/colngroup/zero2algo/tradebot"
 )
 
 func Example() {
 	// Verbose error handling ommitted for brevity
 
 	// Create a special simulated dealer for backtesting
-	dealer := NewBacktestDealer()
+	dealer := backtest.NewDealer()
 
 	// Create a new bot initialized with our dealer
 	// HodlBot implements a basic buy and hold algo
-	bot := NewHodlBot(dealer)
+	bot := tradebot.NewHodlBot(dealer)
 
 	// Read a .csv file of historical prices (aka candlestick data)
 	file, _ := os.Open("prices.csv")
 	defer file.Close()
-	reader := NewCSVKlineReader(csv.NewReader(file))
+	reader := price.NewCSVKlineReader(csv.NewReader(file))
 
 	// Iterate prices sending each price interval to the backtest dealer and then to the bot
 	// When connected to a live exchange we would not be required to supply the price to the dealer!
@@ -35,6 +40,6 @@ func Example() {
 	bot.Close()
 
 	// Generate a performance report from the dealer execution history
-	report := NewReport(dealer.ListTrades(), dealer.EquityCurve())
-	PrintReportSummary(report)
+	report := perf.NewReport(dealer.ListTrades(), dealer.EquityCurve())
+	perf.PrintReportSummary(report)
 }
