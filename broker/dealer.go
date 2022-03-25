@@ -3,12 +3,12 @@ package broker
 import (
 	"context"
 
-	"github.com/colngroup/zero2algo/net"
+	"github.com/colngroup/zero2algo/netapi"
 	"github.com/colngroup/zero2algo/pricing"
 )
 
 type Dealer interface {
-	ListTrades(context.Context, *net.ListOpts) ([]Trade, *net.Response, error)
+	ListTrades(context.Context, *netapi.ListOpts) ([]Trade, *netapi.Response, error)
 }
 
 type SimulatedDealer interface {

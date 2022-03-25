@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/colngroup/zero2algo/broker"
-	"github.com/colngroup/zero2algo/net"
+	"github.com/colngroup/zero2algo/netapi"
 	"github.com/colngroup/zero2algo/pricing"
 )
 
@@ -18,7 +18,7 @@ func NewDealer() *Dealer {
 	return nil
 }
 
-func (d *Dealer) ListTrades(ctx context.Context, opts *net.ListOpts) ([]broker.Trade, *net.Response, error) {
+func (d *Dealer) ListTrades(ctx context.Context, opts *netapi.ListOpts) ([]broker.Trade, *netapi.Response, error) {
 	return nil, nil, nil
 }
 

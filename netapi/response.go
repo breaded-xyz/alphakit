@@ -1,4 +1,4 @@
-package net
+package netapi
 
 import (
 	"net/http"
