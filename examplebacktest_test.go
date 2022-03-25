@@ -18,9 +18,12 @@ func ExampleBacktest() {
 	// Create a special simulated dealer for backtesting
 	dealer := backtest.NewDealer()
 
+	// Identify the asset to trade
+	asset := market.NewAsset("BTCUSD")
+
 	// Create a new bot initialized with our dealer
 	// HodlBot implements a basic buy and hold algo
-	bot := tradebot.NewHodlBot(dealer)
+	bot := tradebot.NewHodlBot(asset, dealer)
 
 	// Read a .csv file of historical prices (aka candlestick data)
 	file, _ := os.Open("prices.csv")

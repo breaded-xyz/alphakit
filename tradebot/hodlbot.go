@@ -4,22 +4,24 @@ import (
 	"context"
 
 	"github.com/colngroup/zero2algo/broker"
+	"github.com/colngroup/zero2algo/dec"
 	"github.com/colngroup/zero2algo/market"
 )
 
 var _ ConfigurableBot = (*HodlBot)(nil)
 
 type HodlBot struct {
-	// Algo parameters
 	BuyBarIndex  int
 	SellBarIndex int
 
+	asset    market.Asset
 	dealer   broker.Dealer
 	barIndex int
 }
 
-func NewHodlBot(dealer broker.Dealer) *HodlBot {
+func NewHodlBot(asset market.Asset, dealer broker.Dealer) *HodlBot {
 	return &HodlBot{
+		asset:  asset,
 		dealer: dealer,
 	}
 }
@@ -52,19 +54,36 @@ func (b *HodlBot) Configure(config map[string]any) error {
 }
 
 func (b *HodlBot) ReceivePrice(ctx context.Context, price market.Kline) error {
+	defer func() { b.barIndex++ }()
 
-	switch {
-	case b.barIndex == b.BuyBarIndex:
-		// Open position with dealer
-	case b.SellBarIndex == 0:
-		break
-	case b.barIndex == b.SellBarIndex:
-		// Close position with dealer
+	signal := b.evalAlgo(b.barIndex, b.BuyBarIndex, b.SellBarIndex)
+	if signal == 0 {
+		return nil
 	}
 
-	b.barIndex++
+	order := broker.NewOrder(b.asset, signal, dec.New(1))
+	if _, _, err := b.dealer.PlaceOrder(ctx, order); err != nil {
+		return err
+	}
 
 	return nil
+}
+
+func (b *HodlBot) evalAlgo(index, buybar, sellbar int) broker.OrderSide {
+	var side broker.OrderSide
+
+	switch {
+	case index == buybar:
+		side = broker.Buy
+		break
+	case sellbar == 0:
+		break
+	case index == sellbar:
+		side = broker.Sell
+		break
+	}
+
+	return side
 }
 
 func (b *HodlBot) Close() error {

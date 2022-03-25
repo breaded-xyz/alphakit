@@ -8,6 +8,7 @@ import (
 )
 
 type Dealer interface {
+	PlaceOrder(context.Context, Order) (*Order, *netapi.Response, error)
 	ListTrades(context.Context, *netapi.ListOpts) ([]Trade, *netapi.Response, error)
 }
 

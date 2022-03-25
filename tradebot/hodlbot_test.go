@@ -1,8 +1,12 @@
 package tradebot
 
 import (
+	"context"
 	"testing"
 
+	"github.com/colngroup/zero2algo/broker"
+	"github.com/colngroup/zero2algo/broker/backtest"
+	"github.com/colngroup/zero2algo/market"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -85,4 +89,51 @@ func TestHoldBot_Configure(t *testing.T) {
 			assert.Equal(t, tt.want, bot)
 		})
 	}
+}
+
+func TestHodlBot_evalAlgo(t *testing.T) {
+	tests := []struct {
+		name string
+		give []int
+		want broker.OrderSide
+	}{
+		{
+			name: "ok: default state",
+			give: []int{0, 0, 0},
+			want: broker.Buy,
+		},
+		{
+			name: "ok: buy",
+			give: []int{10, 10, 20},
+			want: broker.Buy,
+		},
+		{
+			name: "ok: sell",
+			give: []int{20, 10, 20},
+			want: broker.Sell,
+		},
+		{
+			name: "ok: no sell",
+			give: []int{0, 10, 0},
+			want: 0,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			var bot HodlBot
+			actual := bot.evalAlgo(tt.give[0], tt.give[1], tt.give[2])
+			assert.Equal(t, tt.want, actual)
+		})
+	}
+}
+
+func TestHodlBot_ReceivePrice(t *testing.T) {
+
+	bot := HodlBot{
+		dealer: backtest.NewDealer(),
+	}
+	err := bot.ReceivePrice(context.Background(), market.Kline{})
+	assert.NoError(t, err)
+	assert.Equal(t, 1, bot.barIndex)
 }

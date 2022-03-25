@@ -16,6 +16,9 @@ import (
 func ExampleOptimize() {
 	// Verbose error handling ommitted for brevity
 
+	// Identify the asset to trade
+	asset := market.NewAsset("BTCUSD")
+
 	// Define the set of possible values for each param
 	params := map[string][]any{
 		"buybarindex":  {0, 1, 1000},
@@ -47,7 +50,7 @@ func ExampleOptimize() {
 
 			// Create a new bot initialized with our dealer
 			// HodlBot implements a basic buy and hold algo
-			bot := tradebot.NewHodlBot(dealer)
+			bot := tradebot.NewHodlBot(asset, dealer)
 			// The bot is configured with the params in the test case
 			_ = bot.Configure(c)
 
