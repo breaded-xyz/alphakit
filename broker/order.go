@@ -13,9 +13,10 @@ const (
 )
 
 type Order struct {
-	Asset market.Asset
-	Side  OrderSide
-	Size  decimal.Decimal
+	Asset      market.Asset
+	Side       OrderSide
+	Size       decimal.Decimal
+	ReduceOnly bool
 }
 
 func NewOrder(asset market.Asset, side OrderSide, size decimal.Decimal) Order {

@@ -129,7 +129,6 @@ func TestHodlBot_evalAlgo(t *testing.T) {
 }
 
 func TestHodlBot_ReceivePrice(t *testing.T) {
-
 	bot := HodlBot{
 		dealer: backtest.NewDealer(),
 	}

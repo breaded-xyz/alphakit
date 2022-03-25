@@ -60,7 +60,7 @@ func ExampleOptimize() {
 				_ = bot.ReceivePrice(context.Background(), price)
 			}
 			// Close the bot which will liquidate any open position resulting in a final trade
-			_ = bot.Close()
+			_ = bot.Close(context.Background())
 
 			// Generate a performance report for the test case and add it to the result set
 			trades, _, _ := dealer.ListTrades(context.Background(), nil)

@@ -70,23 +70,27 @@ func (b *HodlBot) ReceivePrice(ctx context.Context, price market.Kline) error {
 }
 
 func (b *HodlBot) evalAlgo(index, buybar, sellbar int) broker.OrderSide {
-	var side broker.OrderSide
+	var signal broker.OrderSide
 
 	switch {
 	case index == buybar:
-		side = broker.Buy
+		signal = broker.Buy
 		break
 	case sellbar == 0:
 		break
 	case index == sellbar:
-		side = broker.Sell
+		signal = broker.Sell
 		break
 	}
 
-	return side
+	return signal
 }
 
-func (b *HodlBot) Close() error {
-	// Close position with dealer
+func (b *HodlBot) Close(ctx context.Context) error {
+	order := broker.NewOrder(b.asset, broker.Sell, dec.New(1))
+	order.ReduceOnly = true
+	if _, _, err := b.dealer.PlaceOrder(ctx, order); err != nil {
+		return err
+	}
 	return nil
 }
