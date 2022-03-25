@@ -14,7 +14,7 @@ func TestHoldBot_Configure(t *testing.T) {
 		err  error
 	}{
 		{
-			name: "Success",
+			name: "ok: buy index < sell index",
 			give: map[string]any{"buybarindex": 1, "sellbarindex": 1000},
 			want: HodlBot{
 				BuyBarIndex:  1,
@@ -23,7 +23,16 @@ func TestHoldBot_Configure(t *testing.T) {
 			err: nil,
 		},
 		{
-			name: "Default config state is zero",
+			name: "ok: no sell",
+			give: map[string]any{"buybarindex": 10, "sellbarindex": 0},
+			want: HodlBot{
+				BuyBarIndex:  10,
+				SellBarIndex: 0,
+			},
+			err: nil,
+		},
+		{
+			name: "ok: default",
 			give: map[string]any{"buybarindex": 0, "sellbarindex": 0},
 			want: HodlBot{
 				BuyBarIndex:  0,
@@ -32,7 +41,7 @@ func TestHoldBot_Configure(t *testing.T) {
 			err: nil,
 		},
 		{
-			name: "Buy index >= sell index",
+			name: "err: buy index >= sell index",
 			give: map[string]any{"buybarindex": 10, "sellbarindex": 5},
 			want: HodlBot{
 				BuyBarIndex:  0,
@@ -41,7 +50,7 @@ func TestHoldBot_Configure(t *testing.T) {
 			err: ErrInvalidConfig,
 		},
 		{
-			name: "Not int",
+			name: "err: not int",
 			give: map[string]any{"buybarindex": 10.5, "sellbarindex": 5},
 			want: HodlBot{
 				BuyBarIndex:  0,
@@ -50,7 +59,16 @@ func TestHoldBot_Configure(t *testing.T) {
 			err: ErrInvalidConfig,
 		},
 		{
-			name: "Key not found",
+			name: "err: neg int",
+			give: map[string]any{"buybarindex": -1, "sellbarindex": 5},
+			want: HodlBot{
+				BuyBarIndex:  0,
+				SellBarIndex: 0,
+			},
+			err: ErrInvalidConfig,
+		},
+		{
+			name: "err: key not found",
 			give: map[string]any{"notakey": 10, "sellbarindex": 5},
 			want: HodlBot{
 				BuyBarIndex:  0,

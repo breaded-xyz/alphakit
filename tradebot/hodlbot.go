@@ -37,6 +37,10 @@ func (b *HodlBot) Configure(config map[string]any) error {
 	switch {
 	case buyBarIndex == 0 && sellBarIndex == 0:
 		break
+	case buyBarIndex >= 0 && sellBarIndex == 0:
+		break
+	case buyBarIndex < 0 || sellBarIndex < 0:
+		return ErrInvalidConfig
 	case buyBarIndex >= sellBarIndex:
 		return ErrInvalidConfig
 	}
@@ -50,10 +54,10 @@ func (b *HodlBot) Configure(config map[string]any) error {
 func (b *HodlBot) ReceivePrice(ctx context.Context, price pricing.Kline) error {
 
 	switch {
-	case b.SellBarIndex == 0:
-		break
 	case b.barIndex == b.BuyBarIndex:
 		// Open position with dealer
+	case b.SellBarIndex == 0:
+		break
 	case b.barIndex == b.SellBarIndex:
 		// Close position with dealer
 	}
