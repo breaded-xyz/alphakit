@@ -16,10 +16,10 @@ import (
 func ExampleOptimize() {
 	// Verbose error handling ommitted for brevity
 
-	// Define the set of values for each param
+	// Define the set of possible values for each param
 	params := map[string][]any{
-		"buy":  {1, 1000},
-		"sell": {1000, 2000},
+		"buybarindex":  {0, 1, 1000},
+		"sellbarindex": {0, 1000, 2000},
 	}
 	// Build a set of test cases, one for each permutation of params
 	cases := optimize.BuildTestCases(params)
@@ -57,7 +57,7 @@ func ExampleOptimize() {
 				_ = bot.ReceivePrice(context.Background(), price)
 			}
 			// Close the bot which will liquidate any open position resulting in a final trade
-			bot.Close()
+			_ = bot.Close()
 
 			// Generate a performance report for the test case and add it to the result set
 			trades, _, _ := dealer.ListTrades(context.Background(), nil)

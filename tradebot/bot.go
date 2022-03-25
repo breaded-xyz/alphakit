@@ -1,10 +1,16 @@
 package tradebot
 
-import "github.com/colngroup/zero2algo/pricing"
+import (
+	"errors"
+
+	"github.com/colngroup/zero2algo/pricing"
+)
+
+var ErrInvalidConfig = errors.New("invalid bot config")
 
 type Bot interface {
 	pricing.Receiver
-	Close()
+	Close() error
 }
 
 type ConfigurableBot interface {

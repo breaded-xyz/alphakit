@@ -38,7 +38,7 @@ func ExampleBacktest() {
 		_ = bot.ReceivePrice(context.Background(), price)
 	}
 	// Close the bot which will liquidate the held position resulting in a trade
-	bot.Close()
+	_ = bot.Close()
 
 	// Generate a performance report from the dealer execution history
 	trades, _, _ := dealer.ListTrades(context.Background(), nil)
