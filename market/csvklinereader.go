@@ -1,4 +1,4 @@
-package pricing
+package market
 
 import (
 	"encoding/csv"

@@ -4,8 +4,8 @@ import (
 	"context"
 
 	"github.com/colngroup/zero2algo/broker"
+	"github.com/colngroup/zero2algo/market"
 	"github.com/colngroup/zero2algo/netapi"
-	"github.com/colngroup/zero2algo/pricing"
 )
 
 // Enforce at compile time that the type implements the interface
@@ -26,6 +26,6 @@ func (d *Dealer) ListEquityHistory() []broker.Equity {
 	return nil
 }
 
-func (d *Dealer) ReceivePrice(ctx context.Context, price pricing.Kline) error {
+func (d *Dealer) ReceivePrice(ctx context.Context, price market.Kline) error {
 	return nil
 }

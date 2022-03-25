@@ -3,8 +3,8 @@ package broker
 import (
 	"context"
 
+	"github.com/colngroup/zero2algo/market"
 	"github.com/colngroup/zero2algo/netapi"
-	"github.com/colngroup/zero2algo/pricing"
 )
 
 type Dealer interface {
@@ -13,6 +13,6 @@ type Dealer interface {
 
 type SimulatedDealer interface {
 	Dealer
-	pricing.Receiver
+	market.Receiver
 	ListEquityHistory() []Equity
 }

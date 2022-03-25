@@ -7,9 +7,9 @@ import (
 	"sync"
 
 	"github.com/colngroup/zero2algo/broker/backtest"
+	"github.com/colngroup/zero2algo/market"
 	"github.com/colngroup/zero2algo/optimize"
 	"github.com/colngroup/zero2algo/perf"
-	"github.com/colngroup/zero2algo/pricing"
 	"github.com/colngroup/zero2algo/tradebot"
 )
 
@@ -31,7 +31,7 @@ func ExampleOptimize() {
 	// Cache the prices in memory to use in multiple optimization iterations
 	file, _ := os.Open("prices.csv")
 	defer file.Close()
-	prices, _ := pricing.NewCSVKlineReader(csv.NewReader(file)).ReadAll()
+	prices, _ := market.NewCSVKlineReader(csv.NewReader(file)).ReadAll()
 
 	// Iterate the test cases, executing each set of params and collecting the results
 	// Test cases are executed concurrently to reduce run time

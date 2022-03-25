@@ -3,13 +3,13 @@ package tradebot
 import (
 	"errors"
 
-	"github.com/colngroup/zero2algo/pricing"
+	"github.com/colngroup/zero2algo/market"
 )
 
 var ErrInvalidConfig = errors.New("invalid bot config")
 
 type Bot interface {
-	pricing.Receiver
+	market.Receiver
 	Close() error
 }
 

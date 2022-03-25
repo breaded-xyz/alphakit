@@ -1,4 +1,5 @@
-package pricing
+package market
+
 import (
 	"time"
 

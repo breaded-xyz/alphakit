@@ -1,4 +1,4 @@
-package pricing
+package market
 
 type KlineReader interface {
 	Read() (Kline, error)

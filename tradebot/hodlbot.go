@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/colngroup/zero2algo/broker"
-	"github.com/colngroup/zero2algo/pricing"
+	"github.com/colngroup/zero2algo/market"
 )
 
 var _ ConfigurableBot = (*HodlBot)(nil)
@@ -51,7 +51,7 @@ func (b *HodlBot) Configure(config map[string]any) error {
 	return nil
 }
 
-func (b *HodlBot) ReceivePrice(ctx context.Context, price pricing.Kline) error {
+func (b *HodlBot) ReceivePrice(ctx context.Context, price market.Kline) error {
 
 	switch {
 	case b.barIndex == b.BuyBarIndex:
