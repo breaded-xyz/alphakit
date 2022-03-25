@@ -14,7 +14,8 @@ type HodlBot struct {
 	BuyBarIndex  int
 	SellBarIndex int
 
-	dealer broker.Dealer
+	dealer   broker.Dealer
+	barIndex int
 }
 
 func NewHodlBot(dealer broker.Dealer) *HodlBot {
@@ -47,9 +48,22 @@ func (b *HodlBot) Configure(config map[string]any) error {
 }
 
 func (b *HodlBot) ReceivePrice(ctx context.Context, price pricing.Kline) error {
+
+	switch {
+	case b.SellBarIndex == 0:
+		break
+	case b.barIndex == b.BuyBarIndex:
+		// Open position with dealer
+	case b.barIndex == b.SellBarIndex:
+		// Close position with dealer
+	}
+
+	b.barIndex++
+
 	return nil
 }
 
 func (b *HodlBot) Close() error {
+	// Close position with dealer
 	return nil
 }
