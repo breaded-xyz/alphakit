@@ -6,11 +6,11 @@ import (
 	"os"
 	"sync"
 
+	"github.com/colngroup/zero2algo/bot"
 	"github.com/colngroup/zero2algo/broker/backtest"
 	"github.com/colngroup/zero2algo/market"
 	"github.com/colngroup/zero2algo/optimize"
 	"github.com/colngroup/zero2algo/perf"
-	"github.com/colngroup/zero2algo/tradebot"
 )
 
 func ExampleOptimize() {
@@ -27,7 +27,7 @@ func ExampleOptimize() {
 	// Build a set of test cases, one for each permutation of params
 	cases := optimize.BuildTestCases(params)
 
-	// Slice to store each reports created by execution of a test case
+	// Slice to store each report created by execution of a test case
 	results := make([]perf.Report, 0, len(cases))
 
 	// Read a .csv file of historical prices (aka candlestick data)
@@ -50,7 +50,7 @@ func ExampleOptimize() {
 
 			// Create a new bot initialized with our dealer
 			// HodlBot implements a basic buy and hold algo
-			bot := tradebot.NewHodlBot(asset, dealer)
+			bot := bot.NewHodlBot(asset, dealer)
 			// The bot is configured with the params in the test case
 			_ = bot.Configure(c)
 

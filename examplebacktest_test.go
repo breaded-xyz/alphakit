@@ -6,10 +6,10 @@ import (
 	"io"
 	"os"
 
+	"github.com/colngroup/zero2algo/bot"
 	"github.com/colngroup/zero2algo/broker/backtest"
 	"github.com/colngroup/zero2algo/market"
 	"github.com/colngroup/zero2algo/perf"
-	"github.com/colngroup/zero2algo/tradebot"
 )
 
 func ExampleBacktest() {
@@ -23,7 +23,7 @@ func ExampleBacktest() {
 
 	// Create a new bot initialized with our dealer
 	// HodlBot implements a basic buy and hold algo
-	bot := tradebot.NewHodlBot(asset, dealer)
+	bot := bot.NewHodlBot(asset, dealer)
 
 	// Read a .csv file of historical prices (aka candlestick data)
 	file, _ := os.Open("prices.csv")
