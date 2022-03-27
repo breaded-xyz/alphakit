@@ -141,11 +141,7 @@ func TestHodlBot_ReceivePrice(t *testing.T) {
 }
 
 func TestHodlBot_Close(t *testing.T) {
-	expOrder := broker.Order{
-		Side:       broker.Sell,
-		Size:       dec.New(1),
-		ReduceOnly: true,
-	}
+	expOrder := broker.Order{Side: broker.Sell, Size: dec.New(1), ReduceOnly: true}
 	mock := &broker.MockDealer{}
 	mock.On("PlaceOrder", context.Background(), expOrder)
 
