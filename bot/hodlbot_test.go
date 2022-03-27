@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/colngroup/zero2algo/broker"
-	"github.com/colngroup/zero2algo/broker/backtest"
+	"github.com/colngroup/zero2algo/dec"
 	"github.com/colngroup/zero2algo/market"
 	"github.com/stretchr/testify/assert"
 )
@@ -94,7 +94,7 @@ func TestHoldBot_Configure(t *testing.T) {
 func TestHodlBot_evalAlgo(t *testing.T) {
 	tests := []struct {
 		name string
-		give []int
+		give []int // barIndex, buyIndex, sellIndex
 		want broker.OrderSide
 	}{
 		{
@@ -129,10 +129,28 @@ func TestHodlBot_evalAlgo(t *testing.T) {
 }
 
 func TestHodlBot_ReceivePrice(t *testing.T) {
-	bot := HodlBot{
-		dealer: backtest.NewDealer(),
-	}
+	expOrder := broker.Order{Side: broker.Buy, Size: dec.New(1)}
+	mock := &broker.MockDealer{}
+	mock.On("PlaceOrder", context.Background(), expOrder)
+
+	bot := HodlBot{dealer: mock}
 	err := bot.ReceivePrice(context.Background(), market.Kline{})
 	assert.NoError(t, err)
 	assert.Equal(t, 1, bot.barIndex)
+	mock.AssertExpectations(t)
+}
+
+func TestHodlBot_Close(t *testing.T) {
+	expOrder := broker.Order{
+		Side:       broker.Sell,
+		Size:       dec.New(1),
+		ReduceOnly: true,
+	}
+	mock := &broker.MockDealer{}
+	mock.On("PlaceOrder", context.Background(), expOrder)
+
+	bot := HodlBot{dealer: mock}
+	err := bot.Close(context.Background())
+	assert.NoError(t, err)
+	mock.AssertExpectations(t)
 }
