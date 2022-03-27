@@ -52,15 +52,15 @@ func ExampleOptimize() {
 			// HodlBot implements a basic buy and hold algo
 			bot := bot.NewHodlBot(asset, dealer)
 			// The bot is configured with the params in the test case
-			_ = bot.Configure(c)
+			bot.Configure(c)
 
 			// Iterate prices sending each price interval to the dealer and then to the bot
 			for _, price := range prices {
-				_ = dealer.ReceivePrice(context.Background(), price)
-				_ = bot.ReceivePrice(context.Background(), price)
+				dealer.ReceivePrice(context.Background(), price)
+				bot.ReceivePrice(context.Background(), price)
 			}
 			// Close the bot which will liquidate any open position resulting in a final trade
-			_ = bot.Close(context.Background())
+			bot.Close(context.Background())
 
 			// Generate a performance report for the test case and add it to the result set
 			trades, _, _ := dealer.ListTrades(context.Background(), nil)
@@ -69,7 +69,7 @@ func ExampleOptimize() {
 	}
 	wg.Wait()
 
-	// Rank results based on the test case that produced the highest sharpe ratio
+	// Rank results based on the test case with the highest sharpe ratio
 	optimal := optimize.SharpeSort(results)[0]
 	perf.PrintReportSummary(optimal)
 
