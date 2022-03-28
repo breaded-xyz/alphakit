@@ -37,3 +37,17 @@ func (d *Dealer) ListEquityHistory() []broker.Equity {
 func (d *Dealer) ReceivePrice(ctx context.Context, price market.Kline) error {
 	return nil
 }
+
+func (d *Dealer) processOrder(order broker.Order) broker.Order {
+	switch order.State() {
+	case broker.Pending:
+		// Open order and add to set of working orders
+	case broker.Open:
+		// Evaluate price match
+	case broker.Filled:
+		// Update positions
+	case broker.Closed:
+		// Move to set of closed orders
+	}
+	return order
+}
