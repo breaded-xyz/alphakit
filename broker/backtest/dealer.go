@@ -2,7 +2,7 @@ package backtest
 
 import (
 	"context"
-	"log"
+	"errors"
 	"time"
 
 	"github.com/colngroup/zero2algo/broker"
@@ -11,18 +11,33 @@ import (
 	"github.com/colngroup/zero2algo/netapi"
 )
 
+var ErrInvalidOrderState = errors.New("order is not valid for processing")
+
 // Enforce at compile time that the type implements the interface
 var _ broker.SimulatedDealer = (*Dealer)(nil)
 
 type Dealer struct {
+	simulationTime time.Time
+	marketPrice    market.Kline
+
+	openOrders map[broker.DealID]broker.Order
 }
 
 func NewDealer() *Dealer {
-	return nil
+	return &Dealer{
+		openOrders: make(map[broker.DealID]broker.Order),
+	}
 }
 
 func (d *Dealer) PlaceOrder(ctx context.Context, order broker.Order) (*broker.Order, *netapi.Response, error) {
-	return nil, nil, nil
+	if order.Side == 0 || order.Type == 0 || order.State() != broker.Pending || !order.Size.IsPositive() {
+		return nil, nil, ErrInvalidOrderState
+	}
+
+	order = d.processOrder(order, d.simulationTime, d.marketPrice)
+	d.updateOpenOrders(order)
+
+	return &order, nil, nil
 }
 
 func (d *Dealer) ListPositions(ctx context.Context, opts *netapi.ListOpts) ([]broker.Position, *netapi.Response, error) {
@@ -38,42 +53,44 @@ func (d *Dealer) ListEquityHistory() []broker.Equity {
 }
 
 func (d *Dealer) ReceivePrice(ctx context.Context, price market.Kline) error {
+
+	// Iterate open orders in OpenedAt order and process
+
 	return nil
 }
 
-func (d *Dealer) processOrder(order broker.Order) broker.Order {
+func (d *Dealer) processOrder(order broker.Order, t time.Time, price market.Kline) broker.Order {
 
 	switch order.State() {
 	case broker.Pending:
-		log.Default().Println("Process Pending Order")
-		order.OpenedAt = d.simulationTime()
-		d.processOrder(order)
+		order.ID = broker.NewID()
+		order.OpenedAt = t
+		order = d.processOrder(order, t, price)
 	case broker.Open:
-		log.Default().Println("Process Open Order")
-		if order.Type == broker.Limit {
-			if !dec.Between(order.LimitPrice, d.marketPrice().L, d.marketPrice().H) {
-				break
+		switch order.Type {
+		case broker.Limit:
+			if !dec.Between(order.LimitPrice, price.L, price.H) {
+				return order
 			}
+			order.FilledPrice = order.LimitPrice
+		case broker.Market:
+			order.FilledPrice = price.C
 		}
-		order.FilledAt = d.simulationTime()
-		order.FilledPrice = d.marketPrice().C
+		order.FilledAt = t
 		order.FilledSize = order.Size
-		d.processOrder(order)
+		order = d.processOrder(order, t, price)
 	case broker.Filled:
-		log.Default().Println("Process Filled Order")
-		order.ClosedAt = d.simulationTime()
-		d.processOrder(order)
-	case broker.Closed:
-		// Move to set of closed orders
-		log.Default().Println("Process Closed Order")
+		order.ClosedAt = t
 	}
+
 	return order
 }
 
-func (d *Dealer) simulationTime() time.Time {
-	return time.Now().UTC()
-}
-
-func (d *Dealer) marketPrice() market.Kline {
-	return market.Kline{}
+func (d *Dealer) updateOpenOrders(order broker.Order) {
+	switch order.State() {
+	case broker.Open:
+		d.openOrders[order.ID] = order
+	case broker.Closed:
+		delete(d.openOrders, order.ID)
+	}
 }

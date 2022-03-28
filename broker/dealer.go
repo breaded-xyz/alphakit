@@ -5,7 +5,14 @@ import (
 
 	"github.com/colngroup/zero2algo/market"
 	"github.com/colngroup/zero2algo/netapi"
+	"github.com/google/uuid"
 )
+
+type DealID string
+
+func NewID() DealID {
+	return DealID(uuid.NewString())
+}
 
 type Dealer interface {
 	PlaceOrder(context.Context, Order) (*Order, *netapi.Response, error)

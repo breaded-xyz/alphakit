@@ -43,6 +43,7 @@ func (s OrderState) String() string {
 }
 
 type Order struct {
+	ID       DealID
 	OpenedAt time.Time
 	FilledAt time.Time
 	ClosedAt time.Time
