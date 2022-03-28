@@ -2,8 +2,11 @@ package backtest
 
 import (
 	"context"
+	"log"
+	"time"
 
 	"github.com/colngroup/zero2algo/broker"
+	"github.com/colngroup/zero2algo/dec"
 	"github.com/colngroup/zero2algo/market"
 	"github.com/colngroup/zero2algo/netapi"
 )
@@ -39,15 +42,38 @@ func (d *Dealer) ReceivePrice(ctx context.Context, price market.Kline) error {
 }
 
 func (d *Dealer) processOrder(order broker.Order) broker.Order {
+
 	switch order.State() {
 	case broker.Pending:
-		// Open order and add to set of working orders
+		log.Default().Println("Process Pending Order")
+		order.OpenedAt = d.simulationTime()
+		d.processOrder(order)
 	case broker.Open:
-		// Evaluate price match
+		log.Default().Println("Process Open Order")
+		if order.Type == broker.Limit {
+			if !dec.Between(order.LimitPrice, d.marketPrice().L, d.marketPrice().H) {
+				break
+			}
+		}
+		order.FilledAt = d.simulationTime()
+		order.FilledPrice = d.marketPrice().C
+		order.FilledSize = order.Size
+		d.processOrder(order)
 	case broker.Filled:
-		// Update positions
+		log.Default().Println("Process Filled Order")
+		order.ClosedAt = d.simulationTime()
+		d.processOrder(order)
 	case broker.Closed:
 		// Move to set of closed orders
+		log.Default().Println("Process Closed Order")
 	}
 	return order
+}
+
+func (d *Dealer) simulationTime() time.Time {
+	return time.Now().UTC()
+}
+
+func (d *Dealer) marketPrice() market.Kline {
+	return market.Kline{}
 }

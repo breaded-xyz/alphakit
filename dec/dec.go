@@ -22,3 +22,7 @@ func New[T number](v T) decimal.Decimal {
 
 	return dec
 }
+
+func Between(v, lower, upper decimal.Decimal) bool {
+	return v.GreaterThanOrEqual(lower) && v.LessThanOrEqual(upper)
+}

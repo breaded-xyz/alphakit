@@ -18,6 +18,17 @@ func (s OrderSide) String() string {
 	return [...]string{"Buy", "Sell"}[s]
 }
 
+type OrderType int
+
+const (
+	Market OrderType = iota + 1
+	Limit
+)
+
+func (s OrderType) String() string {
+	return [...]string{"Market", "Limit"}[s]
+}
+
 type OrderState int
 
 const (
@@ -38,8 +49,13 @@ type Order struct {
 
 	Asset      market.Asset
 	Side       OrderSide
+	Type       OrderType
+	LimitPrice decimal.Decimal
 	Size       decimal.Decimal
 	ReduceOnly bool
+
+	FilledPrice decimal.Decimal
+	FilledSize  decimal.Decimal
 }
 
 func NewOrder(asset market.Asset, side OrderSide, size decimal.Decimal) Order {
