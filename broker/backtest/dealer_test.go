@@ -2,6 +2,7 @@ package backtest
 
 import (
 	"context"
+	"log"
 	"testing"
 	"time"
 
@@ -118,6 +119,33 @@ func TestDealerPlaceOrder_InvalidArgs(t *testing.T) {
 	}
 }
 
+func TestDealerReceivePrice(t *testing.T) {
+
+	dealer := NewDealer()
+
+	k1, k2, k3, k4 := broker.NewID(), broker.NewID(), broker.NewID(), broker.NewID()
+	dealer.orders[k1] = broker.Order{ID: k1, Type: broker.Limit, LimitPrice: dec.New(15), OpenedAt: time.Now()}
+	dealer.orders[k2] = broker.Order{ID: k2, Type: broker.Limit, LimitPrice: dec.New(15), OpenedAt: time.Now().Add(time.Hour * 1)}
+	dealer.orders[k3] = broker.Order{ID: k3, Type: broker.Limit, LimitPrice: dec.New(10), ClosedAt: time.Now().Add(time.Hour * 2)}
+	dealer.orders[k4] = broker.Order{ID: k4, Type: broker.Limit, LimitPrice: dec.New(15), OpenedAt: time.Now().Add(time.Hour * 3)}
+
+	price := market.Kline{Start: time.Now(), O: dec.New(8), H: dec.New(15), L: dec.New(5), C: dec.New(10)}
+	dealer.ReceivePrice(context.Background(), price)
+
+	// Confirm all open orders are now closed
+	for _, v := range dealer.orders {
+		if v.State() != broker.Closed {
+			assert.Fail(t, "expect all orders to be closed")
+		}
+	}
+
+	assert.True(t, dealer.orders[k1].ClosedAt.Before(dealer.orders[k2].ClosedAt))
+
+	log.Default().Println(dealer.orders[k1].ClosedAt)
+	log.Default().Println(dealer.orders[k2].ClosedAt)
+
+}
+
 func TestMatchOrder(t *testing.T) {
 	tests := []struct {
 		name      string
@@ -204,4 +232,22 @@ func TestDealerCloseOrder(t *testing.T) {
 	dealer := NewDealer()
 	order := dealer.closeOrder(broker.Order{})
 	assert.EqualValues(t, broker.Closed, order.State())
+}
+
+func TestCloseTime(t *testing.T) {
+
+	// ok
+	interval := time.Hour * 4
+	start1 := time.Now()
+	start2 := start1.Add(interval)
+	exp := start2.Add(interval).UTC()
+	act := closeTime(start1, start2)
+	assert.EqualValues(t, exp, act)
+
+	// fail: start1 is zero: return
+	assert.Equal(t, start2, closeTime(time.Time{}, start2))
+
+	// fail: curr start is before prev start
+	assert.Equal(t, start1, closeTime(start2, start1))
+
 }

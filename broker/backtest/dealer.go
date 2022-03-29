@@ -68,11 +68,10 @@ func (d *Dealer) ReceivePrice(ctx context.Context, price market.Kline) error {
 	for _, k := range ks {
 		order := d.orders[k]
 		if order.State() == broker.Open {
-			d.processOrder(order)
+			order = d.processOrder(order)
+			d.orders[order.ID] = order
 		}
 	}
-
-	// Calculate equity history point
 
 	return nil
 }
@@ -89,14 +88,12 @@ func (d *Dealer) processOrder(order broker.Order) broker.Order {
 	case broker.Filled:
 		order = d.closeOrder(order)
 	}
-
 	return order
 }
 
 func (d *Dealer) openOrder(order broker.Order) broker.Order {
 	order.ID = broker.NewID()
 	order.OpenedAt = d.simulationTime
-	d.orders[order.ID] = order
 	return order
 }
 
@@ -104,13 +101,11 @@ func (d *Dealer) fillOrder(order broker.Order, matchedPrice decimal.Decimal) bro
 	order.FilledAt = d.simulationTime
 	order.FilledPrice = matchedPrice
 	order.FilledSize = order.Size
-	d.orders[order.ID] = order
 	return order
 }
 
 func (d *Dealer) closeOrder(order broker.Order) broker.Order {
 	order.ClosedAt = d.simulationTime
-	d.orders[order.ID] = order
 	return order
 }
 
@@ -129,10 +124,10 @@ func matchOrder(order broker.Order, quote market.Kline) decimal.Decimal {
 	return matchedPrice
 }
 
-func closeTime(prevStart, currStart time.Time) time.Time {
-	if prevStart.IsZero() || currStart.Before(prevStart) {
-		return currStart
+func closeTime(start1, start2 time.Time) time.Time {
+	if start1.IsZero() || start2.Before(start1) {
+		return start2
 	}
-	interval := currStart.UTC().Sub(prevStart.UTC())
-	return currStart.UTC().Add(interval)
+	interval := start2.UTC().Sub(start1.UTC())
+	return start2.UTC().Add(interval)
 }
