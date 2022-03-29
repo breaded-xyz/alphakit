@@ -64,6 +64,7 @@ func NewOrder(asset market.Asset, side OrderSide, size decimal.Decimal) Order {
 		Asset: asset,
 		Side:  side,
 		Size:  size,
+		Type:  Market,
 	}
 }
 

@@ -9,6 +9,7 @@ import (
 	"github.com/colngroup/zero2algo/dec"
 	"github.com/colngroup/zero2algo/market"
 	"github.com/colngroup/zero2algo/netapi"
+	"github.com/shopspring/decimal"
 )
 
 var ErrInvalidOrderState = errors.New("order is not valid for processing")
@@ -25,7 +26,8 @@ type Dealer struct {
 
 func NewDealer() *Dealer {
 	return &Dealer{
-		openOrders: make(map[broker.DealID]broker.Order),
+		simulationTime: time.Now().UTC(),
+		openOrders:     make(map[broker.DealID]broker.Order),
 	}
 }
 
@@ -34,8 +36,7 @@ func (d *Dealer) PlaceOrder(ctx context.Context, order broker.Order) (*broker.Or
 		return nil, nil, ErrInvalidOrderState
 	}
 
-	order = d.processOrder(order, d.simulationTime, d.marketPrice)
-	d.updateOpenOrders(order)
+	order = d.processOrder(order)
 
 	return &order, nil, nil
 }
@@ -59,38 +60,53 @@ func (d *Dealer) ReceivePrice(ctx context.Context, price market.Kline) error {
 	return nil
 }
 
-func (d *Dealer) processOrder(order broker.Order, t time.Time, price market.Kline) broker.Order {
+func (d *Dealer) processOrder(order broker.Order) broker.Order {
 
 	switch order.State() {
 	case broker.Pending:
-		order.ID = broker.NewID()
-		order.OpenedAt = t
-		order = d.processOrder(order, t, price)
+		order = d.processOrder(d.openOrder(order))
 	case broker.Open:
-		switch order.Type {
-		case broker.Limit:
-			if !dec.Between(order.LimitPrice, price.L, price.H) {
-				return order
-			}
-			order.FilledPrice = order.LimitPrice
-		case broker.Market:
-			order.FilledPrice = price.C
+		if matchedPrice := matchOrder(order, d.marketPrice); matchedPrice.IsPositive() {
+			order = d.processOrder(d.fillOrder(order, matchedPrice))
 		}
-		order.FilledAt = t
-		order.FilledSize = order.Size
-		order = d.processOrder(order, t, price)
 	case broker.Filled:
-		order.ClosedAt = t
+		order = d.closeOrder(order)
 	}
 
 	return order
 }
 
-func (d *Dealer) updateOpenOrders(order broker.Order) {
-	switch order.State() {
-	case broker.Open:
-		d.openOrders[order.ID] = order
-	case broker.Closed:
-		delete(d.openOrders, order.ID)
+func (d *Dealer) openOrder(order broker.Order) broker.Order {
+	order.ID = broker.NewID()
+	order.OpenedAt = d.simulationTime
+	d.openOrders[order.ID] = order
+	return order
+}
+
+func (d *Dealer) fillOrder(order broker.Order, matchedPrice decimal.Decimal) broker.Order {
+	order.FilledAt = d.simulationTime
+	order.FilledPrice = matchedPrice
+	order.FilledSize = order.Size
+	delete(d.openOrders, order.ID)
+	return order
+}
+
+func (d *Dealer) closeOrder(order broker.Order) broker.Order {
+	order.ClosedAt = d.simulationTime
+	return order
+}
+
+func matchOrder(order broker.Order, quote market.Kline) decimal.Decimal {
+	var matchedPrice decimal.Decimal
+
+	switch order.Type {
+	case broker.Limit:
+		if dec.Between(order.LimitPrice, quote.L, quote.H) {
+			matchedPrice = order.LimitPrice
+		}
+	case broker.Market:
+		matchedPrice = quote.C
 	}
+
+	return matchedPrice
 }
