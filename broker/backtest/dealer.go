@@ -10,6 +10,8 @@ import (
 	"github.com/colngroup/zero2algo/market"
 	"github.com/colngroup/zero2algo/netapi"
 	"github.com/shopspring/decimal"
+	"golang.org/x/exp/maps"
+	"golang.org/x/exp/slices"
 )
 
 var ErrInvalidOrderState = errors.New("order is not valid for processing")
@@ -21,13 +23,13 @@ type Dealer struct {
 	simulationTime time.Time
 	marketPrice    market.Kline
 
-	openOrders map[broker.DealID]broker.Order
+	orders map[broker.DealID]broker.Order
 }
 
 func NewDealer() *Dealer {
 	return &Dealer{
 		simulationTime: time.Now().UTC(),
-		openOrders:     make(map[broker.DealID]broker.Order),
+		orders:         make(map[broker.DealID]broker.Order),
 	}
 }
 
@@ -55,7 +57,22 @@ func (d *Dealer) ListEquityHistory() []broker.Equity {
 
 func (d *Dealer) ReceivePrice(ctx context.Context, price market.Kline) error {
 
-	// Iterate open orders in OpenedAt order and process
+	d.simulationTime = closeTime(d.marketPrice.Start, price.Start)
+	d.marketPrice = price
+
+	// Iterate open orders in the order they were placed with the dealer
+	// Go maps do not maintain insertion order so we must sort the keys in a slice first
+	// The key is a ULID seeded from a time and supports lexicographic sorting
+	ks := maps.Keys(d.orders)
+	slices.Sort(ks)
+	for _, k := range ks {
+		order := d.orders[k]
+		if order.State() == broker.Open {
+			d.processOrder(order)
+		}
+	}
+
+	// Calculate equity history point
 
 	return nil
 }
@@ -79,7 +96,7 @@ func (d *Dealer) processOrder(order broker.Order) broker.Order {
 func (d *Dealer) openOrder(order broker.Order) broker.Order {
 	order.ID = broker.NewID()
 	order.OpenedAt = d.simulationTime
-	d.openOrders[order.ID] = order
+	d.orders[order.ID] = order
 	return order
 }
 
@@ -87,12 +104,13 @@ func (d *Dealer) fillOrder(order broker.Order, matchedPrice decimal.Decimal) bro
 	order.FilledAt = d.simulationTime
 	order.FilledPrice = matchedPrice
 	order.FilledSize = order.Size
-	delete(d.openOrders, order.ID)
+	d.orders[order.ID] = order
 	return order
 }
 
 func (d *Dealer) closeOrder(order broker.Order) broker.Order {
 	order.ClosedAt = d.simulationTime
+	d.orders[order.ID] = order
 	return order
 }
 
@@ -109,4 +127,12 @@ func matchOrder(order broker.Order, quote market.Kline) decimal.Decimal {
 	}
 
 	return matchedPrice
+}
+
+func closeTime(prevStart, currStart time.Time) time.Time {
+	if prevStart.IsZero() || currStart.Before(prevStart) {
+		return currStart
+	}
+	interval := currStart.UTC().Sub(prevStart.UTC())
+	return currStart.UTC().Add(interval)
 }

@@ -2,16 +2,20 @@ package broker
 
 import (
 	"context"
+	"math/rand"
+	"time"
 
 	"github.com/colngroup/zero2algo/market"
 	"github.com/colngroup/zero2algo/netapi"
-	"github.com/google/uuid"
+	"github.com/oklog/ulid/v2"
 )
 
 type DealID string
 
 func NewID() DealID {
-	return DealID(uuid.NewString())
+	t := time.Now().UTC()
+	entropy := ulid.Monotonic(rand.New(rand.NewSource(t.UnixNano())), 0)
+	return DealID(ulid.MustNew(ulid.Timestamp(t), entropy).String())
 }
 
 type Dealer interface {

@@ -186,3 +186,22 @@ func TestMatchOrder(t *testing.T) {
 		})
 	}
 }
+
+func TestDealerOpenOrder(t *testing.T) {
+	dealer := NewDealer()
+	order := dealer.openOrder(broker.Order{})
+	assert.EqualValues(t, broker.Open, order.State())
+	assert.Contains(t, dealer.orders, order.ID)
+}
+
+func TestDealerFillOrder(t *testing.T) {
+	dealer := NewDealer()
+	order := dealer.fillOrder(broker.Order{}, dec.New(100))
+	assert.EqualValues(t, broker.Filled, order.State())
+}
+
+func TestDealerCloseOrder(t *testing.T) {
+	dealer := NewDealer()
+	order := dealer.closeOrder(broker.Order{})
+	assert.EqualValues(t, broker.Closed, order.State())
+}
