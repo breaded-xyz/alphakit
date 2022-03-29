@@ -20,16 +20,16 @@ var ErrInvalidOrderState = errors.New("order is not valid for processing")
 var _ broker.SimulatedDealer = (*Dealer)(nil)
 
 type Dealer struct {
-	simulationTime time.Time
-	marketPrice    market.Kline
+	clock Clock
+	price market.Kline
 
 	orders map[broker.DealID]broker.Order
 }
 
 func NewDealer() *Dealer {
 	return &Dealer{
-		simulationTime: time.Now().UTC(),
-		orders:         make(map[broker.DealID]broker.Order),
+		clock:  NewClock(),
+		orders: make(map[broker.DealID]broker.Order),
 	}
 }
 
@@ -57,8 +57,8 @@ func (d *Dealer) ListEquityHistory() []broker.Equity {
 
 func (d *Dealer) ReceivePrice(ctx context.Context, price market.Kline) error {
 
-	d.simulationTime = closeTime(d.marketPrice.Start, price.Start)
-	d.marketPrice = price
+	d.clock.NextEpoch(closeTime(d.price.Start, price.Start))
+	d.price = price
 
 	// Iterate open orders in the order they were placed with the dealer
 	// Go maps do not maintain insertion order so we must sort the keys in a slice first
@@ -69,7 +69,6 @@ func (d *Dealer) ReceivePrice(ctx context.Context, price market.Kline) error {
 		order := d.orders[k]
 		if order.State() == broker.Open {
 			order = d.processOrder(order)
-			d.orders[order.ID] = order
 		}
 	}
 
@@ -82,30 +81,32 @@ func (d *Dealer) processOrder(order broker.Order) broker.Order {
 	case broker.Pending:
 		order = d.processOrder(d.openOrder(order))
 	case broker.Open:
-		if matchedPrice := matchOrder(order, d.marketPrice); matchedPrice.IsPositive() {
+		if matchedPrice := matchOrder(order, d.price); matchedPrice.IsPositive() {
 			order = d.processOrder(d.fillOrder(order, matchedPrice))
 		}
 	case broker.Filled:
 		order = d.closeOrder(order)
 	}
+
+	d.orders[order.ID] = order
 	return order
 }
 
 func (d *Dealer) openOrder(order broker.Order) broker.Order {
-	order.ID = broker.NewID()
-	order.OpenedAt = d.simulationTime
+	order.ID = broker.NewIDWithTime(d.clock.Now())
+	order.OpenedAt = d.clock.Now()
 	return order
 }
 
 func (d *Dealer) fillOrder(order broker.Order, matchedPrice decimal.Decimal) broker.Order {
-	order.FilledAt = d.simulationTime
+	order.FilledAt = d.clock.Now()
 	order.FilledPrice = matchedPrice
 	order.FilledSize = order.Size
 	return order
 }
 
 func (d *Dealer) closeOrder(order broker.Order) broker.Order {
-	order.ClosedAt = d.simulationTime
+	order.ClosedAt = d.clock.Now()
 	return order
 }
 
@@ -125,9 +126,6 @@ func matchOrder(order broker.Order, quote market.Kline) decimal.Decimal {
 }
 
 func closeTime(start1, start2 time.Time) time.Time {
-	if start1.IsZero() || start2.Before(start1) {
-		return start2
-	}
-	interval := start2.UTC().Sub(start1.UTC())
-	return start2.UTC().Add(interval)
+	interval := start2.Sub(start1)
+	return start2.Add(interval)
 }

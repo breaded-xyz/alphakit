@@ -2,7 +2,6 @@ package backtest
 
 import (
 	"context"
-	"log"
 	"testing"
 	"time"
 
@@ -59,7 +58,7 @@ func TestDealerProcessOrder(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			dealer := NewDealer()
-			dealer.marketPrice = market.Kline{O: dec.New(8), H: dec.New(15), L: dec.New(5), C: dec.New(10)}
+			dealer.price = market.Kline{O: dec.New(8), H: dec.New(15), L: dec.New(5), C: dec.New(10)}
 			act := dealer.processOrder(tt.give)
 			assert.Equal(t, tt.wantOrder.FilledSize, act.FilledSize)
 			assert.Equal(t, tt.wantOrder.FilledPrice, act.FilledPrice)
@@ -123,13 +122,22 @@ func TestDealerReceivePrice(t *testing.T) {
 
 	dealer := NewDealer()
 
-	k1, k2, k3, k4 := broker.NewID(), broker.NewID(), broker.NewID(), broker.NewID()
-	dealer.orders[k1] = broker.Order{ID: k1, Type: broker.Limit, LimitPrice: dec.New(15), OpenedAt: time.Now()}
-	dealer.orders[k2] = broker.Order{ID: k2, Type: broker.Limit, LimitPrice: dec.New(15), OpenedAt: time.Now().Add(time.Hour * 1)}
-	dealer.orders[k3] = broker.Order{ID: k3, Type: broker.Limit, LimitPrice: dec.New(10), ClosedAt: time.Now().Add(time.Hour * 2)}
-	dealer.orders[k4] = broker.Order{ID: k4, Type: broker.Limit, LimitPrice: dec.New(15), OpenedAt: time.Now().Add(time.Hour * 3)}
+	k1 := broker.NewIDWithTime(dealer.clock.Now())
+	dealer.orders[k1] = broker.Order{ID: k1, Type: broker.Limit, LimitPrice: dec.New(15), OpenedAt: dealer.clock.Now()}
 
-	price := market.Kline{Start: time.Now(), O: dec.New(8), H: dec.New(15), L: dec.New(5), C: dec.New(10)}
+	k2 := broker.NewIDWithTime(dealer.clock.Now())
+	dealer.orders[k2] = broker.Order{ID: k2, Type: broker.Limit, LimitPrice: dec.New(15), OpenedAt: dealer.clock.Now()}
+
+	k3 := broker.NewIDWithTime(dealer.clock.Now())
+	dealer.orders[k3] = broker.Order{ID: k3, Type: broker.Limit, LimitPrice: dec.New(10), OpenedAt: dealer.clock.Now()}
+
+	price := market.Kline{
+		Start: dealer.clock.Epoch().Add(time.Hour * 1),
+		O:     dec.New(8),
+		H:     dec.New(15),
+		L:     dec.New(5),
+		C:     dec.New(10)}
+
 	dealer.ReceivePrice(context.Background(), price)
 
 	// Confirm all open orders are now closed
@@ -139,11 +147,9 @@ func TestDealerReceivePrice(t *testing.T) {
 		}
 	}
 
+	// Confirm orders are closed in the order they were created
 	assert.True(t, dealer.orders[k1].ClosedAt.Before(dealer.orders[k2].ClosedAt))
-
-	log.Default().Println(dealer.orders[k1].ClosedAt)
-	log.Default().Println(dealer.orders[k2].ClosedAt)
-
+	assert.True(t, dealer.orders[k2].ClosedAt.Before(dealer.orders[k3].ClosedAt))
 }
 
 func TestMatchOrder(t *testing.T) {
@@ -219,7 +225,6 @@ func TestDealerOpenOrder(t *testing.T) {
 	dealer := NewDealer()
 	order := dealer.openOrder(broker.Order{})
 	assert.EqualValues(t, broker.Open, order.State())
-	assert.Contains(t, dealer.orders, order.ID)
 }
 
 func TestDealerFillOrder(t *testing.T) {
@@ -235,19 +240,10 @@ func TestDealerCloseOrder(t *testing.T) {
 }
 
 func TestCloseTime(t *testing.T) {
-
-	// ok
 	interval := time.Hour * 4
 	start1 := time.Now()
 	start2 := start1.Add(interval)
-	exp := start2.Add(interval).UTC()
+	exp := start2.Add(interval)
 	act := closeTime(start1, start2)
 	assert.EqualValues(t, exp, act)
-
-	// fail: start1 is zero: return
-	assert.Equal(t, start2, closeTime(time.Time{}, start2))
-
-	// fail: curr start is before prev start
-	assert.Equal(t, start1, closeTime(start2, start1))
-
 }
