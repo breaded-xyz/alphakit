@@ -10,7 +10,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestHoldBot_Configure(t *testing.T) {
+func TestHoldBotConfigure(t *testing.T) {
 	tests := []struct {
 		name string
 		give map[string]any
@@ -18,7 +18,7 @@ func TestHoldBot_Configure(t *testing.T) {
 		err  error
 	}{
 		{
-			name: "ok: buy index < sell index",
+			name: "buy index < sell index",
 			give: map[string]any{"buybarindex": 1, "sellbarindex": 1000},
 			want: HodlBot{
 				BuyBarIndex:  1,
@@ -27,7 +27,7 @@ func TestHoldBot_Configure(t *testing.T) {
 			err: nil,
 		},
 		{
-			name: "ok: no sell",
+			name: "no sell",
 			give: map[string]any{"buybarindex": 10, "sellbarindex": 0},
 			want: HodlBot{
 				BuyBarIndex:  10,
@@ -36,7 +36,7 @@ func TestHoldBot_Configure(t *testing.T) {
 			err: nil,
 		},
 		{
-			name: "ok: default",
+			name: "default",
 			give: map[string]any{"buybarindex": 0, "sellbarindex": 0},
 			want: HodlBot{
 				BuyBarIndex:  0,
@@ -45,7 +45,7 @@ func TestHoldBot_Configure(t *testing.T) {
 			err: nil,
 		},
 		{
-			name: "err: buy index >= sell index",
+			name: "buy index >= sell index",
 			give: map[string]any{"buybarindex": 10, "sellbarindex": 5},
 			want: HodlBot{
 				BuyBarIndex:  0,
@@ -54,7 +54,7 @@ func TestHoldBot_Configure(t *testing.T) {
 			err: ErrInvalidConfig,
 		},
 		{
-			name: "err: not int",
+			name: "not int",
 			give: map[string]any{"buybarindex": 10.5, "sellbarindex": 5},
 			want: HodlBot{
 				BuyBarIndex:  0,
@@ -63,7 +63,7 @@ func TestHoldBot_Configure(t *testing.T) {
 			err: ErrInvalidConfig,
 		},
 		{
-			name: "err: neg int",
+			name: "neg int",
 			give: map[string]any{"buybarindex": -1, "sellbarindex": 5},
 			want: HodlBot{
 				BuyBarIndex:  0,
@@ -72,7 +72,7 @@ func TestHoldBot_Configure(t *testing.T) {
 			err: ErrInvalidConfig,
 		},
 		{
-			name: "err: key not found",
+			name: "key not found",
 			give: map[string]any{"notakey": 10, "sellbarindex": 5},
 			want: HodlBot{
 				BuyBarIndex:  0,
@@ -91,29 +91,29 @@ func TestHoldBot_Configure(t *testing.T) {
 	}
 }
 
-func TestHodlBot_evalAlgo(t *testing.T) {
+func TestHodlBotEvalAlgo(t *testing.T) {
 	tests := []struct {
 		name string
 		give []int // barIndex, buyIndex, sellIndex
 		want broker.OrderSide
 	}{
 		{
-			name: "ok: default state",
+			name: "default state",
 			give: []int{0, 0, 0},
 			want: broker.Buy,
 		},
 		{
-			name: "ok: buy",
+			name: "buy",
 			give: []int{10, 10, 20},
 			want: broker.Buy,
 		},
 		{
-			name: "ok: sell",
+			name: "sell",
 			give: []int{20, 10, 20},
 			want: broker.Sell,
 		},
 		{
-			name: "ok: no sell",
+			name: "no sell",
 			give: []int{0, 10, 0},
 			want: 0,
 		},
@@ -128,7 +128,7 @@ func TestHodlBot_evalAlgo(t *testing.T) {
 	}
 }
 
-func TestHodlBot_ReceivePrice(t *testing.T) {
+func TestHodlBotReceivePrice(t *testing.T) {
 	expOrder := broker.Order{Type: broker.Market, Side: broker.Buy, Size: dec.New(1)}
 	mock := &broker.MockDealer{}
 	mock.On("PlaceOrder", context.Background(), expOrder)
@@ -140,7 +140,7 @@ func TestHodlBot_ReceivePrice(t *testing.T) {
 	mock.AssertExpectations(t)
 }
 
-func TestHodlBot_Close(t *testing.T) {
+func TestHodlBotClose(t *testing.T) {
 	expOrder := broker.Order{Type: broker.Market, Side: broker.Sell, Size: dec.New(1), ReduceOnly: true}
 	mock := &broker.MockDealer{}
 	mock.On("PlaceOrder", context.Background(), expOrder)

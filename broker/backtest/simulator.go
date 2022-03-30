@@ -18,9 +18,10 @@ type Simulator struct {
 	clock Clock
 	price market.Kline
 
-	orders    map[broker.DealID]broker.Order
-	positions map[broker.DealID]broker.Position
-	trades    map[broker.DealID]broker.Trade
+	orders        map[broker.DealID]broker.Order
+	positions     map[broker.DealID]broker.Position
+	trades        map[broker.DealID]broker.Trade
+	equityHistory []broker.Equity
 }
 
 func NewSimulator() *Simulator {
@@ -60,19 +61,21 @@ func (s *Simulator) Next(price market.Kline) error {
 }
 
 func (s *Simulator) Orders() []broker.Order {
-	return nil
+	return maps.Values(s.orders)
 }
 
 func (s *Simulator) Positions() []broker.Position {
-	return nil
+	return maps.Values(s.positions)
 }
 
 func (s *Simulator) Trades() []broker.Trade {
-	return nil
+	return maps.Values(s.trades)
 }
 
 func (s *Simulator) EquityHistory() []broker.Equity {
-	return nil
+	var copied []broker.Equity
+	copy(copied, s.equityHistory)
+	return copied
 }
 
 func (s *Simulator) processOrder(order broker.Order) broker.Order {
