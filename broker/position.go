@@ -20,12 +20,14 @@ func (s PositionState) String() string {
 }
 
 type Position struct {
-	OpenedAt time.Time
-	ClosedAt time.Time
-	Asset    market.Asset
-	Side     OrderSide
-	Price    decimal.Decimal
-	Size     decimal.Decimal
+	ID               DealID
+	OpenedAt         time.Time
+	ClosedAt         time.Time
+	Asset            market.Asset
+	Side             OrderSide
+	Price            decimal.Decimal
+	Size             decimal.Decimal
+	LiquidationPrice decimal.Decimal
 }
 
 func (p *Position) State() PositionState {

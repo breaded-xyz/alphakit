@@ -110,7 +110,42 @@ func TestDealerUpdatePosition(t *testing.T) {
 	}
 }
 
-func TestDealerPlaceOrder_InvalidArgs(t *testing.T) {
+func TestDealerGetLatestOrNewPosition(t *testing.T) {
+	tests := []struct {
+		name string
+		give map[broker.DealID]broker.Position
+		want broker.PositionState
+	}{
+		{
+			name: "no positions",
+			give: map[broker.DealID]broker.Position{},
+			want: broker.PositionPending,
+		},
+		{
+			name: "latest position is closed",
+			give: map[broker.DealID]broker.Position{
+				"1": {OpenedAt: time.Now()},
+				"2": {ClosedAt: time.Now()},
+			},
+			want: broker.PositionPending,
+		},
+		{
+			name: "latest position is open",
+			give: map[broker.DealID]broker.Position{"1": {ID: "1", OpenedAt: time.Now()}},
+			want: broker.PositionOpen,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			dealer := NewDealer()
+			dealer.positions = tt.give
+			act := dealer.getLatestOrNewPosition()
+			assert.Equal(t, tt.want, act.State())
+		})
+	}
+}
+
+func TestDealerPlaceOrder(t *testing.T) {
 	tests := []struct {
 		name string
 		give broker.Order
@@ -183,8 +218,7 @@ func TestDealerReceivePrice(t *testing.T) {
 
 	dealer.ReceivePrice(context.Background(), price)
 
-	t.Run("all open orders are processed", func(t *testing.T) {
-		// Confirm all open orders are now closed
+	t.Run("all open orders are closed", func(t *testing.T) {
 		for _, v := range dealer.orders {
 			if v.State() != broker.OrderClosed {
 				assert.Fail(t, "expect all orders to be closed")
@@ -192,8 +226,7 @@ func TestDealerReceivePrice(t *testing.T) {
 		}
 	})
 
-	t.Run("orders are closed in order they were created", func(t *testing.T) {
-		// Confirm orders are closed in the order they were created
+	t.Run("orders are processed in order they were created", func(t *testing.T) {
 		assert.True(t, dealer.orders[k1].ClosedAt.Before(dealer.orders[k2].ClosedAt))
 		assert.True(t, dealer.orders[k2].ClosedAt.Before(dealer.orders[k3].ClosedAt))
 	})
@@ -301,4 +334,59 @@ func TestCloseTime(t *testing.T) {
 		act := closeTime(time.Time{}, start2)
 		assert.EqualValues(t, start2, act)
 	})
+}
+
+func TestProfit(t *testing.T) {
+	tests := []struct {
+		name string
+		give broker.Position
+		want decimal.Decimal
+	}{
+		{
+			name: "buy side profit",
+			give: broker.Position{
+				Side:             broker.Buy,
+				Price:            dec.New(10),
+				Size:             dec.New(2),
+				LiquidationPrice: dec.New(20),
+			},
+			want: dec.New(20),
+		},
+		{
+			name: "sell side profit",
+			give: broker.Position{
+				Side:             broker.Sell,
+				Price:            dec.New(100),
+				Size:             dec.New(2),
+				LiquidationPrice: dec.New(50),
+			},
+			want: dec.New(100),
+		},
+		{
+			name: "buy side loss",
+			give: broker.Position{
+				Side:             broker.Buy,
+				Price:            dec.New(10),
+				Size:             dec.New(2),
+				LiquidationPrice: dec.New(5),
+			},
+			want: dec.New(-10),
+		},
+		{
+			name: "sell side loss",
+			give: broker.Position{
+				Side:             broker.Sell,
+				Price:            dec.New(10),
+				Size:             dec.New(2),
+				LiquidationPrice: dec.New(20),
+			},
+			want: dec.New(-20),
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			act := profit(tt.give)
+			assert.Equal(t, tt.want, act)
+		})
+	}
 }

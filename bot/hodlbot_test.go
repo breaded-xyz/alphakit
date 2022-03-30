@@ -129,7 +129,7 @@ func TestHodlBot_evalAlgo(t *testing.T) {
 }
 
 func TestHodlBot_ReceivePrice(t *testing.T) {
-	expOrder := broker.Order{Side: broker.Buy, Size: dec.New(1)}
+	expOrder := broker.Order{Type: broker.Market, Side: broker.Buy, Size: dec.New(1)}
 	mock := &broker.MockDealer{}
 	mock.On("PlaceOrder", context.Background(), expOrder)
 
@@ -141,7 +141,7 @@ func TestHodlBot_ReceivePrice(t *testing.T) {
 }
 
 func TestHodlBot_Close(t *testing.T) {
-	expOrder := broker.Order{Side: broker.Sell, Size: dec.New(1), ReduceOnly: true}
+	expOrder := broker.Order{Type: broker.Market, Side: broker.Sell, Size: dec.New(1), ReduceOnly: true}
 	mock := &broker.MockDealer{}
 	mock.On("PlaceOrder", context.Background(), expOrder)
 

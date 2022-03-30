@@ -24,13 +24,16 @@ type Dealer struct {
 	price market.Kline
 
 	orders    map[broker.DealID]broker.Order
-	positions []broker.Position
+	positions map[broker.DealID]broker.Position
+	trades    map[broker.DealID]broker.Trade
 }
 
 func NewDealer() *Dealer {
 	return &Dealer{
-		clock:  NewClock(),
-		orders: make(map[broker.DealID]broker.Order),
+		clock:     NewClock(),
+		orders:    make(map[broker.DealID]broker.Order),
+		positions: make(map[broker.DealID]broker.Position),
+		trades:    make(map[broker.DealID]broker.Trade),
 	}
 }
 
@@ -45,11 +48,11 @@ func (d *Dealer) PlaceOrder(ctx context.Context, order broker.Order) (*broker.Or
 }
 
 func (d *Dealer) ListPositions(ctx context.Context, opts *netapi.ListOpts) ([]broker.Position, *netapi.Response, error) {
-	return nil, nil, nil
+	return maps.Values(d.positions), nil, nil
 }
 
 func (d *Dealer) ListTrades(ctx context.Context, opts *netapi.ListOpts) ([]broker.Trade, *netapi.Response, error) {
-	return nil, nil, nil
+	return maps.Values(d.trades), nil, nil
 }
 
 func (d *Dealer) ListEquityHistory() []broker.Equity {
@@ -78,6 +81,8 @@ func (d *Dealer) ReceivePrice(ctx context.Context, price market.Kline) error {
 
 func (d *Dealer) processOrder(order broker.Order) broker.Order {
 
+	var position broker.Position
+
 	switch order.State() {
 	case broker.OrderPending:
 		order = d.processOrder(d.openOrder(order))
@@ -86,8 +91,11 @@ func (d *Dealer) processOrder(order broker.Order) broker.Order {
 			order = d.processOrder(d.fillOrder(order, matchedPrice))
 		}
 	case broker.OrderFilled:
-		position := d.positions[len(d.positions)-1]
-		position = d.updatePosition(position, order)
+		position = d.updatePosition(d.getLatestOrNewPosition(), order)
+		if position.State() == broker.OrderClosed {
+			d.trades[position.ID] = d.newTrade(position)
+		}
+		d.positions[position.ID] = position
 		order = d.closeOrder(order)
 	}
 
@@ -113,6 +121,23 @@ func (d *Dealer) closeOrder(order broker.Order) broker.Order {
 	return order
 }
 
+func (d *Dealer) getLatestOrNewPosition() broker.Position {
+	var empty, position broker.Position
+
+	if len(d.positions) == 0 {
+		return empty
+	}
+
+	ks := maps.Keys(d.positions)
+	slices.Sort(ks)
+	position = d.positions[ks[len(ks)-1]]
+
+	if position.State() == broker.PositionClosed {
+		return empty
+	}
+	return position
+}
+
 func (d *Dealer) updatePosition(position broker.Position, order broker.Order) broker.Position {
 
 	switch position.State() {
@@ -123,12 +148,12 @@ func (d *Dealer) updatePosition(position broker.Position, order broker.Order) br
 			position = d.closePosition(position, order)
 		}
 	}
-
 	return position
 }
 
 func (d *Dealer) openPosition(order broker.Order) broker.Position {
 	return broker.Position{
+		ID:       order.ID,
 		OpenedAt: d.clock.Now(),
 		Asset:    order.Asset,
 		Side:     order.Side,
@@ -139,7 +164,19 @@ func (d *Dealer) openPosition(order broker.Order) broker.Position {
 
 func (d *Dealer) closePosition(position broker.Position, order broker.Order) broker.Position {
 	position.ClosedAt = d.clock.Now()
+	position.LiquidationPrice = order.FilledPrice
 	return position
+}
+
+func (d *Dealer) newTrade(position broker.Position) broker.Trade {
+	return broker.Trade{
+		ID:        position.ID,
+		CreatedAt: d.clock.Now(),
+		Asset:     position.Asset,
+		Side:      position.Side,
+		Size:      position.Size,
+		Profit:    profit(position),
+	}
 }
 
 func matchOrder(order broker.Order, quote market.Kline) decimal.Decimal {
@@ -163,4 +200,12 @@ func closeTime(start1, start2 time.Time) time.Time {
 	}
 	interval := start2.Sub(start1)
 	return start2.Add(interval)
+}
+
+func profit(position broker.Position) decimal.Decimal {
+	profit := position.LiquidationPrice.Sub(position.Price).Mul(position.Size)
+	if position.Side == broker.Sell {
+		profit = profit.Neg()
+	}
+	return profit
 }
