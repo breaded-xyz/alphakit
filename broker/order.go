@@ -18,6 +18,16 @@ func (s OrderSide) String() string {
 	return [...]string{"Buy", "Sell"}[s]
 }
 
+func (s OrderSide) Opposite() OrderSide {
+	switch s {
+	case Buy:
+		return Sell
+	case Sell:
+		return Buy
+	}
+	return 0
+}
+
 type OrderType int
 
 const (
@@ -32,10 +42,10 @@ func (s OrderType) String() string {
 type OrderState int
 
 const (
-	Pending = iota
-	Open
-	Filled
-	Closed
+	OrderPending = iota
+	OrderOpen
+	OrderFilled
+	OrderClosed
 )
 
 func (s OrderState) String() string {
@@ -71,11 +81,11 @@ func NewOrder(asset market.Asset, side OrderSide, size decimal.Decimal) Order {
 func (o *Order) State() OrderState {
 	switch {
 	case !o.ClosedAt.IsZero():
-		return Closed
+		return OrderClosed
 	case !o.FilledAt.IsZero():
-		return Filled
+		return OrderFilled
 	case !o.OpenedAt.IsZero():
-		return Open
+		return OrderOpen
 	}
-	return Pending
+	return OrderPending
 }

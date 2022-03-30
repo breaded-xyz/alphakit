@@ -23,7 +23,8 @@ type Dealer struct {
 	clock Clock
 	price market.Kline
 
-	orders map[broker.DealID]broker.Order
+	orders    map[broker.DealID]broker.Order
+	positions []broker.Position
 }
 
 func NewDealer() *Dealer {
@@ -34,7 +35,7 @@ func NewDealer() *Dealer {
 }
 
 func (d *Dealer) PlaceOrder(ctx context.Context, order broker.Order) (*broker.Order, *netapi.Response, error) {
-	if order.Side == 0 || order.Type == 0 || order.State() != broker.Pending || !order.Size.IsPositive() {
+	if order.Side == 0 || order.Type == 0 || order.State() != broker.OrderPending || !order.Size.IsPositive() {
 		return nil, nil, ErrInvalidOrderState
 	}
 
@@ -67,7 +68,7 @@ func (d *Dealer) ReceivePrice(ctx context.Context, price market.Kline) error {
 	slices.Sort(ks)
 	for _, k := range ks {
 		order := d.orders[k]
-		if order.State() == broker.Open {
+		if order.State() == broker.OrderOpen {
 			order = d.processOrder(order)
 		}
 	}
@@ -78,13 +79,14 @@ func (d *Dealer) ReceivePrice(ctx context.Context, price market.Kline) error {
 func (d *Dealer) processOrder(order broker.Order) broker.Order {
 
 	switch order.State() {
-	case broker.Pending:
+	case broker.OrderPending:
 		order = d.processOrder(d.openOrder(order))
-	case broker.Open:
+	case broker.OrderOpen:
 		if matchedPrice := matchOrder(order, d.price); matchedPrice.IsPositive() {
 			order = d.processOrder(d.fillOrder(order, matchedPrice))
 		}
-	case broker.Filled:
+	case broker.OrderFilled:
+		d.updatePosition(order)
 		order = d.closeOrder(order)
 	}
 
@@ -108,6 +110,35 @@ func (d *Dealer) fillOrder(order broker.Order, matchedPrice decimal.Decimal) bro
 func (d *Dealer) closeOrder(order broker.Order) broker.Order {
 	order.ClosedAt = d.clock.Now()
 	return order
+}
+
+func (d *Dealer) updatePosition(order broker.Order) broker.Position {
+
+	position := d.positions[len(d.positions)-1]
+	switch position.State() {
+	case broker.PositionClosed:
+		position = d.openPosition(order)
+	case broker.PositionOpen:
+		if order.Side == position.Side.Opposite() {
+			position = d.closePosition(position, order)
+		}
+	}
+
+	return position
+}
+
+func (d *Dealer) openPosition(order broker.Order) broker.Position {
+	return broker.Position{
+		OpenedAt: d.clock.Now(),
+		Asset:    order.Asset,
+		Side:     order.Side,
+		Price:    order.FilledPrice,
+		Size:     order.FilledSize,
+	}
+}
+
+func (d *Dealer) closePosition(position broker.Position, order broker.Order) broker.Position {
+	return position
 }
 
 func matchOrder(order broker.Order, quote market.Kline) decimal.Decimal {

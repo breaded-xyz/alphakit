@@ -29,7 +29,7 @@ func TestDealerProcessOrder(t *testing.T) {
 				FilledPrice: dec.New(10),
 				FilledSize:  dec.New(1),
 			},
-			wantState: broker.Closed,
+			wantState: broker.OrderClosed,
 		},
 		{
 			name: "ok: limit order filled",
@@ -42,7 +42,7 @@ func TestDealerProcessOrder(t *testing.T) {
 				FilledPrice: dec.New(8),
 				FilledSize:  dec.New(1),
 			},
-			wantState: broker.Closed,
+			wantState: broker.OrderClosed,
 		},
 		{
 			name: "ok: limit order open but not filled",
@@ -52,7 +52,7 @@ func TestDealerProcessOrder(t *testing.T) {
 				Size:       dec.New(1),
 			},
 			wantOrder: broker.Order{},
-			wantState: broker.Open,
+			wantState: broker.OrderOpen,
 		},
 	}
 	for _, tt := range tests {
@@ -143,7 +143,7 @@ func TestDealerReceivePrice(t *testing.T) {
 	t.Run("all open orders are processed", func(t *testing.T) {
 		// Confirm all open orders are now closed
 		for _, v := range dealer.orders {
-			if v.State() != broker.Closed {
+			if v.State() != broker.OrderClosed {
 				assert.Fail(t, "expect all orders to be closed")
 			}
 		}
@@ -228,19 +228,19 @@ func TestMatchOrder(t *testing.T) {
 func TestDealerOpenOrder(t *testing.T) {
 	dealer := NewDealer()
 	order := dealer.openOrder(broker.Order{})
-	assert.EqualValues(t, broker.Open, order.State())
+	assert.EqualValues(t, broker.OrderOpen, order.State())
 }
 
 func TestDealerFillOrder(t *testing.T) {
 	dealer := NewDealer()
 	order := dealer.fillOrder(broker.Order{}, dec.New(100))
-	assert.EqualValues(t, broker.Filled, order.State())
+	assert.EqualValues(t, broker.OrderFilled, order.State())
 }
 
 func TestDealerCloseOrder(t *testing.T) {
 	dealer := NewDealer()
 	order := dealer.closeOrder(broker.Order{})
-	assert.EqualValues(t, broker.Closed, order.State())
+	assert.EqualValues(t, broker.OrderClosed, order.State())
 }
 
 func TestCloseTime(t *testing.T) {
