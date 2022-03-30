@@ -15,13 +15,14 @@ import (
 var ErrInvalidOrderState = errors.New("order is not valid for processing")
 
 type Simulator struct {
-	clock Clock
-	price market.Kline
+	clock       Clock
+	cashBalance decimal.Decimal
+	marketPrice market.Kline
 
-	orders        map[broker.DealID]broker.Order
-	positions     map[broker.DealID]broker.Position
-	trades        map[broker.DealID]broker.Trade
-	equityHistory []broker.Equity
+	orders    map[broker.DealID]broker.Order
+	positions map[broker.DealID]broker.Position
+	trades    map[broker.DealID]broker.Trade
+	curve     []broker.Equity
 }
 
 func NewSimulator() *Simulator {
@@ -42,8 +43,8 @@ func (s *Simulator) AddOrder(order broker.Order) (broker.Order, error) {
 }
 
 func (s *Simulator) Next(price market.Kline) error {
-	s.clock.NextEpoch(closeTime(s.price.Start, price.Start))
-	s.price = price
+	s.clock.NextEpoch(closeTime(s.marketPrice.Start, price.Start))
+	s.marketPrice = price
 
 	// Iterate open orders in the order they were placed with the dealer
 	// Go maps do not maintain insertion order so we must sort the keys in a slice first
@@ -56,6 +57,8 @@ func (s *Simulator) Next(price market.Kline) error {
 			order = s.processOrder(order)
 		}
 	}
+
+	s.curve = append(s.curve, s.equityNow())
 
 	return nil
 }
@@ -72,9 +75,9 @@ func (s *Simulator) Trades() []broker.Trade {
 	return maps.Values(s.trades)
 }
 
-func (s *Simulator) EquityHistory() []broker.Equity {
+func (s *Simulator) Curve() []broker.Equity {
 	var copied []broker.Equity
-	copy(copied, s.equityHistory)
+	copy(copied, s.curve)
 	return copied
 }
 
@@ -83,7 +86,7 @@ func (s *Simulator) processOrder(order broker.Order) broker.Order {
 	case broker.OrderPending:
 		order = s.processOrder(s.openOrder(order))
 	case broker.OrderOpen:
-		if matchedPrice := matchOrder(order, s.price); matchedPrice.IsPositive() {
+		if matchedPrice := matchOrder(order, s.marketPrice); matchedPrice.IsPositive() {
 			order = s.processOrder(s.fillOrder(order, matchedPrice))
 		}
 	case broker.OrderFilled:
@@ -171,8 +174,19 @@ func (s *Simulator) newTrade(position broker.Position) broker.Trade {
 		Asset:     position.Asset,
 		Side:      position.Side,
 		Size:      position.Size,
-		Profit:    profit(position),
+		Profit:    Profit(position, position.LiquidationPrice),
 	}
+}
+
+func (s *Simulator) equityNow() broker.Equity {
+	equity := broker.Equity{
+		At:     s.clock.Now(),
+		Amount: s.cashBalance,
+	}
+	if position := s.getLatestOrNewPosition(); position.State() == broker.PositionOpen {
+		equity.Amount = equity.Amount.Add(Profit(position, s.marketPrice.C))
+	}
+	return equity
 }
 
 func matchOrder(order broker.Order, quote market.Kline) decimal.Decimal {
@@ -196,12 +210,4 @@ func closeTime(start1, start2 time.Time) time.Time {
 	}
 	interval := start2.Sub(start1)
 	return start2.Add(interval)
-}
-
-func profit(position broker.Position) decimal.Decimal {
-	profit := position.LiquidationPrice.Sub(position.Price).Mul(position.Size)
-	if position.Side == broker.Sell {
-		profit = profit.Neg()
-	}
-	return profit
 }

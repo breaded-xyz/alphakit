@@ -57,7 +57,7 @@ func TestSimulatorProcessOrder(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			sim := NewSimulator()
-			sim.price = market.Kline{O: dec.New(8), H: dec.New(15), L: dec.New(5), C: dec.New(10)}
+			sim.marketPrice = market.Kline{O: dec.New(8), H: dec.New(15), L: dec.New(5), C: dec.New(10)}
 			act := sim.processOrder(tt.give)
 			assert.Equal(t, tt.wantOrder.FilledSize, act.FilledSize)
 			assert.Equal(t, tt.wantOrder.FilledPrice, act.FilledPrice)
@@ -332,59 +332,4 @@ func TestCloseTime(t *testing.T) {
 		act := closeTime(time.Time{}, start2)
 		assert.EqualValues(t, start2, act)
 	})
-}
-
-func TestProfit(t *testing.T) {
-	tests := []struct {
-		name string
-		give broker.Position
-		want decimal.Decimal
-	}{
-		{
-			name: "buy side profit",
-			give: broker.Position{
-				Side:             broker.Buy,
-				Price:            dec.New(10),
-				Size:             dec.New(2),
-				LiquidationPrice: dec.New(20),
-			},
-			want: dec.New(20),
-		},
-		{
-			name: "sell side profit",
-			give: broker.Position{
-				Side:             broker.Sell,
-				Price:            dec.New(100),
-				Size:             dec.New(2),
-				LiquidationPrice: dec.New(50),
-			},
-			want: dec.New(100),
-		},
-		{
-			name: "buy side loss",
-			give: broker.Position{
-				Side:             broker.Buy,
-				Price:            dec.New(10),
-				Size:             dec.New(2),
-				LiquidationPrice: dec.New(5),
-			},
-			want: dec.New(-10),
-		},
-		{
-			name: "sell side loss",
-			give: broker.Position{
-				Side:             broker.Sell,
-				Price:            dec.New(10),
-				Size:             dec.New(2),
-				LiquidationPrice: dec.New(20),
-			},
-			want: dec.New(-20),
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			act := profit(tt.give)
-			assert.Equal(t, tt.want, act)
-		})
-	}
 }
