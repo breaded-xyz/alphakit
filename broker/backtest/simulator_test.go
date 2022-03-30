@@ -1,7 +1,6 @@
 package backtest
 
 import (
-	"context"
 	"testing"
 	"time"
 
@@ -12,7 +11,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestDealerProcessOrder(t *testing.T) {
+func TestSimulatorProcessOrder(t *testing.T) {
 	tests := []struct {
 		name      string
 		give      broker.Order
@@ -20,7 +19,7 @@ func TestDealerProcessOrder(t *testing.T) {
 		wantState broker.OrderState
 	}{
 		{
-			name: "ok: market order filled",
+			name: "market order filled",
 			give: broker.Order{
 				Type: broker.Market,
 				Size: dec.New(1),
@@ -32,7 +31,7 @@ func TestDealerProcessOrder(t *testing.T) {
 			wantState: broker.OrderClosed,
 		},
 		{
-			name: "ok: limit order filled",
+			name: "limit order filled",
 			give: broker.Order{
 				Type:       broker.Limit,
 				LimitPrice: dec.New(8),
@@ -45,7 +44,7 @@ func TestDealerProcessOrder(t *testing.T) {
 			wantState: broker.OrderClosed,
 		},
 		{
-			name: "ok: limit order open but not filled",
+			name: "limit order opened but not filled",
 			give: broker.Order{
 				Type:       broker.Limit,
 				LimitPrice: dec.New(100),
@@ -57,9 +56,9 @@ func TestDealerProcessOrder(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			dealer := NewDealer()
-			dealer.price = market.Kline{O: dec.New(8), H: dec.New(15), L: dec.New(5), C: dec.New(10)}
-			act := dealer.processOrder(tt.give)
+			sim := NewSimulator()
+			sim.price = market.Kline{O: dec.New(8), H: dec.New(15), L: dec.New(5), C: dec.New(10)}
+			act := sim.processOrder(tt.give)
 			assert.Equal(t, tt.wantOrder.FilledSize, act.FilledSize)
 			assert.Equal(t, tt.wantOrder.FilledPrice, act.FilledPrice)
 			assert.Equal(t, tt.wantState, act.State())
@@ -67,7 +66,7 @@ func TestDealerProcessOrder(t *testing.T) {
 	}
 }
 
-func TestDealerUpdatePosition(t *testing.T) {
+func TestSimulatorUpdatePosition(t *testing.T) {
 	tests := []struct {
 		name         string
 		giveOrder    broker.Order
@@ -100,8 +99,8 @@ func TestDealerUpdatePosition(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			dealer := NewDealer()
-			act := dealer.updatePosition(tt.givePosition, tt.giveOrder)
+			sim := NewSimulator()
+			act := sim.updatePosition(tt.givePosition, tt.giveOrder)
 			assert.Equal(t, tt.wantPosition.Side, act.Side)
 			assert.Equal(t, tt.wantPosition.Price, act.Price)
 			assert.Equal(t, tt.wantPosition.Size, act.Size)
@@ -110,7 +109,7 @@ func TestDealerUpdatePosition(t *testing.T) {
 	}
 }
 
-func TestDealerGetLatestOrNewPosition(t *testing.T) {
+func TestSimulatorGetLatestOrNewPosition(t *testing.T) {
 	tests := []struct {
 		name string
 		give map[broker.DealID]broker.Position
@@ -137,22 +136,22 @@ func TestDealerGetLatestOrNewPosition(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			dealer := NewDealer()
-			dealer.positions = tt.give
-			act := dealer.getLatestOrNewPosition()
+			sim := NewSimulator()
+			sim.positions = tt.give
+			act := sim.getLatestOrNewPosition()
 			assert.Equal(t, tt.want, act.State())
 		})
 	}
 }
 
-func TestDealerPlaceOrder(t *testing.T) {
+func TestSimulatorAddOrder(t *testing.T) {
 	tests := []struct {
 		name string
 		give broker.Order
 		want error
 	}{
 		{
-			name: "err: invalid side",
+			name: "invalid side",
 			give: broker.Order{
 				Side: 0,
 				Type: broker.Market,
@@ -161,7 +160,7 @@ func TestDealerPlaceOrder(t *testing.T) {
 			want: ErrInvalidOrderState,
 		},
 		{
-			name: "err: invalid type",
+			name: "invalid type",
 			give: broker.Order{
 				Side: broker.Buy,
 				Type: 0,
@@ -170,7 +169,7 @@ func TestDealerPlaceOrder(t *testing.T) {
 			want: ErrInvalidOrderState,
 		},
 		{
-			name: "err: invalid size",
+			name: "invalid size",
 			give: broker.Order{
 				Side: broker.Buy,
 				Type: broker.Market,
@@ -179,7 +178,7 @@ func TestDealerPlaceOrder(t *testing.T) {
 			want: ErrInvalidOrderState,
 		},
 		{
-			name: "err: no pending state",
+			name: "no pending state",
 			give: broker.Order{
 				OpenedAt: time.Now(),
 			},
@@ -188,38 +187,38 @@ func TestDealerPlaceOrder(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			var dealer Dealer
-			act, _, err := dealer.PlaceOrder(context.Background(), tt.give)
+			var sim Simulator
+			act, err := sim.AddOrder(tt.give)
 			assert.ErrorIs(t, err, tt.want)
 			assert.Nil(t, act)
 		})
 	}
 }
 
-func TestDealerReceivePrice(t *testing.T) {
+func TestSimulatorReceivePrice(t *testing.T) {
 
-	dealer := NewDealer()
+	sim := NewSimulator()
 
-	k1 := broker.NewIDWithTime(dealer.clock.Now())
-	dealer.orders[k1] = broker.Order{ID: k1, Type: broker.Limit, LimitPrice: dec.New(15), OpenedAt: dealer.clock.Now()}
+	k1 := broker.NewIDWithTime(sim.clock.Now())
+	sim.orders[k1] = broker.Order{ID: k1, Type: broker.Limit, LimitPrice: dec.New(15), OpenedAt: sim.clock.Now()}
 
-	k2 := broker.NewIDWithTime(dealer.clock.Now())
-	dealer.orders[k2] = broker.Order{ID: k2, Type: broker.Limit, LimitPrice: dec.New(15), OpenedAt: dealer.clock.Now()}
+	k2 := broker.NewIDWithTime(sim.clock.Now())
+	sim.orders[k2] = broker.Order{ID: k2, Type: broker.Limit, LimitPrice: dec.New(15), OpenedAt: sim.clock.Now()}
 
-	k3 := broker.NewIDWithTime(dealer.clock.Now())
-	dealer.orders[k3] = broker.Order{ID: k3, Type: broker.Limit, LimitPrice: dec.New(10), OpenedAt: dealer.clock.Now()}
+	k3 := broker.NewIDWithTime(sim.clock.Now())
+	sim.orders[k3] = broker.Order{ID: k3, Type: broker.Limit, LimitPrice: dec.New(10), OpenedAt: sim.clock.Now()}
 
 	price := market.Kline{
-		Start: dealer.clock.Epoch().Add(time.Hour * 1),
+		Start: sim.clock.Epoch().Add(time.Hour * 1),
 		O:     dec.New(8),
 		H:     dec.New(15),
 		L:     dec.New(5),
 		C:     dec.New(10)}
 
-	dealer.ReceivePrice(context.Background(), price)
+	sim.Next(price)
 
 	t.Run("all open orders are closed", func(t *testing.T) {
-		for _, v := range dealer.orders {
+		for _, v := range sim.orders {
 			if v.State() != broker.OrderClosed {
 				assert.Fail(t, "expect all orders to be closed")
 			}
@@ -227,26 +226,26 @@ func TestDealerReceivePrice(t *testing.T) {
 	})
 
 	t.Run("orders are processed in order they were created", func(t *testing.T) {
-		assert.True(t, dealer.orders[k1].ClosedAt.Before(dealer.orders[k2].ClosedAt))
-		assert.True(t, dealer.orders[k2].ClosedAt.Before(dealer.orders[k3].ClosedAt))
+		assert.True(t, sim.orders[k1].ClosedAt.Before(sim.orders[k2].ClosedAt))
+		assert.True(t, sim.orders[k2].ClosedAt.Before(sim.orders[k3].ClosedAt))
 	})
 }
 
-func TestDealerOpenOrder(t *testing.T) {
-	dealer := NewDealer()
-	order := dealer.openOrder(broker.Order{})
+func TestSimulatorOpenOrder(t *testing.T) {
+	sim := NewSimulator()
+	order := sim.openOrder(broker.Order{})
 	assert.EqualValues(t, broker.OrderOpen, order.State())
 }
 
-func TestDealerFillOrder(t *testing.T) {
-	dealer := NewDealer()
-	order := dealer.fillOrder(broker.Order{}, dec.New(100))
+func TestSimulatorFillOrder(t *testing.T) {
+	sim := NewSimulator()
+	order := sim.fillOrder(broker.Order{}, dec.New(100))
 	assert.EqualValues(t, broker.OrderFilled, order.State())
 }
 
-func TestDealerCloseOrder(t *testing.T) {
-	dealer := NewDealer()
-	order := dealer.closeOrder(broker.Order{})
+func TestSimulatorCloseOrder(t *testing.T) {
+	sim := NewSimulator()
+	order := sim.closeOrder(broker.Order{})
 	assert.EqualValues(t, broker.OrderClosed, order.State())
 }
 
