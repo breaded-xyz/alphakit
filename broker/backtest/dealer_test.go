@@ -140,16 +140,20 @@ func TestDealerReceivePrice(t *testing.T) {
 
 	dealer.ReceivePrice(context.Background(), price)
 
-	// Confirm all open orders are now closed
-	for _, v := range dealer.orders {
-		if v.State() != broker.Closed {
-			assert.Fail(t, "expect all orders to be closed")
+	t.Run("all open orders are processed", func(t *testing.T) {
+		// Confirm all open orders are now closed
+		for _, v := range dealer.orders {
+			if v.State() != broker.Closed {
+				assert.Fail(t, "expect all orders to be closed")
+			}
 		}
-	}
+	})
 
-	// Confirm orders are closed in the order they were created
-	assert.True(t, dealer.orders[k1].ClosedAt.Before(dealer.orders[k2].ClosedAt))
-	assert.True(t, dealer.orders[k2].ClosedAt.Before(dealer.orders[k3].ClosedAt))
+	t.Run("orders are closed in order they were created", func(t *testing.T) {
+		// Confirm orders are closed in the order they were created
+		assert.True(t, dealer.orders[k1].ClosedAt.Before(dealer.orders[k2].ClosedAt))
+		assert.True(t, dealer.orders[k2].ClosedAt.Before(dealer.orders[k3].ClosedAt))
+	})
 }
 
 func TestMatchOrder(t *testing.T) {
@@ -243,7 +247,15 @@ func TestCloseTime(t *testing.T) {
 	interval := time.Hour * 4
 	start1 := time.Now()
 	start2 := start1.Add(interval)
-	exp := start2.Add(interval)
-	act := closeTime(start1, start2)
-	assert.EqualValues(t, exp, act)
+
+	t.Run("valid start times", func(t *testing.T) {
+		exp := start2.Add(interval)
+		act := closeTime(start1, start2)
+		assert.EqualValues(t, exp, act)
+	})
+
+	t.Run("start 1 is zero", func(t *testing.T) {
+		act := closeTime(time.Time{}, start2)
+		assert.EqualValues(t, start2, act)
+	})
 }

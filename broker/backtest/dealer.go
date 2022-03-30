@@ -62,7 +62,7 @@ func (d *Dealer) ReceivePrice(ctx context.Context, price market.Kline) error {
 
 	// Iterate open orders in the order they were placed with the dealer
 	// Go maps do not maintain insertion order so we must sort the keys in a slice first
-	// The key is a ULID seeded from a time and supports lexicographic sorting
+	// The map key is a ULID seeded from a time and supports lexicographic sorting
 	ks := maps.Keys(d.orders)
 	slices.Sort(ks)
 	for _, k := range ks {
@@ -126,6 +126,9 @@ func matchOrder(order broker.Order, quote market.Kline) decimal.Decimal {
 }
 
 func closeTime(start1, start2 time.Time) time.Time {
+	if start1.IsZero() {
+		return start2
+	}
 	interval := start2.Sub(start1)
 	return start2.Add(interval)
 }
