@@ -10,12 +10,13 @@ import (
 type PositionState int
 
 const (
-	PositionOpen = iota + 1
+	PositionPending = iota
+	PositionOpen
 	PositionClosed
 )
 
 func (s PositionState) String() string {
-	return [...]string{"Open", "Closed"}[s]
+	return [...]string{"Pending", "Open", "Closed"}[s]
 }
 
 type Position struct {
@@ -32,7 +33,7 @@ func (p *Position) State() PositionState {
 	case !p.ClosedAt.IsZero():
 		return PositionClosed
 	case !p.OpenedAt.IsZero():
-		return PositionClosed
+		return PositionOpen
 	}
-	return 0
+	return PositionPending
 }

@@ -86,7 +86,8 @@ func (d *Dealer) processOrder(order broker.Order) broker.Order {
 			order = d.processOrder(d.fillOrder(order, matchedPrice))
 		}
 	case broker.OrderFilled:
-		d.updatePosition(order)
+		position := d.positions[len(d.positions)-1]
+		position = d.updatePosition(position, order)
 		order = d.closeOrder(order)
 	}
 
@@ -112,11 +113,10 @@ func (d *Dealer) closeOrder(order broker.Order) broker.Order {
 	return order
 }
 
-func (d *Dealer) updatePosition(order broker.Order) broker.Position {
+func (d *Dealer) updatePosition(position broker.Position, order broker.Order) broker.Position {
 
-	position := d.positions[len(d.positions)-1]
 	switch position.State() {
-	case broker.PositionClosed:
+	case broker.PositionPending:
 		position = d.openPosition(order)
 	case broker.PositionOpen:
 		if order.Side == position.Side.Opposite() {
@@ -138,6 +138,7 @@ func (d *Dealer) openPosition(order broker.Order) broker.Position {
 }
 
 func (d *Dealer) closePosition(position broker.Position, order broker.Order) broker.Position {
+	position.ClosedAt = d.clock.Now()
 	return position
 }
 

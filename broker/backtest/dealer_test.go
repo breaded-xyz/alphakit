@@ -67,6 +67,49 @@ func TestDealerProcessOrder(t *testing.T) {
 	}
 }
 
+func TestDealerUpdatePosition(t *testing.T) {
+	tests := []struct {
+		name         string
+		giveOrder    broker.Order
+		givePosition broker.Position
+		wantPosition broker.Position
+		wantState    broker.PositionState
+	}{
+		{
+			name:         "open new position",
+			giveOrder:    broker.Order{Side: broker.Buy, FilledPrice: dec.New(10), FilledSize: dec.New(1)},
+			givePosition: broker.Position{},
+			wantPosition: broker.Position{
+				Side:  broker.Buy,
+				Price: dec.New(10),
+				Size:  dec.New(1),
+			},
+			wantState: broker.PositionOpen,
+		},
+		{
+			name:         "close existing position",
+			giveOrder:    broker.Order{Side: broker.Sell, FilledPrice: dec.New(10), FilledSize: dec.New(1)},
+			givePosition: broker.Position{Side: broker.Buy, Price: dec.New(10), Size: dec.New(1), OpenedAt: time.Now()},
+			wantPosition: broker.Position{
+				Side:  broker.Buy,
+				Price: dec.New(10),
+				Size:  dec.New(1),
+			},
+			wantState: broker.PositionClosed,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			dealer := NewDealer()
+			act := dealer.updatePosition(tt.givePosition, tt.giveOrder)
+			assert.Equal(t, tt.wantPosition.Side, act.Side)
+			assert.Equal(t, tt.wantPosition.Price, act.Price)
+			assert.Equal(t, tt.wantPosition.Size, act.Size)
+			assert.Equal(t, tt.wantState, act.State())
+		})
+	}
+}
+
 func TestDealerPlaceOrder_InvalidArgs(t *testing.T) {
 	tests := []struct {
 		name string
@@ -156,6 +199,24 @@ func TestDealerReceivePrice(t *testing.T) {
 	})
 }
 
+func TestDealerOpenOrder(t *testing.T) {
+	dealer := NewDealer()
+	order := dealer.openOrder(broker.Order{})
+	assert.EqualValues(t, broker.OrderOpen, order.State())
+}
+
+func TestDealerFillOrder(t *testing.T) {
+	dealer := NewDealer()
+	order := dealer.fillOrder(broker.Order{}, dec.New(100))
+	assert.EqualValues(t, broker.OrderFilled, order.State())
+}
+
+func TestDealerCloseOrder(t *testing.T) {
+	dealer := NewDealer()
+	order := dealer.closeOrder(broker.Order{})
+	assert.EqualValues(t, broker.OrderClosed, order.State())
+}
+
 func TestMatchOrder(t *testing.T) {
 	tests := []struct {
 		name      string
@@ -223,24 +284,6 @@ func TestMatchOrder(t *testing.T) {
 			assert.Equal(t, tt.want, act)
 		})
 	}
-}
-
-func TestDealerOpenOrder(t *testing.T) {
-	dealer := NewDealer()
-	order := dealer.openOrder(broker.Order{})
-	assert.EqualValues(t, broker.OrderOpen, order.State())
-}
-
-func TestDealerFillOrder(t *testing.T) {
-	dealer := NewDealer()
-	order := dealer.fillOrder(broker.Order{}, dec.New(100))
-	assert.EqualValues(t, broker.OrderFilled, order.State())
-}
-
-func TestDealerCloseOrder(t *testing.T) {
-	dealer := NewDealer()
-	order := dealer.closeOrder(broker.Order{})
-	assert.EqualValues(t, broker.OrderClosed, order.State())
 }
 
 func TestCloseTime(t *testing.T) {
