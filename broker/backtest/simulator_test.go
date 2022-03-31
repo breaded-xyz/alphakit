@@ -16,7 +16,7 @@ var _fixed time.Time = time.Date(2022, time.January, 1, 0, 0, 0, 0, time.Local)
 // newSimulatorForTest sets the simulation clock to a fixed time
 func newSimulatorForTest() *Simulator {
 	sim := NewSimulator()
-	sim.clock = &FakeClock{Fixed: _fixed}
+	sim.clock = &StubClock{Fixed: _fixed}
 	return sim
 }
 
