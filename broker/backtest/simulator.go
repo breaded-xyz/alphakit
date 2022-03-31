@@ -15,7 +15,7 @@ import (
 var ErrInvalidOrderState = errors.New("order is not valid for processing")
 
 type Simulator struct {
-	clock          Clock
+	clock          Clocker
 	accountBalance decimal.Decimal
 	marketPrice    market.Kline
 
@@ -141,7 +141,7 @@ func (s *Simulator) processPosition(position broker.Position, order broker.Order
 			position = s.processPosition(s.closePosition(position, order), order)
 		}
 	case broker.PositionClosed:
-		s.trades[position.ID] = s.newTrade(position)
+		s.trades[position.ID] = s.createTrade(position)
 	}
 	s.positions[position.ID] = position
 	return position
@@ -164,7 +164,7 @@ func (s *Simulator) closePosition(position broker.Position, order broker.Order) 
 	return position
 }
 
-func (s *Simulator) newTrade(position broker.Position) broker.Trade {
+func (s *Simulator) createTrade(position broker.Position) broker.Trade {
 	return broker.Trade{
 		ID:        position.ID,
 		CreatedAt: s.clock.Now(),

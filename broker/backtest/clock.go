@@ -1,14 +1,24 @@
 package backtest
 
-import "time"
+import (
+	"time"
+)
+
+var _ Clocker = (*Clock)(nil)
+
+type Clocker interface {
+	NextEpoch(time.Time)
+	Now() time.Time
+	Epoch() time.Time
+}
 
 type Clock struct {
 	tock  int64
 	epoch time.Time
 }
 
-func NewClock() Clock {
-	return Clock{
+func NewClock() Clocker {
+	return &Clock{
 		epoch: time.Now(),
 	}
 }
