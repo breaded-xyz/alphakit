@@ -436,3 +436,55 @@ func TestProfit(t *testing.T) {
 		})
 	}
 }
+
+func TestCreateTrade(t *testing.T) {
+
+	sim := newSimulatorForTest()
+
+	give := broker.Position{
+		ID:               "1",
+		ClosedAt:         _fixed,
+		Asset:            market.NewAsset("BTCUSD"),
+		Side:             broker.Sell,
+		Price:            dec.New(10),
+		Size:             dec.New(2),
+		LiquidationPrice: dec.New(20),
+	}
+
+	exp := broker.Trade{
+		ID:        give.ID,
+		CreatedAt: give.ClosedAt,
+		Asset:     give.Asset,
+		Side:      give.Side,
+		Size:      give.Size,
+		Profit:    dec.New(-20),
+	}
+
+	act := sim.createTrade(give)
+	assert.Equal(t, exp, act)
+}
+
+func TestEquityNow(t *testing.T) {
+	sim := newSimulatorForTest()
+	sim.accountBalance = dec.New(10)
+	sim.marketPrice = market.Kline{C: dec.New(20)}
+
+	t.Run("open position - unrealized profit", func(t *testing.T) {
+		sim.positions = map[broker.DealID]broker.Position{
+			"1": {OpenedAt: _fixed, Side: broker.Sell, Price: dec.New(10), Size: dec.New(2)},
+		}
+		exp := dec.New(-10)
+		act := sim.equityNow()
+		assert.Equal(t, exp, act)
+	})
+
+	t.Run("closed position - just account balance", func(t *testing.T) {
+		sim.positions = map[broker.DealID]broker.Position{
+			"1": {ClosedAt: _fixed, Side: broker.Sell, Price: dec.New(10), Size: dec.New(2)},
+		}
+		exp := dec.New(10)
+		act := sim.equityNow()
+		assert.Equal(t, exp, act)
+	})
+
+}

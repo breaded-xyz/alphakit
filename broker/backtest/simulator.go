@@ -167,7 +167,7 @@ func (s *Simulator) closePosition(position broker.Position, order broker.Order) 
 func (s *Simulator) createTrade(position broker.Position) broker.Trade {
 	return broker.Trade{
 		ID:        position.ID,
-		CreatedAt: s.clock.Now(),
+		CreatedAt: position.ClosedAt,
 		Asset:     position.Asset,
 		Side:      position.Side,
 		Size:      position.Size,
