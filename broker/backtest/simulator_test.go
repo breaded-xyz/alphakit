@@ -66,7 +66,7 @@ func TestSimulatorProcessOrder(t *testing.T) {
 	}
 }
 
-func TestSimulatorUpdatePosition(t *testing.T) {
+func TestSimulatorProcessPosition(t *testing.T) {
 	tests := []struct {
 		name         string
 		giveOrder    broker.Order
@@ -100,7 +100,7 @@ func TestSimulatorUpdatePosition(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			sim := NewSimulator()
-			act := sim.updatePosition(tt.givePosition, tt.giveOrder)
+			act := sim.processPosition(tt.givePosition, tt.giveOrder)
 			assert.Equal(t, tt.wantPosition.Side, act.Side)
 			assert.Equal(t, tt.wantPosition.Price, act.Price)
 			assert.Equal(t, tt.wantPosition.Size, act.Size)
@@ -224,7 +224,7 @@ func TestSimulatorReceivePrice(t *testing.T) {
 		}
 	})
 
-	t.Run("orders are processed in order they were created", func(t *testing.T) {
+	t.Run("orders are processed in sequence they were created", func(t *testing.T) {
 		assert.True(t, sim.orders[k1].ClosedAt.Before(sim.orders[k2].ClosedAt))
 		assert.True(t, sim.orders[k2].ClosedAt.Before(sim.orders[k3].ClosedAt))
 	})
@@ -256,7 +256,7 @@ func TestMatchOrder(t *testing.T) {
 		want      decimal.Decimal
 	}{
 		{
-			name: "ok: match limit",
+			name: "match limit",
 			giveOrder: broker.Order{
 				Type:       broker.Limit,
 				LimitPrice: dec.New(12),
@@ -265,7 +265,7 @@ func TestMatchOrder(t *testing.T) {
 			want:      dec.New(12),
 		},
 		{
-			name: "ok: match limit lower bound inclusive",
+			name: "match limit lower bound inclusive",
 			giveOrder: broker.Order{
 				Type:       broker.Limit,
 				LimitPrice: dec.New(5),
@@ -274,7 +274,7 @@ func TestMatchOrder(t *testing.T) {
 			want:      dec.New(5),
 		},
 		{
-			name: "ok: match limit upper bound inclusive",
+			name: "match limit upper bound inclusive",
 			giveOrder: broker.Order{
 				Type:       broker.Limit,
 				LimitPrice: dec.New(15),
@@ -283,7 +283,7 @@ func TestMatchOrder(t *testing.T) {
 			want:      dec.New(15),
 		},
 		{
-			name: "ok: no match limit below lower bound",
+			name: "no match limit below lower bound",
 			giveOrder: broker.Order{
 				Type:       broker.Limit,
 				LimitPrice: dec.New(2),
@@ -292,7 +292,7 @@ func TestMatchOrder(t *testing.T) {
 			want:      decimal.Decimal{},
 		},
 		{
-			name: "ok: no match limit above upper bound",
+			name: "no match limit above upper bound",
 			giveOrder: broker.Order{
 				Type:       broker.Limit,
 				LimitPrice: dec.New(100),
@@ -301,7 +301,7 @@ func TestMatchOrder(t *testing.T) {
 			want:      decimal.Decimal{},
 		},
 		{
-			name: "ok: always match market on close price",
+			name: "always match market on latest close price",
 			giveOrder: broker.Order{
 				Type: broker.Market,
 			},
@@ -332,4 +332,59 @@ func TestCloseTime(t *testing.T) {
 		act := closeTime(time.Time{}, start2)
 		assert.EqualValues(t, start2, act)
 	})
+}
+
+func TestProfit(t *testing.T) {
+	tests := []struct {
+		name string
+		give broker.Position
+		want decimal.Decimal
+	}{
+		{
+			name: "buy side profit",
+			give: broker.Position{
+				Side:             broker.Buy,
+				Price:            dec.New(10),
+				Size:             dec.New(2),
+				LiquidationPrice: dec.New(20),
+			},
+			want: dec.New(20),
+		},
+		{
+			name: "sell side profit",
+			give: broker.Position{
+				Side:             broker.Sell,
+				Price:            dec.New(100),
+				Size:             dec.New(2),
+				LiquidationPrice: dec.New(50),
+			},
+			want: dec.New(100),
+		},
+		{
+			name: "buy side loss",
+			give: broker.Position{
+				Side:             broker.Buy,
+				Price:            dec.New(10),
+				Size:             dec.New(2),
+				LiquidationPrice: dec.New(5),
+			},
+			want: dec.New(-10),
+		},
+		{
+			name: "sell side loss",
+			give: broker.Position{
+				Side:             broker.Sell,
+				Price:            dec.New(10),
+				Size:             dec.New(2),
+				LiquidationPrice: dec.New(20),
+			},
+			want: dec.New(-20),
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			act := profit(tt.give, tt.give.LiquidationPrice)
+			assert.Equal(t, tt.want, act)
+		})
+	}
 }

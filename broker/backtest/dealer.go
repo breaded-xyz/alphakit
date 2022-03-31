@@ -34,8 +34,8 @@ func (d *Dealer) ListTrades(ctx context.Context, opts *netapi.ListOpts) ([]broke
 	return d.simulator.Trades(), nil, nil
 }
 
-func (d *Dealer) ListEquityHistory() []broker.Equity {
-	return d.simulator.Curve()
+func (d *Dealer) Equity() broker.EquitySeries {
+	return d.simulator.Equity()
 }
 
 func (d *Dealer) ReceivePrice(ctx context.Context, price market.Kline) error {

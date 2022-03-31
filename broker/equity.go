@@ -1,12 +1,11 @@
 package broker
 
 import (
-	"time"
-
 	"github.com/shopspring/decimal"
 )
 
-type Equity struct {
-	At     time.Time
-	Amount decimal.Decimal
-}
+type Timestamp int64
+
+type TimeSeries[V any] map[Timestamp]V
+
+type EquitySeries TimeSeries[decimal.Decimal]

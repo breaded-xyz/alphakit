@@ -5,7 +5,7 @@ import "github.com/colngroup/zero2algo/broker"
 type Report struct {
 }
 
-func NewReport(trades []broker.Trade, curve []broker.Equity) Report {
+func NewReport(trades []broker.Trade, equity broker.EquitySeries) Report {
 	return Report{}
 }
 

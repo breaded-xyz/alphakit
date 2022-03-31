@@ -16,5 +16,5 @@ type Dealer interface {
 type SimulatedDealer interface {
 	Dealer
 	market.Receiver
-	ListEquityHistory() []Equity
+	Equity() EquitySeries
 }

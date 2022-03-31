@@ -15,14 +15,14 @@ import (
 var ErrInvalidOrderState = errors.New("order is not valid for processing")
 
 type Simulator struct {
-	clock       Clock
-	cashBalance decimal.Decimal
-	marketPrice market.Kline
+	clock          Clock
+	accountBalance decimal.Decimal
+	marketPrice    market.Kline
 
 	orders    map[broker.DealID]broker.Order
 	positions map[broker.DealID]broker.Position
 	trades    map[broker.DealID]broker.Trade
-	curve     []broker.Equity
+	equity    broker.EquitySeries
 }
 
 func NewSimulator() *Simulator {
@@ -31,6 +31,7 @@ func NewSimulator() *Simulator {
 		orders:    make(map[broker.DealID]broker.Order),
 		positions: make(map[broker.DealID]broker.Position),
 		trades:    make(map[broker.DealID]broker.Trade),
+		equity:    make(broker.EquitySeries),
 	}
 }
 
@@ -58,7 +59,7 @@ func (s *Simulator) Next(price market.Kline) error {
 		}
 	}
 
-	s.curve = append(s.curve, s.equityNow())
+	s.equity[broker.Timestamp(s.clock.Epoch().Unix())] = s.equityNow()
 
 	return nil
 }
@@ -75,9 +76,9 @@ func (s *Simulator) Trades() []broker.Trade {
 	return maps.Values(s.trades)
 }
 
-func (s *Simulator) Curve() []broker.Equity {
-	var copied []broker.Equity
-	copy(copied, s.curve)
+func (s *Simulator) Equity() broker.EquitySeries {
+	var copied broker.EquitySeries
+	maps.Copy(copied, s.equity)
 	return copied
 }
 
@@ -90,11 +91,7 @@ func (s *Simulator) processOrder(order broker.Order) broker.Order {
 			order = s.processOrder(s.fillOrder(order, matchedPrice))
 		}
 	case broker.OrderFilled:
-		position := s.updatePosition(s.getLatestOrNewPosition(), order)
-		if position.State() == broker.OrderClosed {
-			s.trades[position.ID] = s.newTrade(position)
-		}
-		s.positions[position.ID] = position
+		s.processPosition(s.getLatestOrNewPosition(), order)
 		order = s.closeOrder(order)
 	}
 
@@ -122,7 +119,6 @@ func (s *Simulator) closeOrder(order broker.Order) broker.Order {
 
 func (s *Simulator) getLatestOrNewPosition() broker.Position {
 	var empty, position broker.Position
-
 	if len(s.positions) == 0 {
 		return empty
 	}
@@ -130,23 +126,24 @@ func (s *Simulator) getLatestOrNewPosition() broker.Position {
 	ks := maps.Keys(s.positions)
 	slices.Sort(ks)
 	position = s.positions[ks[len(ks)-1]]
-
 	if position.State() == broker.PositionClosed {
 		return empty
 	}
 	return position
 }
 
-func (s *Simulator) updatePosition(position broker.Position, order broker.Order) broker.Position {
-
+func (s *Simulator) processPosition(position broker.Position, order broker.Order) broker.Position {
 	switch position.State() {
 	case broker.PositionPending:
-		position = s.openPosition(order)
+		position = s.processPosition(s.openPosition(order), order)
 	case broker.PositionOpen:
 		if order.Side == position.Side.Opposite() {
-			position = s.closePosition(position, order)
+			position = s.processPosition(s.closePosition(position, order), order)
 		}
+	case broker.PositionClosed:
+		s.trades[position.ID] = s.newTrade(position)
 	}
+	s.positions[position.ID] = position
 	return position
 }
 
@@ -174,17 +171,14 @@ func (s *Simulator) newTrade(position broker.Position) broker.Trade {
 		Asset:     position.Asset,
 		Side:      position.Side,
 		Size:      position.Size,
-		Profit:    Profit(position, position.LiquidationPrice),
+		Profit:    profit(position, position.LiquidationPrice),
 	}
 }
 
-func (s *Simulator) equityNow() broker.Equity {
-	equity := broker.Equity{
-		At:     s.clock.Now(),
-		Amount: s.cashBalance,
-	}
+func (s *Simulator) equityNow() decimal.Decimal {
+	equity := s.accountBalance
 	if position := s.getLatestOrNewPosition(); position.State() == broker.PositionOpen {
-		equity.Amount = equity.Amount.Add(Profit(position, s.marketPrice.C))
+		equity = equity.Add(profit(position, s.marketPrice.C))
 	}
 	return equity
 }
@@ -210,4 +204,12 @@ func closeTime(start1, start2 time.Time) time.Time {
 	}
 	interval := start2.Sub(start1)
 	return start2.Add(interval)
+}
+
+func profit(position broker.Position, price decimal.Decimal) decimal.Decimal {
+	profit := price.Sub(position.Price).Mul(position.Size)
+	if position.Side == broker.Sell {
+		profit = profit.Neg()
+	}
+	return profit
 }
