@@ -12,81 +12,81 @@ import (
 
 func TestHoldBotConfigure(t *testing.T) {
 	tests := []struct {
-		name string
-		give map[string]any
-		want HodlBot
-		err  error
+		name    string
+		give    map[string]any
+		wantBot HodlBot
+		wantErr error
 	}{
 		{
 			name: "buy index < sell index",
 			give: map[string]any{"buybarindex": 1, "sellbarindex": 1000},
-			want: HodlBot{
+			wantBot: HodlBot{
 				BuyBarIndex:  1,
 				SellBarIndex: 1000,
 			},
-			err: nil,
+			wantErr: nil,
 		},
 		{
 			name: "no sell",
 			give: map[string]any{"buybarindex": 10, "sellbarindex": 0},
-			want: HodlBot{
+			wantBot: HodlBot{
 				BuyBarIndex:  10,
 				SellBarIndex: 0,
 			},
-			err: nil,
+			wantErr: nil,
 		},
 		{
 			name: "default",
 			give: map[string]any{"buybarindex": 0, "sellbarindex": 0},
-			want: HodlBot{
+			wantBot: HodlBot{
 				BuyBarIndex:  0,
 				SellBarIndex: 0,
 			},
-			err: nil,
+			wantErr: nil,
 		},
 		{
 			name: "buy index >= sell index",
 			give: map[string]any{"buybarindex": 10, "sellbarindex": 5},
-			want: HodlBot{
+			wantBot: HodlBot{
 				BuyBarIndex:  0,
 				SellBarIndex: 0,
 			},
-			err: ErrInvalidConfig,
+			wantErr: ErrInvalidConfig,
 		},
 		{
 			name: "not int",
 			give: map[string]any{"buybarindex": 10.5, "sellbarindex": 5},
-			want: HodlBot{
+			wantBot: HodlBot{
 				BuyBarIndex:  0,
 				SellBarIndex: 0,
 			},
-			err: ErrInvalidConfig,
+			wantErr: ErrInvalidConfig,
 		},
 		{
 			name: "neg int",
 			give: map[string]any{"buybarindex": -1, "sellbarindex": 5},
-			want: HodlBot{
+			wantBot: HodlBot{
 				BuyBarIndex:  0,
 				SellBarIndex: 0,
 			},
-			err: ErrInvalidConfig,
+			wantErr: ErrInvalidConfig,
 		},
 		{
 			name: "key not found",
 			give: map[string]any{"notakey": 10, "sellbarindex": 5},
-			want: HodlBot{
+			wantBot: HodlBot{
 				BuyBarIndex:  0,
 				SellBarIndex: 0,
 			},
-			err: ErrInvalidConfig,
+			wantErr: ErrInvalidConfig,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			var bot HodlBot
 			err := bot.Configure(tt.give)
-			assert.Equal(t, tt.err, err)
-			assert.Equal(t, tt.want, bot)
+			assert.Equal(t, tt.wantErr, err)
+			assert.Equal(t, tt.wantBot, bot)
 		})
 	}
 }
@@ -122,8 +122,8 @@ func TestHodlBotEvalAlgo(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			var bot HodlBot
-			actual := bot.evalAlgo(tt.give[0], tt.give[1], tt.give[2])
-			assert.Equal(t, tt.want, actual)
+			act := bot.evalAlgo(tt.give[0], tt.give[1], tt.give[2])
+			assert.Equal(t, tt.want, act)
 		})
 	}
 }
