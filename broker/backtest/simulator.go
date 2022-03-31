@@ -47,7 +47,7 @@ func (s *Simulator) Next(price market.Kline) error {
 	s.clock.NextEpoch(closeTime(s.marketPrice.Start, price.Start))
 	s.marketPrice = price
 
-	// Iterate open orders in the order they were placed with the dealer
+	// Iterate open orders in the sequence they were placed (FIFO)
 	// Go maps do not maintain insertion order so we must sort the keys in a slice first
 	// The map key is a ULID seeded from a time and supports lexicographic sorting
 	ks := maps.Keys(s.orders)
