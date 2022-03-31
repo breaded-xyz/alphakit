@@ -44,7 +44,16 @@ func (s *Simulator) AddOrder(order broker.Order) (broker.Order, error) {
 }
 
 func (s *Simulator) Next(price market.Kline) error {
-	s.clock.NextEpoch(closeTime(s.marketPrice.Start, price.Start))
+
+	// Init simulation clock the first time a price is received
+	if s.clock.Epoch().IsZero() {
+		s.clock.Start(price.Start)
+	}
+
+	// Advance the clock epoch to the start time of the kline
+	s.clock.NextEpoch(price.Start)
+
+	// Set the market price used in this epoch to the received price
 	s.marketPrice = price
 
 	// Iterate open orders in the sequence they were placed (FIFO)
@@ -150,7 +159,7 @@ func (s *Simulator) processPosition(position broker.Position, order broker.Order
 func (s *Simulator) openPosition(order broker.Order) broker.Position {
 	return broker.Position{
 		ID:       order.ID,
-		OpenedAt: s.clock.Now(),
+		OpenedAt: order.FilledAt,
 		Asset:    order.Asset,
 		Side:     order.Side,
 		Price:    order.FilledPrice,
@@ -159,7 +168,7 @@ func (s *Simulator) openPosition(order broker.Order) broker.Position {
 }
 
 func (s *Simulator) closePosition(position broker.Position, order broker.Order) broker.Position {
-	position.ClosedAt = s.clock.Now()
+	position.ClosedAt = order.FilledAt
 	position.LiquidationPrice = order.FilledPrice
 	return position
 }

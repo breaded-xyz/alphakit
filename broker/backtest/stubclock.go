@@ -14,6 +14,11 @@ type StubClock struct {
 	Fixed time.Time
 }
 
+// Start not implemented.
+func (c *StubClock) Start(epoch time.Time) {
+	// Intentionally empty
+}
+
 // NextEpoch not implemented.
 func (c *StubClock) NextEpoch(epoch time.Time) {
 	// Intentionally empty
@@ -27,4 +32,9 @@ func (c *StubClock) Now() time.Time {
 // Epoch returns Fixed.
 func (c *StubClock) Epoch() time.Time {
 	return c.Fixed
+}
+
+// Elapsed returns 0.
+func (c *StubClock) Elapsed() time.Duration {
+	return 0
 }

@@ -201,7 +201,7 @@ func TestSimulatorProcessPosition(t *testing.T) {
 	}{
 		{
 			name:         "open new position",
-			giveOrder:    broker.Order{Side: broker.Buy, FilledPrice: dec.New(10), FilledSize: dec.New(1)},
+			giveOrder:    broker.Order{Side: broker.Buy, FilledAt: _fixed, FilledPrice: dec.New(10), FilledSize: dec.New(1)},
 			givePosition: broker.Position{},
 			wantPosition: broker.Position{
 				OpenedAt: _fixed,
@@ -213,8 +213,8 @@ func TestSimulatorProcessPosition(t *testing.T) {
 		},
 		{
 			name:         "close existing position",
-			giveOrder:    broker.Order{Side: broker.Sell, FilledPrice: dec.New(20), FilledSize: dec.New(1)},
-			givePosition: broker.Position{Side: broker.Buy, Price: dec.New(10), Size: dec.New(1), OpenedAt: _fixed},
+			giveOrder:    broker.Order{FilledAt: _fixed, Side: broker.Sell, FilledPrice: dec.New(20), FilledSize: dec.New(1)},
+			givePosition: broker.Position{OpenedAt: _fixed, Side: broker.Buy, Price: dec.New(10), Size: dec.New(1)},
 			wantPosition: broker.Position{
 				OpenedAt:         _fixed,
 				ClosedAt:         _fixed,
@@ -251,6 +251,7 @@ func TestSimulatorOpenPosition(t *testing.T) {
 
 	act := sim.openPosition(broker.Order{
 		ID:          exp.ID,
+		FilledAt:    _fixed,
 		Asset:       exp.Asset,
 		Side:        exp.Side,
 		FilledPrice: exp.Price,
@@ -263,6 +264,7 @@ func TestSimulatorOpenPosition(t *testing.T) {
 func TestSimulatorReceivePrice(t *testing.T) {
 
 	sim := NewSimulator()
+	sim.clock.Start(time.Now())
 
 	k1 := broker.NewIDWithTime(sim.clock.Now())
 	sim.orders[k1] = broker.Order{ID: k1, Type: broker.Limit, LimitPrice: dec.New(15), OpenedAt: sim.clock.Now()}
