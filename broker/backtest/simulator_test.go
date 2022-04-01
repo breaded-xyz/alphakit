@@ -81,6 +81,7 @@ func TestSimulatorProcessOrder(t *testing.T) {
 			name: "market order filled",
 			give: broker.Order{
 				Type: broker.Market,
+				Side: broker.Buy,
 				Size: dec.New(1),
 			},
 			wantOrder: broker.Order{
@@ -92,6 +93,7 @@ func TestSimulatorProcessOrder(t *testing.T) {
 		{
 			name: "limit order filled",
 			give: broker.Order{
+				Side:       broker.Buy,
 				Type:       broker.Limit,
 				LimitPrice: dec.New(8),
 				Size:       dec.New(1),
@@ -138,12 +140,13 @@ func TestSimulatorOpenOrder(t *testing.T) {
 func TestSimulatorFillOrder(t *testing.T) {
 	sim := newSimulatorForTest()
 	exp := broker.Order{
+		Side:        broker.Buy,
 		FilledAt:    _fixed,
 		Size:        dec.New(1),
 		FilledPrice: dec.New(100),
 		FilledSize:  dec.New(1),
 	}
-	act := sim.fillOrder(broker.Order{Size: exp.Size}, exp.FilledPrice)
+	act := sim.fillOrder(broker.Order{Side: broker.Buy, Size: exp.Size}, exp.FilledPrice)
 	assert.Equal(t, exp, act)
 }
 

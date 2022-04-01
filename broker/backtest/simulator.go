@@ -21,6 +21,8 @@ type Simulator struct {
 	accountBalance decimal.Decimal
 	marketPrice    market.Kline
 
+	cost Coster
+
 	orders    map[broker.DealID]broker.Order
 	positions map[broker.DealID]broker.Position
 	trades    map[broker.DealID]broker.Trade
@@ -30,6 +32,7 @@ type Simulator struct {
 func NewSimulator() *Simulator {
 	return &Simulator{
 		clock:     NewClock(),
+		cost:      NewPerpCost(),
 		orders:    make(map[broker.DealID]broker.Order),
 		positions: make(map[broker.DealID]broker.Position),
 		trades:    make(map[broker.DealID]broker.Trade),
@@ -72,6 +75,9 @@ func (s *Simulator) Next(price market.Kline) error {
 
 	s.equity[broker.Timestamp(s.clock.Peek().Unix())] = s.equityNow()
 
+	s.accountBalance = s.accountBalance.Sub(
+		s.cost.Funding(s.getLatestOrNewPosition(), s.clock.Elapsed()))
+
 	return nil
 }
 
@@ -102,6 +108,7 @@ func (s *Simulator) processOrder(order broker.Order) broker.Order {
 			order = s.processOrder(s.fillOrder(order, matchedPrice))
 		}
 	case broker.OrderFilled:
+		s.accountBalance = s.accountBalance.Sub(s.cost.Transaction(order))
 		s.processPosition(s.getLatestOrNewPosition(), order)
 		order = s.closeOrder(order)
 	}
@@ -118,8 +125,21 @@ func (s *Simulator) openOrder(order broker.Order) broker.Order {
 
 func (s *Simulator) fillOrder(order broker.Order, matchedPrice decimal.Decimal) broker.Order {
 	order.FilledAt = s.clock.Now()
-	order.FilledPrice = matchedPrice
+
+	var fillPrice decimal.Decimal
+
+	switch order.Side {
+	case broker.Buy:
+		fillPrice = matchedPrice.Add(s.cost.Slippage(matchedPrice))
+		fillPrice = fillPrice.Add(s.cost.Spread(fillPrice))
+	case broker.Sell:
+		fillPrice = matchedPrice.Sub(s.cost.Slippage(matchedPrice))
+		fillPrice = fillPrice.Sub(s.cost.Spread(fillPrice))
+	}
+
+	order.FilledPrice = fillPrice
 	order.FilledSize = order.Size
+
 	return order
 }
 
