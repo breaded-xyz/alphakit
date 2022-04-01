@@ -264,7 +264,7 @@ func TestSimulatorOpenPosition(t *testing.T) {
 func TestSimulatorReceivePrice(t *testing.T) {
 
 	sim := NewSimulator()
-	sim.clock.Start(time.Now())
+	sim.clock.Start(time.Now(), time.Millisecond)
 
 	k1 := broker.NewIDWithTime(sim.clock.Now())
 	sim.orders[k1] = broker.Order{ID: k1, Type: broker.Limit, LimitPrice: dec.New(15), OpenedAt: sim.clock.Now()}
@@ -276,7 +276,7 @@ func TestSimulatorReceivePrice(t *testing.T) {
 	sim.orders[k3] = broker.Order{ID: k3, Type: broker.Limit, LimitPrice: dec.New(10), OpenedAt: sim.clock.Now()}
 
 	price := market.Kline{
-		Start: sim.clock.Epoch().Add(time.Hour * 1),
+		Start: sim.clock.Now().Add(time.Hour * 1),
 		O:     dec.New(8),
 		H:     dec.New(15),
 		L:     dec.New(5),

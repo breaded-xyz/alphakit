@@ -15,12 +15,12 @@ type StubClock struct {
 }
 
 // Start not implemented.
-func (c *StubClock) Start(epoch time.Time) {
+func (c *StubClock) Start(start time.Time, tock time.Duration) {
 	// Intentionally empty
 }
 
 // NextEpoch not implemented.
-func (c *StubClock) NextEpoch(epoch time.Time) {
+func (c *StubClock) Advance(epoch time.Time) {
 	// Intentionally empty
 }
 
@@ -29,8 +29,8 @@ func (c *StubClock) Now() time.Time {
 	return c.Fixed
 }
 
-// Epoch returns Fixed.
-func (c *StubClock) Epoch() time.Time {
+// Now returns Fixed.
+func (c *StubClock) Peek() time.Time {
 	return c.Fixed
 }
 

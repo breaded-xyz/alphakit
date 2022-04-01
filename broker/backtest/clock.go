@@ -10,69 +10,72 @@ var _ Clocker = (*Clock)(nil)
 // Clocker defines a clock to be used by Simulation to timestamp events.
 type Clocker interface {
 
-	// Resets state with the first epoch at the given time.
-	Start(time.Time)
+	// Resets the clock with a new start time and tock interval.
+	Start(time.Time, time.Duration)
 
-	// NextEpoch advances the simulation clock to a new time.
-	NextEpoch(time.Time)
+	// Advance advances the simulation clock to a future time.
+	Advance(time.Time)
 
-	// Now returns an incrementally later each time it is called.
-	// The returned time should always be >= the epoch start time.
+	// Now returns an incrementally later time each call.
+	// Increments are defined by the tock interval given to Start.
+	// Returned time should always be >= the start time or latest advance time.
 	Now() time.Time
 
-	// Epoch returns the start time of the current epoch.
-	Epoch() time.Time
+	// Peek returns the current time (last value returned by Now())
+	// but does not advance the time by the tock interval.
+	Peek() time.Time
 
-	// Elapsed returns the total duration since the first epoch.
+	// Elapsed returns the total duration since the start time.
 	Elapsed() time.Duration
 }
 
 // Clock is the default Clocker implementation for Simulation.
 // When Now is called an incrementally later time is returned.
-// Each increment is a 'tock' and equals 1 * time.Millisecond.
+// Each increment is a 'tock' which defaults to 1 millisecond.
 // Tock term is used to avoid confusion with 'tick' which has a defined meaning in trading.
 // Clock helps ensure orders are processed in the sequence they are submitted.
 type Clock struct {
-	tock    int64
-	epoch   time.Time
-	elapsed time.Duration
+	now      time.Time
+	interval time.Duration
+	elapsed  time.Duration
 }
 
-// NewClock sets the starting epoch to the zero time.
+// NewClock sets the start to the zero time and tock interval to 1 millisecond.
 func NewClock() Clocker {
-	return &Clock{}
+	return &Clock{
+		interval: 1 * time.Millisecond,
+	}
 }
 
 // Start initializes the clock and resets all state.
-func (c *Clock) Start(epoch time.Time) {
-	c.epoch = epoch
-	c.tock = 0
+func (c *Clock) Start(start time.Time, tock time.Duration) {
+	c.now = start
+	c.interval = tock
 	c.elapsed = 0
 }
 
-// NextEpoch advances to the next epoch with the start at the given time.
-// Tock counter is reset, when Now is called it will be epoch + 1 tock.
+// Advance advances to the next epoch at the given time.
+// When Now is next called it will be epoch + 1 tock interval.
 // Undefined behaviour if the given epoch is earlier than the current.
-func (c *Clock) NextEpoch(epoch time.Time) {
-	c.elapsed += epoch.Sub(c.epoch)
-	c.epoch = epoch
-	c.tock = 0
+func (c *Clock) Advance(epoch time.Time) {
+	c.elapsed += epoch.Sub(c.now)
+	c.now = epoch
 }
 
 // Now returns the next tock, which is 1 * time.millisecond later than the last call.
-// To reset tock call NextEpoch.
 func (c *Clock) Now() time.Time {
-	c.tock++
-	return c.epoch.Add(time.Duration(c.tock) * time.Millisecond)
+	c.now = c.now.Add(c.interval)
+	return c.now
 }
 
-// Epoch returns the current epoch start time.
-func (c *Clock) Epoch() time.Time {
-	return c.epoch
+// Peek returns the time without mutation.
+func (c *Clock) Peek() time.Time {
+	return c.now
 }
 
-// Elapsed returns the total elapsed duration since the first epoch.
-// This is primarily used for calculating funding charges.
+// Elapsed returns the total elapsed duration since the start.
+// Elapsed time is calculated on each call to Advance.
+// Primarily used for calculating funding charges.
 func (c *Clock) Elapsed() time.Duration {
 	return c.elapsed
 }

@@ -12,6 +12,8 @@ import (
 	"golang.org/x/exp/slices"
 )
 
+const _defaultTockInterval = 1 * time.Millisecond
+
 var ErrInvalidOrderState = errors.New("order is not valid for processing")
 
 type Simulator struct {
@@ -46,12 +48,12 @@ func (s *Simulator) AddOrder(order broker.Order) (broker.Order, error) {
 func (s *Simulator) Next(price market.Kline) error {
 
 	// Init simulation clock the first time a price is received
-	if s.clock.Epoch().IsZero() {
-		s.clock.Start(price.Start)
+	if s.clock.Peek().IsZero() {
+		s.clock.Start(price.Start, _defaultTockInterval)
 	}
 
 	// Advance the clock epoch to the start time of the kline
-	s.clock.NextEpoch(price.Start)
+	s.clock.Advance(price.Start)
 
 	// Set the market price used in this epoch to the received price
 	s.marketPrice = price
@@ -68,7 +70,7 @@ func (s *Simulator) Next(price market.Kline) error {
 		}
 	}
 
-	s.equity[broker.Timestamp(s.clock.Epoch().Unix())] = s.equityNow()
+	s.equity[broker.Timestamp(s.clock.Peek().Unix())] = s.equityNow()
 
 	return nil
 }
