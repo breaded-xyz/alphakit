@@ -1,9 +1,11 @@
 package backtest
 
 import (
+	"math"
 	"time"
 
 	"github.com/colngroup/zero2algo/broker"
+	"github.com/colngroup/zero2algo/dec"
 	"github.com/shopspring/decimal"
 )
 
@@ -15,7 +17,7 @@ type PerpCost struct {
 	TransactionPct decimal.Decimal
 	FundingHourPct decimal.Decimal
 
-	lastestFundingHour int
+	lastFundingHour float64
 }
 
 func NewPerpCost() *PerpCost {
@@ -34,6 +36,22 @@ func (c *PerpCost) Transaction(order broker.Order) decimal.Decimal {
 	return order.FilledPrice.Mul(order.FilledSize).Mul(c.TransactionPct)
 }
 
-func (c *PerpCost) Funding(position broker.Position, elapsed time.Duration) decimal.Decimal {
-	return decimal.Zero
+func (c *PerpCost) Funding(position broker.Position, price decimal.Decimal, elapsed time.Duration) decimal.Decimal {
+
+	if position.State() != broker.OrderOpen {
+		return decimal.Zero
+	}
+
+	hours := math.Trunc(elapsed.Hours())
+	excess := hours - c.lastFundingHour
+
+	if excess == 0 {
+		return decimal.Zero
+	}
+
+	c.lastFundingHour = hours
+	perHourCost := position.Size.Mul(price).Mul(c.FundingHourPct)
+	totalCost := perHourCost.Mul(dec.New(excess))
+
+	return totalCost
 }

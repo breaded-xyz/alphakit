@@ -10,6 +10,6 @@ import (
 type Coster interface {
 	Slippage(price decimal.Decimal) decimal.Decimal
 	Spread(price decimal.Decimal) decimal.Decimal
-	Transaction(order broker.Order) decimal.Decimal
-	Funding(position broker.Position, elapsed time.Duration) decimal.Decimal
+	Transaction(broker.Order) decimal.Decimal
+	Funding(position broker.Position, price decimal.Decimal, elapsed time.Duration) decimal.Decimal
 }

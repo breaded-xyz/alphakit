@@ -65,6 +65,10 @@ func (s *Simulator) Next(price market.Kline) error {
 	// Set the market price used in this epoch to the received price
 	s.marketPrice = price
 
+	// Deduct funding fees if an existing position is open
+	s.accountBalance = s.accountBalance.Sub(
+		s.cost.Funding(s.getLatestOrNewPosition(), s.marketPrice.C, s.clock.Elapsed()))
+
 	// Iterate open orders in the sequence they were placed (FIFO)
 	// Go maps do not maintain insertion order so we must sort the keys in a slice first
 	// The map key is a ULID seeded from a time and supports lexicographic sorting
@@ -77,10 +81,8 @@ func (s *Simulator) Next(price market.Kline) error {
 		}
 	}
 
+	// Add current portfolio equity to the history
 	s.equity[broker.Timestamp(s.clock.Peek().Unix())] = s.equityNow()
-
-	s.accountBalance = s.accountBalance.Sub(
-		s.cost.Funding(s.getLatestOrNewPosition(), s.clock.Elapsed()))
 
 	return nil
 }
