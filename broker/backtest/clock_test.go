@@ -11,7 +11,7 @@ func TestClockStart(t *testing.T) {
 	giveStart := time.Now()
 	giveInterval := time.Second * 10
 
-	want := Clock{
+	want := &Clock{
 		now:      giveStart,
 		interval: giveInterval,
 		elapsed:  0,
