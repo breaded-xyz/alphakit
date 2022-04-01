@@ -30,9 +30,13 @@ type Simulator struct {
 }
 
 func NewSimulator() *Simulator {
+	return NewSimulatorWithCost(NewPerpCost())
+}
+
+func NewSimulatorWithCost(cost Coster) *Simulator {
 	return &Simulator{
 		clock:     NewClock(),
-		cost:      NewPerpCost(),
+		cost:      cost,
 		orders:    make(map[broker.DealID]broker.Order),
 		positions: make(map[broker.DealID]broker.Position),
 		trades:    make(map[broker.DealID]broker.Trade),
