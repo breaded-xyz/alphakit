@@ -41,7 +41,7 @@ type Clock struct {
 }
 
 // NewClock sets the start to the zero time and tock interval to 1 millisecond.
-func NewClock() Clocker {
+func NewClock() *Clock {
 	return &Clock{
 		interval: 1 * time.Millisecond,
 	}
@@ -62,7 +62,8 @@ func (c *Clock) Advance(epoch time.Time) {
 	c.now = epoch
 }
 
-// Now returns the next tock, which is 1 * time.millisecond later than the last call.
+// Now returns the time incremented by a tock,
+// which by default is  1 * time.millisecond later than the last call.
 func (c *Clock) Now() time.Time {
 	c.now = c.now.Add(c.interval)
 	return c.now

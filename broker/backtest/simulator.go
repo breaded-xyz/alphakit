@@ -12,7 +12,7 @@ import (
 	"golang.org/x/exp/slices"
 )
 
-const _defaultTockInterval = 1 * time.Millisecond
+const _defaultTockInterval = time.Millisecond
 
 var ErrInvalidOrderState = errors.New("order is not valid for processing")
 
