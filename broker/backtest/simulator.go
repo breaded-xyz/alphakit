@@ -66,8 +66,7 @@ func (s *Simulator) Next(price market.Kline) error {
 	s.marketPrice = price
 
 	// Deduct funding fees if an existing position is open
-	s.accountBalance = s.accountBalance.Sub(
-		s.cost.Funding(s.getLatestOrNewPosition(), s.marketPrice.C, s.clock.Elapsed()))
+	s.accountBalance = s.accountBalance.Sub(s.cost.Funding(s.getPosition(), s.marketPrice.C, s.clock.Elapsed()))
 
 	// Iterate open orders in the sequence they were placed (FIFO)
 	// Go maps do not maintain insertion order so we must sort the keys in a slice first
@@ -105,17 +104,23 @@ func (s *Simulator) Equity() broker.EquitySeries {
 	return copied
 }
 
+func (s *Simulator) AccountBalance() decimal.Decimal {
+	return s.accountBalance
+}
+
 func (s *Simulator) processOrder(order broker.Order) broker.Order {
 	switch order.State() {
 	case broker.OrderPending:
-		order = s.processOrder(s.openOrder(order))
+		if !order.ReduceOnly {
+			order = s.processOrder(s.openOrder(order))
+		}
 	case broker.OrderOpen:
 		if matchedPrice := matchOrder(order, s.marketPrice); matchedPrice.IsPositive() {
 			order = s.processOrder(s.fillOrder(order, matchedPrice))
 		}
 	case broker.OrderFilled:
 		s.accountBalance = s.accountBalance.Sub(s.cost.Transaction(order))
-		s.processPosition(s.getLatestOrNewPosition(), order)
+		s.processPosition(s.getPosition(), order)
 		order = s.closeOrder(order)
 	}
 
@@ -131,7 +136,6 @@ func (s *Simulator) openOrder(order broker.Order) broker.Order {
 
 func (s *Simulator) fillOrder(order broker.Order, matchedPrice decimal.Decimal) broker.Order {
 	order.FilledAt = s.clock.Now()
-
 	var fillPrice decimal.Decimal
 
 	switch order.Side {
@@ -154,7 +158,7 @@ func (s *Simulator) closeOrder(order broker.Order) broker.Order {
 	return order
 }
 
-func (s *Simulator) getLatestOrNewPosition() broker.Position {
+func (s *Simulator) getPosition() broker.Position {
 	var empty, position broker.Position
 	if len(s.positions) == 0 {
 		return empty
@@ -172,13 +176,17 @@ func (s *Simulator) getLatestOrNewPosition() broker.Position {
 func (s *Simulator) processPosition(position broker.Position, order broker.Order) broker.Position {
 	switch position.State() {
 	case broker.PositionPending:
-		position = s.processPosition(s.openPosition(order), order)
+		if !order.ReduceOnly {
+			position = s.processPosition(s.openPosition(order), order)
+		}
 	case broker.PositionOpen:
 		if order.Side == position.Side.Opposite() {
 			position = s.processPosition(s.closePosition(position, order), order)
 		}
 	case broker.PositionClosed:
-		s.trades[position.ID] = s.createTrade(position)
+		trade := s.createTrade(position)
+		s.accountBalance = s.accountBalance.Add(trade.Profit)
+		s.trades[position.ID] = trade
 	}
 	s.positions[position.ID] = position
 	return position
@@ -214,7 +222,7 @@ func (s *Simulator) createTrade(position broker.Position) broker.Trade {
 
 func (s *Simulator) equityNow() decimal.Decimal {
 	equity := s.accountBalance
-	if position := s.getLatestOrNewPosition(); position.State() == broker.PositionOpen {
+	if position := s.getPosition(); position.State() == broker.PositionOpen {
 		equity = equity.Add(profit(position, s.marketPrice.C))
 	}
 	return equity

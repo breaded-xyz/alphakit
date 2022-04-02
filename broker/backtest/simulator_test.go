@@ -159,7 +159,7 @@ func TestSimulatorCloseOrder(t *testing.T) {
 	assert.Equal(t, exp, act)
 }
 
-func TestSimulatorGetLatestOrNewPosition(t *testing.T) {
+func TestSimulatorGetPosition(t *testing.T) {
 	tests := []struct {
 		name string
 		give map[broker.DealID]broker.Position
@@ -188,7 +188,7 @@ func TestSimulatorGetLatestOrNewPosition(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			sim := newSimulatorForTest()
 			sim.positions = tt.give
-			act := sim.getLatestOrNewPosition()
+			act := sim.getPosition()
 			assert.Equal(t, tt.want, act.State())
 		})
 	}
@@ -456,7 +456,7 @@ func TestCreateTrade(t *testing.T) {
 		LiquidationPrice: dec.New(20),
 	}
 
-	exp := broker.Trade{
+	want := broker.Trade{
 		ID:        give.ID,
 		CreatedAt: give.ClosedAt,
 		Asset:     give.Asset,
@@ -466,7 +466,7 @@ func TestCreateTrade(t *testing.T) {
 	}
 
 	act := sim.createTrade(give)
-	assert.Equal(t, exp, act)
+	assert.Equal(t, want, act)
 }
 
 func TestEquityNow(t *testing.T) {

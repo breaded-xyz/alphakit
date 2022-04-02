@@ -21,6 +21,12 @@ func NewDealer() *Dealer {
 	}
 }
 
+func NewDealerWithCost(cost Coster) *Dealer {
+	return &Dealer{
+		simulator: NewSimulatorWithCost(cost),
+	}
+}
+
 func (d *Dealer) PlaceOrder(ctx context.Context, order broker.Order) (*broker.Order, *netapi.Response, error) {
 	order, err := d.simulator.AddOrder(order)
 	return &order, nil, err
