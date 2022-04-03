@@ -294,7 +294,7 @@ func profit(position broker.Position, price decimal.Decimal) decimal.Decimal {
 }
 
 func equalClock(t1, t2 time.Time) bool {
-	xH, xM, xS := t1.Clock()
-	yH, yM, yS := t2.Clock()
-	return xH == yH && xM == yM && xS == yS
+	t1H, t1M, t1S := t1.Clock()
+	t2H, t2M, t2S := t2.Clock()
+	return t1H == t2H && t1M == t2M && t1S == t2S
 }
