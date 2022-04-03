@@ -10,9 +10,9 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestPerpCostFunding2(t *testing.T) {
+func TestPerpCostFunding(t *testing.T) {
 	// Test evaluates how state mutates over time in response to elapsed duration input
-	// so the same PerpCost instance is used in all sub tests
+	// Same PerpCost instance is used in all sub tests
 	cost := PerpCost{
 		FundingHourPct: dec.New(0.1),
 	}
@@ -59,4 +59,35 @@ func TestPerpCostFunding2(t *testing.T) {
 			assert.Equal(t, tt.want.IntPart(), act.IntPart())
 		})
 	}
+}
+
+func TestPerpCostSlippage(t *testing.T) {
+	cost := PerpCost{
+		SlippagePct: dec.New(0.1),
+	}
+	exp := dec.New(1)
+	act := cost.Slippage(dec.New(10))
+	assert.True(t, act.Equal(exp))
+}
+
+func TestPerpCostSpread(t *testing.T) {
+	cost := PerpCost{
+		SpreadPct: dec.New(0.2),
+	}
+	exp := dec.New(2)
+	act := cost.Spread(dec.New(10))
+	assert.True(t, act.Equal(exp))
+}
+
+func TestPerpCostTransaction(t *testing.T) {
+	cost := PerpCost{
+		TransactionPct: dec.New(0.5),
+	}
+	order := broker.Order{
+		FilledPrice: dec.New(2),
+		FilledSize:  dec.New(5),
+	}
+	exp := dec.New(5)
+	act := cost.Transaction(order)
+	assert.True(t, act.Equal(exp))
 }
