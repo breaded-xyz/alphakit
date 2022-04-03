@@ -111,14 +111,30 @@ func (s *Simulator) AccountBalance() decimal.Decimal {
 func (s *Simulator) processOrder(order broker.Order) broker.Order {
 	switch order.State() {
 	case broker.OrderPending:
-		if !order.ReduceOnly {
-			order = s.processOrder(s.openOrder(order))
-		}
+		order = s.processOrder(s.openOrder(order))
 	case broker.OrderOpen:
-		if matchedPrice := matchOrder(order, s.marketPrice); matchedPrice.IsPositive() {
-			order = s.processOrder(s.fillOrder(order, matchedPrice))
+
+		// State transition condition:
+		// Guard for temporal logic error whereby a past or future price is used to fill an order
+		// Limit orders cannot be filled in the same epoch as the current price
+		if order.Type == broker.Limit && equalClock(order.OpenedAt, s.clock.Peek()) {
+			return order
 		}
+
+		// State transition condition:
+		// Order price can be matched to the market price
+		// Market orders will always match the current close price
+		matchedPrice := matchOrder(order, s.marketPrice)
+		if !matchedPrice.IsPositive() {
+			return order
+		}
+
+		// Transition to filled state
+		order = s.processOrder(s.fillOrder(order, matchedPrice))
+
 	case broker.OrderFilled:
+
+		// Deduct costs from account balance and apply order to position
 		s.accountBalance = s.accountBalance.Sub(s.cost.Transaction(order))
 		s.processPosition(s.getPosition(), order)
 		order = s.closeOrder(order)
@@ -176,18 +192,36 @@ func (s *Simulator) getPosition() broker.Position {
 func (s *Simulator) processPosition(position broker.Position, order broker.Order) broker.Position {
 	switch position.State() {
 	case broker.PositionPending:
-		if !order.ReduceOnly {
-			position = s.processPosition(s.openPosition(order), order)
+
+		// State transition condition:
+		// Do not open a new position with a 'reduce-only' order
+		// Reduce-only is typically used for stop loss orders and is only permitted to close a position
+		if order.ReduceOnly {
+			return position
 		}
+
+		// Transition to open
+		position = s.processPosition(s.openPosition(order), order)
+
 	case broker.PositionOpen:
-		if order.Side == position.Side.Opposite() {
-			position = s.processPosition(s.closePosition(position, order), order)
+
+		// State transition condition:
+		// Position can only be closed in full once opened and never partially reduced or increased
+		if !(order.Side == position.Side.Opposite() && order.FilledSize.Equal(position.Size)) {
+			return position
 		}
+
+		// Transition to closed
+		position = s.processPosition(s.closePosition(position, order), order)
+
 	case broker.PositionClosed:
+
+		// Create a trade for the closed position and update the account balance with the profit / loss
 		trade := s.createTrade(position)
 		s.accountBalance = s.accountBalance.Add(trade.Profit)
 		s.trades[position.ID] = trade
 	}
+
 	s.positions[position.ID] = position
 	return position
 }
@@ -257,4 +291,10 @@ func profit(position broker.Position, price decimal.Decimal) decimal.Decimal {
 		profit = profit.Neg()
 	}
 	return profit
+}
+
+func equalClock(t1, t2 time.Time) bool {
+	xH, xM, xS := t1.Clock()
+	yH, yM, yS := t2.Clock()
+	return xH == yH && xM == yM && xS == yS
 }

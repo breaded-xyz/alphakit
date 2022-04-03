@@ -91,8 +91,9 @@ func TestSimulatorProcessOrder(t *testing.T) {
 			wantState: broker.OrderClosed,
 		},
 		{
-			name: "limit order filled",
+			name: "limit order filled: open time before now",
 			give: broker.Order{
+				OpenedAt:   _fixed.Add(time.Hour),
 				Side:       broker.Buy,
 				Type:       broker.Limit,
 				LimitPrice: dec.New(8),
@@ -105,8 +106,20 @@ func TestSimulatorProcessOrder(t *testing.T) {
 			wantState: broker.OrderClosed,
 		},
 		{
-			name: "limit order opened but not filled",
+			name: "limit order not filled: open time equals now",
 			give: broker.Order{
+				Side:       broker.Buy,
+				Type:       broker.Limit,
+				LimitPrice: dec.New(8),
+				Size:       dec.New(1),
+			},
+			wantOrder: broker.Order{},
+			wantState: broker.OrderOpen,
+		},
+		{
+			name: "limit order opened but no price match",
+			give: broker.Order{
+				OpenedAt:   _fixed.Add(time.Hour),
 				Type:       broker.Limit,
 				LimitPrice: dec.New(100),
 				Size:       dec.New(1),
@@ -117,9 +130,11 @@ func TestSimulatorProcessOrder(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+
 			sim := newSimulatorForTest()
 			sim.marketPrice = market.Kline{O: dec.New(8), H: dec.New(15), L: dec.New(5), C: dec.New(10)}
 			act := sim.processOrder(tt.give)
+
 			assert.Equal(t, tt.wantOrder.FilledSize, act.FilledSize)
 			assert.Equal(t, tt.wantOrder.FilledPrice, act.FilledPrice)
 			assert.Equal(t, tt.wantState, act.State())
