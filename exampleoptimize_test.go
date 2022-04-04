@@ -28,7 +28,7 @@ func ExampleOptimize() {
 	cases := optimize.BuildTestCases(params)
 
 	// Slice to store each report created by execution of a test case
-	results := make([]perf.Report, 0, len(cases))
+	results := make([]perf.PerformanceReport, 0, len(cases))
 
 	// Read a .csv file of historical prices (aka candlestick data)
 	// Cache the prices in memory to use in multiple optimization iterations
@@ -64,13 +64,13 @@ func ExampleOptimize() {
 
 			// Generate a performance report for the test case and add it to the result set
 			trades, _, _ := dealer.ListTrades(context.Background(), nil)
-			results = append(results, perf.NewReport(trades, dealer.Equity()))
+			results = append(results, perf.NewPerformanceReport(trades, dealer.Equity()))
 		}(c)
 	}
 	wg.Wait()
 
 	// Rank results based on the test case with the highest sharpe ratio
 	optimal := optimize.SharpeSort(results)[0]
-	perf.PrintReportSummary(optimal)
+	perf.PrintPerformanceReportSummary(optimal)
 
 }
