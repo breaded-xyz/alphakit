@@ -130,8 +130,8 @@ func (s *Simulator) processOrder(order broker.Order) (broker.Order, error) {
 		}
 
 		// State transition condition:
-		// Order price can be matched to the market price
-		// Market orders will always match the current close price
+		// Order price must be matched to the available market price
+		// Market type orders will always match the current close price
 		matchedPrice := matchOrder(order, s.marketPrice)
 		if !matchedPrice.IsPositive() {
 			break
