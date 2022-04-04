@@ -508,3 +508,13 @@ func TestEquityNow(t *testing.T) {
 	})
 
 }
+
+func TestEqualClock(t *testing.T) {
+	t1 := time.Date(0, 0, 0, 1, 1, 1, 5, time.Local)
+	t2 := time.Date(0, 0, 0, 1, 1, 1, 8, time.Local)
+	assert.True(t, equalClock(t1, t2))
+
+	t1 = time.Date(0, 0, 0, 1, 2, 1, 5, time.Local)
+	t2 = time.Date(0, 0, 0, 1, 1, 1, 8, time.Local)
+	assert.False(t, equalClock(t1, t2))
+}
