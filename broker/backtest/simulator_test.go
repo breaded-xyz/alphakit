@@ -491,7 +491,8 @@ func TestCreateTrade(t *testing.T) {
 
 	give := broker.Position{
 		ID:               "1",
-		ClosedAt:         _fixed,
+		OpenedAt:         _fixed,
+		ClosedAt:         _fixed.Add(2 * time.Hour),
 		Asset:            market.NewAsset("BTCUSD"),
 		Side:             broker.Sell,
 		Price:            dec.New(10),
@@ -500,12 +501,13 @@ func TestCreateTrade(t *testing.T) {
 	}
 
 	want := broker.Trade{
-		ID:        give.ID,
-		CreatedAt: give.ClosedAt,
-		Asset:     give.Asset,
-		Side:      give.Side,
-		Size:      give.Size,
-		Profit:    dec.New(-20),
+		ID:         give.ID,
+		CreatedAt:  give.ClosedAt,
+		Asset:      give.Asset,
+		Side:       give.Side,
+		Size:       give.Size,
+		Profit:     dec.New(-20),
+		HoldPeriod: 2 * time.Hour,
 	}
 
 	act := sim.createTrade(give)

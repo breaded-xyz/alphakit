@@ -30,6 +30,9 @@ type PortfolioReport struct {
 
 	Sharpe float64
 	Calmar float64
+
+	drawdowns []Drawdown
+	mdd       Drawdown
 }
 
 func NewPortfolioReport(curve broker.EquitySeries) *PortfolioReport {
@@ -48,10 +51,10 @@ func NewPortfolioReport(curve broker.EquitySeries) *PortfolioReport {
 	report.EquityReturn = (report.EndEquity - report.StartEquity) / report.StartEquity
 	report.CAGR = CAGR(report.StartEquity, report.EndEquity, int(report.Period.Hours())/24)
 
-	//report.drawdowns = Drawdowns(curve)
-	//report.mdd = MaxDrawdown(report.drawdowns)
-	//report.MaxDrawdown = report.mdd.Pct
-	//report.MDDRecovery = report.mdd.Recovery
+	report.drawdowns = Drawdowns(curve)
+	report.mdd = MaxDrawdown(report.drawdowns)
+	report.MaxDrawdown = report.mdd.Pct
+	report.MDDRecovery = report.mdd.Recovery
 
 	returns := DiffOfReturns(ReduceToEOD(curve))
 	report.Sharpe = SharpeRatio(returns, SharpeAnnualRiskFreeRate)
