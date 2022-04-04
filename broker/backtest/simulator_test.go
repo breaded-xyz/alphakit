@@ -133,8 +133,8 @@ func TestSimulatorProcessOrder(t *testing.T) {
 
 			sim := newSimulatorForTest()
 			sim.marketPrice = market.Kline{O: dec.New(8), H: dec.New(15), L: dec.New(5), C: dec.New(10)}
-			act := sim.processOrder(tt.give)
-
+			act, err := sim.processOrder(tt.give)
+			assert.NoError(t, err)
 			assert.True(t, act.FilledSize.Equal(tt.wantOrder.FilledSize))
 			assert.True(t, act.FilledPrice.Equal(tt.wantOrder.FilledPrice))
 			assert.Equal(t, tt.wantState, act.State())
@@ -216,24 +216,28 @@ func TestSimulatorProcessPosition(t *testing.T) {
 		givePosition broker.Position
 		wantPosition broker.Position
 		wantState    broker.PositionState
+		wantErr      error
 	}{
 		{
 			name:         "open new position",
-			giveOrder:    broker.Order{Side: broker.Buy, FilledAt: _fixed, FilledPrice: dec.New(10), FilledSize: dec.New(1)},
+			giveOrder:    broker.Order{ID: "1", Side: broker.Buy, FilledAt: _fixed, FilledPrice: dec.New(10), FilledSize: dec.New(1)},
 			givePosition: broker.Position{},
 			wantPosition: broker.Position{
+				ID:       "1",
 				OpenedAt: _fixed,
 				Side:     broker.Buy,
 				Price:    dec.New(10),
 				Size:     dec.New(1),
 			},
 			wantState: broker.PositionOpen,
+			wantErr:   nil,
 		},
 		{
 			name:         "close existing position",
-			giveOrder:    broker.Order{FilledAt: _fixed, Side: broker.Sell, FilledPrice: dec.New(20), FilledSize: dec.New(1)},
-			givePosition: broker.Position{OpenedAt: _fixed, Side: broker.Buy, Price: dec.New(10), Size: dec.New(1)},
+			giveOrder:    broker.Order{ID: "2", FilledAt: _fixed, Side: broker.Sell, FilledPrice: dec.New(20), FilledSize: dec.New(1)},
+			givePosition: broker.Position{ID: "1", OpenedAt: _fixed, Side: broker.Buy, Price: dec.New(10), Size: dec.New(1)},
 			wantPosition: broker.Position{
+				ID:               "1",
 				OpenedAt:         _fixed,
 				ClosedAt:         _fixed,
 				Side:             broker.Buy,
@@ -242,12 +246,36 @@ func TestSimulatorProcessPosition(t *testing.T) {
 				LiquidationPrice: dec.New(20),
 			},
 			wantState: broker.PositionClosed,
+			wantErr:   nil,
+		},
+		{
+			name:         "failed attempt to partially increase existing position",
+			giveOrder:    broker.Order{ID: "2", FilledAt: _fixed, Side: broker.Buy, FilledPrice: dec.New(20), FilledSize: dec.New(2)},
+			givePosition: broker.Position{ID: "1", OpenedAt: _fixed, Side: broker.Buy, Price: dec.New(10), Size: dec.New(1)},
+			wantPosition: broker.Position{
+				ID:       "1",
+				OpenedAt: _fixed,
+				Side:     broker.Buy,
+				Price:    dec.New(10),
+				Size:     dec.New(1),
+			},
+			wantState: broker.PositionOpen,
+			wantErr:   ErrRejectedOrder,
+		},
+		{
+			name:         "failed to open new position with reduce-only order",
+			giveOrder:    broker.Order{ID: "1", ReduceOnly: true, FilledAt: _fixed, Side: broker.Buy, FilledPrice: dec.New(20), FilledSize: dec.New(2)},
+			givePosition: broker.Position{},
+			wantPosition: broker.Position{},
+			wantState:    broker.PositionPending,
+			wantErr:      ErrRejectedOrder,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			sim := newSimulatorForTest()
-			act := sim.processPosition(tt.givePosition, tt.giveOrder)
+			act, err := sim.processPosition(tt.givePosition, tt.giveOrder)
+			assert.Equal(t, tt.wantErr, err)
 			assert.Equal(t, tt.wantPosition, act)
 			assert.Equal(t, tt.wantState, act.State())
 		})

@@ -15,6 +15,7 @@ import (
 const _defaultTockInterval = time.Millisecond
 
 var ErrInvalidOrderState = errors.New("order is not valid for processing")
+var ErrRejectedOrder = errors.New("order rejected during processing")
 
 type Simulator struct {
 	clock          Clocker
@@ -49,7 +50,7 @@ func (s *Simulator) AddOrder(order broker.Order) (broker.Order, error) {
 	if order.Side == 0 || order.Type == 0 || order.State() != broker.OrderPending || !order.Size.IsPositive() {
 		return empty, ErrInvalidOrderState
 	}
-	return s.processOrder(order), nil
+	return s.processOrder(order)
 }
 
 func (s *Simulator) Next(price market.Kline) error {
@@ -75,8 +76,11 @@ func (s *Simulator) Next(price market.Kline) error {
 	slices.Sort(ks)
 	for _, k := range ks {
 		order := s.orders[k]
-		if order.State() == broker.OrderOpen {
-			order = s.processOrder(order)
+		if order.State() != broker.OrderOpen {
+			continue
+		}
+		if _, err := s.processOrder(order); err != nil {
+			return err
 		}
 	}
 
@@ -108,17 +112,21 @@ func (s *Simulator) AccountBalance() decimal.Decimal {
 	return s.accountBalance
 }
 
-func (s *Simulator) processOrder(order broker.Order) broker.Order {
+func (s *Simulator) processOrder(order broker.Order) (broker.Order, error) {
+	var err error
+
 	switch order.State() {
 	case broker.OrderPending:
-		order = s.processOrder(s.openOrder(order))
+		if order, err = s.processOrder(s.openOrder(order)); err != nil {
+			return order, err
+		}
 	case broker.OrderOpen:
 
 		// State transition condition:
 		// Guard for temporal logic error whereby a past or future price is used to fill an order
 		// Limit orders cannot be filled in the same epoch as the current price
 		if order.Type == broker.Limit && equalClock(order.OpenedAt, s.clock.Peek()) {
-			return order
+			break
 		}
 
 		// State transition condition:
@@ -126,22 +134,24 @@ func (s *Simulator) processOrder(order broker.Order) broker.Order {
 		// Market orders will always match the current close price
 		matchedPrice := matchOrder(order, s.marketPrice)
 		if !matchedPrice.IsPositive() {
-			return order
+			break
 		}
 
 		// Transition to filled state
-		order = s.processOrder(s.fillOrder(order, matchedPrice))
+		if order, err = s.processOrder(s.fillOrder(order, matchedPrice)); err != nil {
+			return order, err
+		}
 
 	case broker.OrderFilled:
-
-		// Deduct costs from account balance and apply order to position
+		if _, err = s.processPosition(s.getPosition(), order); err != nil {
+			return order, err
+		}
 		s.accountBalance = s.accountBalance.Sub(s.cost.Transaction(order))
-		s.processPosition(s.getPosition(), order)
 		order = s.closeOrder(order)
 	}
 
 	s.orders[order.ID] = order
-	return order
+	return order, nil
 }
 
 func (s *Simulator) openOrder(order broker.Order) broker.Order {
@@ -189,7 +199,9 @@ func (s *Simulator) getPosition() broker.Position {
 	return position
 }
 
-func (s *Simulator) processPosition(position broker.Position, order broker.Order) broker.Position {
+func (s *Simulator) processPosition(position broker.Position, order broker.Order) (broker.Position, error) {
+	var err error
+
 	switch position.State() {
 	case broker.PositionPending:
 
@@ -197,22 +209,32 @@ func (s *Simulator) processPosition(position broker.Position, order broker.Order
 		// Do not open a new position with a 'reduce-only' order
 		// Reduce-only is typically used for stop loss orders and is only permitted to close a position
 		if order.ReduceOnly {
-			return position
+			return position, ErrRejectedOrder
 		}
 
 		// Transition to open
-		position = s.processPosition(s.openPosition(order), order)
+		if position, err = s.processPosition(s.openPosition(order), order); err != nil {
+			return position, err
+		}
 
 	case broker.PositionOpen:
 
 		// State transition condition:
-		// Position can only be closed in full once opened and never partially reduced or increased
+		// If processing the order that opened the position then do not attempt to close position
+		if order.ID == position.ID {
+			break
+		}
+
+		// State transition condition:
+		// A new order can only close an opened position in full and never partially reduce or increase
 		if !(order.Side == position.Side.Opposite() && order.FilledSize.Equal(position.Size)) {
-			return position
+			return position, ErrRejectedOrder
 		}
 
 		// Transition to closed
-		position = s.processPosition(s.closePosition(position, order), order)
+		if position, err = s.processPosition(s.closePosition(position, order), order); err != nil {
+			return position, err
+		}
 
 	case broker.PositionClosed:
 
@@ -223,7 +245,7 @@ func (s *Simulator) processPosition(position broker.Position, order broker.Order
 	}
 
 	s.positions[position.ID] = position
-	return position
+	return position, nil
 }
 
 func (s *Simulator) openPosition(order broker.Order) broker.Position {
