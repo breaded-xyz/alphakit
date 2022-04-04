@@ -135,8 +135,8 @@ func TestSimulatorProcessOrder(t *testing.T) {
 			sim.marketPrice = market.Kline{O: dec.New(8), H: dec.New(15), L: dec.New(5), C: dec.New(10)}
 			act := sim.processOrder(tt.give)
 
-			assert.Equal(t, tt.wantOrder.FilledSize, act.FilledSize)
-			assert.Equal(t, tt.wantOrder.FilledPrice, act.FilledPrice)
+			assert.True(t, act.FilledSize.Equal(tt.wantOrder.FilledSize))
+			assert.True(t, act.FilledPrice.Equal(tt.wantOrder.FilledPrice))
 			assert.Equal(t, tt.wantState, act.State())
 		})
 	}
@@ -380,7 +380,7 @@ func TestMatchOrder(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			act := matchOrder(tt.giveOrder, tt.giveQuote)
-			assert.Equal(t, tt.want, act)
+			assert.True(t, act.Equal(tt.want))
 		})
 	}
 }
@@ -452,7 +452,7 @@ func TestProfit(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			act := profit(tt.give, tt.give.LiquidationPrice)
-			assert.Equal(t, tt.want, act)
+			assert.True(t, act.Equal(tt.want))
 		})
 	}
 }
@@ -495,7 +495,7 @@ func TestEquityNow(t *testing.T) {
 		}
 		exp := dec.New(-10)
 		act := sim.equityNow()
-		assert.Equal(t, exp, act)
+		assert.True(t, act.Equal(exp))
 	})
 
 	t.Run("closed position - just account balance", func(t *testing.T) {
@@ -504,7 +504,7 @@ func TestEquityNow(t *testing.T) {
 		}
 		exp := dec.New(10)
 		act := sim.equityNow()
-		assert.Equal(t, exp, act)
+		assert.True(t, act.Equal(exp))
 	})
 
 }

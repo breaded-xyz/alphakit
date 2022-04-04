@@ -8,19 +8,12 @@ type number interface {
 	~int | ~int64 | ~float64
 }
 
+// New creates a new instance of decimal.Decimal from the given number.
+// Int values are cast to float64 for conversion.
+// Ensures equal internal representation by decimal.Decimal of the equivalent input number.
+// Thus enables expected behaviour in equality funcs such as assert.Equal.
 func New[T number](v T) decimal.Decimal {
-	var dec decimal.Decimal
-
-	switch (any)(v).(type) {
-	case int:
-		return decimal.NewFromInt(int64(v))
-	case int64:
-		return decimal.NewFromInt(int64(v))
-	case float64:
-		return decimal.NewFromFloat(float64(v))
-	}
-
-	return dec
+	return decimal.NewFromFloat(float64(v))
 }
 
 func Between(v, lower, upper decimal.Decimal) bool {

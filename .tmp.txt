@@ -1,0 +1,10 @@
+var dec decimal.Decimal
+
+	switch (any)(v).(type) {
+	case int:
+		return decimal.NewFromInt(int64(v))
+	case int64:
+		return decimal.NewFromInt(int64(v))
+	case float64:
+		return decimal.NewFromFloat(float64(v))
+	}
