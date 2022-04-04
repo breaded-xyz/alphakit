@@ -3,7 +3,6 @@ package broker
 import (
 	"time"
 
-	"github.com/shopspring/decimal"
 	"golang.org/x/exp/maps"
 	"golang.org/x/exp/slices"
 )
@@ -11,7 +10,7 @@ import (
 type Timestamp int64
 
 func (t Timestamp) Time() time.Time {
-	return time.Unix(int64(t), 0)
+	return time.UnixMilli(int64(t))
 }
 
 type TimeSeries[V any] map[Timestamp]V
@@ -29,14 +28,4 @@ func (ts TimeSeries[V]) SortValuesByTime() []V {
 		sorted[i] = ts[ks[i]]
 	}
 	return sorted
-}
-
-type EquitySeries TimeSeries[decimal.Decimal]
-
-func (es EquitySeries) SortKeys() []Timestamp {
-	return TimeSeries[decimal.Decimal](es).SortKeys()
-}
-
-func (es EquitySeries) SortValuesByTime() []decimal.Decimal {
-	return TimeSeries[decimal.Decimal](es).SortValuesByTime()
 }
