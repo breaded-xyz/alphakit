@@ -16,7 +16,7 @@ require (
 )
 
 require (
-	github.com/davecgh/go-spew v1.1.0 // indirect
+	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/gonum/stat v0.0.0-20181125101827-41a0da705a5b
 	github.com/google/uuid v1.3.0 // indirect
 	github.com/oklog/ulid/v2 v2.0.2 // indirect
