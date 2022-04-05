@@ -33,9 +33,9 @@ func Drawdowns(curve broker.EquitySeries) []Drawdown {
 
 	var dds []Drawdown
 
+	// Iterate the series in chronological order
 	for i, k := range curve.SortKeys() {
-		t := k.Time()
-		v := curve[k]
+		t, v := k.Time(), curve[k]
 
 		// Init an empty DD to begin tracking changes as we walk the equity curve
 		if i == 0 {
@@ -46,8 +46,10 @@ func Drawdowns(curve broker.EquitySeries) []Drawdown {
 		// Get pointer to latest DD
 		dd := &dds[len(dds)-1]
 
-		// End of curve is reached so calc DD values based on last equity point
-		if i == len(curve)-1 && dd.StartAt.IsZero() {
+		// Case: end of curve is reached
+		// If a drawdown is open close it based on last equity point
+		// IsOpen field is set to flag drawdown is not a complete recovery
+		if i == len(curve)-1 && !dd.StartAt.IsZero() {
 			dd.EndAt = t
 			dd.Recovery = t.Sub(dd.StartAt)
 			dd.Amount = dd.High.Sub(dd.Low)
@@ -56,40 +58,41 @@ func Drawdowns(curve broker.EquitySeries) []Drawdown {
 			continue
 		}
 
-		// Track lower low for current open DD
+		// Case: new lower low
 		if v.LessThanOrEqual(dd.Low) {
-			// Detect if this is the start of the drawdown
+			// Open a new DD if not already started
 			if dd.StartAt.IsZero() {
 				dd.StartAt = t
 			}
+			// Update the DD low
 			dd.LowAt, dd.Low = t, v
 			continue
 		}
 
-		// Track higher high for current open DD
+		// Case: new higher high
 		if v.GreaterThanOrEqual(dd.High) {
 
-			// If current DD in initial empty state then move high and low up together
+			// If DD not open then continue to mark high and low to curve
 			if dd.StartAt.IsZero() {
 				dd.HighAt, dd.High = t, v
 				dd.LowAt, dd.Low = t, v
 				continue
 			}
 
-			// Else a DD has recovered from a low so close current drawdown
+			// Else the DD was open and has recovered from a low so close it
 			dd.EndAt = t
 			dd.Recovery = t.Sub(dd.StartAt)
 			dd.Amount = dd.High.Sub(dd.Low)
 			dd.Pct = dd.Amount.Div(dd.High).InexactFloat64()
 
-			// Open new DD to continue tracking
+			// Open new empty DD ready for next iteration
 			dds = append(dds, Drawdown{HighAt: t, High: v, LowAt: t, Low: v})
 			continue
 		}
 
 	}
 
-	// If final DD was empty then strip from sequence
+	// If final DD was empty then strip from slice
 	if dds[len(dds)-1].StartAt.IsZero() {
 		dds = dds[:len(dds)-1]
 	}
@@ -97,11 +100,11 @@ func Drawdowns(curve broker.EquitySeries) []Drawdown {
 	return dds
 }
 
-// MaxDrawdown finds the biggest drawdown based on the currency amount.
+// MaxDrawdown finds the largest drawdown based on the percentage amount.
 func MaxDrawdown(dds []Drawdown) (max Drawdown) {
 	for i := range dds {
 		d := dds[i]
-		if d.Amount.GreaterThanOrEqual(max.Amount) {
+		if d.Pct >= max.Pct {
 			max = d
 		}
 	}

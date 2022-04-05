@@ -64,7 +64,7 @@ func newKlineFromCSVRecord(record []string) (Kline, error) {
 		return k, ErrNotEnoughColumns
 	}
 
-	msec, err := strconv.ParseInt(record[0], 0, 64)
+	msec, err := strconv.ParseInt(record[0], 10, 64)
 	if err != nil {
 		return empty, ErrInvalidTimeFormat
 	}

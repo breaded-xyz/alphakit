@@ -5,6 +5,7 @@ import (
 
 	"github.com/colngroup/zero2algo/market"
 	"github.com/colngroup/zero2algo/netapi"
+	"github.com/shopspring/decimal"
 )
 
 type Dealer interface {
@@ -17,4 +18,5 @@ type SimulatedDealer interface {
 	Dealer
 	market.Receiver
 	Equity() EquitySeries
+	SetAccountBalance(amount decimal.Decimal)
 }

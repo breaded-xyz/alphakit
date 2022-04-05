@@ -43,7 +43,7 @@ func NewPortfolioReport(curve broker.EquitySeries) *PortfolioReport {
 	t := curve.SortKeys()
 	tStart, tEnd := t[0], t[len(t)-1]
 
-	report := &PortfolioReport{}
+	var report PortfolioReport
 	report.PeriodStart, report.StartEquity = tStart.Time(), curve[tStart].InexactFloat64()
 	report.PeriodEnd, report.EndEquity = tEnd.Time(), curve[tEnd].InexactFloat64()
 	report.Period = report.PeriodEnd.Sub(report.PeriodStart)
@@ -60,7 +60,7 @@ func NewPortfolioReport(curve broker.EquitySeries) *PortfolioReport {
 	report.Sharpe = SharpeRatio(returns, SharpeAnnualRiskFreeRate)
 	report.Calmar = CalmarRatio(report.CAGR, report.MaxDrawdown)
 
-	return report
+	return &report
 }
 
 func DiffOfReturns(curve broker.EquitySeries) []float64 {

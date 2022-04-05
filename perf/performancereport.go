@@ -1,6 +1,9 @@
 package perf
 
-import "github.com/colngroup/zero2algo/broker"
+import (
+	"github.com/colngroup/zero2algo/broker"
+	"github.com/davecgh/go-spew/spew"
+)
 
 type PerformanceReport struct {
 	Trade     *TradeReport
@@ -15,5 +18,6 @@ func NewPerformanceReport(trades []broker.Trade, equity broker.EquitySeries) Per
 }
 
 func PrintPerformanceReportSummary(report PerformanceReport) {
-
+	spew.Dump(report.Trade)
+	spew.Dump(report.Portfolio)
 }

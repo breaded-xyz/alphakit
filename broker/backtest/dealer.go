@@ -4,9 +4,13 @@ import (
 	"context"
 
 	"github.com/colngroup/zero2algo/broker"
+	"github.com/colngroup/zero2algo/dec"
 	"github.com/colngroup/zero2algo/market"
 	"github.com/colngroup/zero2algo/netapi"
+	"github.com/shopspring/decimal"
 )
+
+var _defaultInitialCapital decimal.Decimal = dec.New(1000)
 
 // Enforce at compile time that the type implements the interface
 var _ broker.SimulatedDealer = (*Dealer)(nil)
@@ -42,6 +46,10 @@ func (d *Dealer) ListTrades(ctx context.Context, opts *netapi.ListOpts) ([]broke
 
 func (d *Dealer) Equity() broker.EquitySeries {
 	return d.simulator.Equity()
+}
+
+func (d *Dealer) SetAccountBalance(amount decimal.Decimal) {
+	d.simulator.accountBalance = amount
 }
 
 func (d *Dealer) ReceivePrice(ctx context.Context, price market.Kline) error {

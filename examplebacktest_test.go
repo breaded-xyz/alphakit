@@ -17,13 +17,15 @@ func ExampleBacktest() {
 	// Verbose error handling ommitted for brevity
 
 	// Create a special simulated dealer for backtesting
+	// with initial capital of 1000
 	dealer := backtest.NewDealer()
+	dealer.SetAccountBalance(dec.New(29409.99))
 
 	// Identify the asset to trade
 	asset := market.NewAsset("BTCUSD")
 
 	// Read a .csv file of historical prices (aka candlestick data)
-	file, _ := os.Open("prices.csv")
+	file, _ := os.Open("example_prices.csv")
 	defer file.Close()
 	reader := market.NewCSVKlineReader(csv.NewReader(file))
 
@@ -36,7 +38,7 @@ func ExampleBacktest() {
 			break
 		}
 		dealer.ReceivePrice(context.Background(), price)
-		if i == 0 {
+		if i == 1 {
 			dealer.PlaceOrder(context.Background(), broker.NewOrder(asset, broker.Buy, dec.New(1)))
 		}
 		i++
@@ -46,6 +48,9 @@ func ExampleBacktest() {
 
 	// Generate a performance report from the dealer execution history
 	trades, _, _ := dealer.ListTrades(context.Background(), nil)
-	report := perf.NewPerformanceReport(trades, dealer.Equity())
+	equity := dealer.Equity()
+	report := perf.NewPerformanceReport(trades, equity)
 	perf.PrintPerformanceReportSummary(report)
+
+	// Output: Print performance report summary to console
 }

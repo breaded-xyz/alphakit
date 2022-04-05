@@ -38,7 +38,7 @@ func NewTradeReport(trades []broker.Trade) *TradeReport {
 		return nil
 	}
 
-	var report *TradeReport
+	var report TradeReport
 	var lossStreak int
 
 	profits := make([]float64, len(trades))
@@ -84,5 +84,5 @@ func NewTradeReport(trades []broker.Trade) *TradeReport {
 	report.Kelly = KellyCriterion(report.ProfitFactor, report.winningPct)
 	report.OptimalF = OptimalF(profits)
 
-	return report
+	return &report
 }

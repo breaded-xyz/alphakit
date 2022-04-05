@@ -85,7 +85,7 @@ func (s *Simulator) Next(price market.Kline) error {
 	}
 
 	// Add current portfolio equity to the history
-	s.equity[broker.Timestamp(s.clock.Peek().Unix())] = s.equityNow()
+	s.equity[broker.Timestamp(s.clock.Peek().UnixMilli())] = s.equityNow()
 
 	return nil
 }
@@ -99,11 +99,17 @@ func (s *Simulator) Positions() []broker.Position {
 }
 
 func (s *Simulator) Trades() []broker.Trade {
-	return maps.Values(s.trades)
+	copied := make([]broker.Trade, len(s.trades))
+	ks := maps.Keys(s.trades)
+	slices.Sort(ks)
+	for i := range ks {
+		copied[i] = s.trades[ks[i]]
+	}
+	return copied
 }
 
 func (s *Simulator) Equity() broker.EquitySeries {
-	var copied broker.EquitySeries
+	copied := make(broker.EquitySeries, len(s.equity))
 	maps.Copy(copied, s.equity)
 	return copied
 }
