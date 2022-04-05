@@ -17,8 +17,7 @@ import (
 func ExampleBacktest() {
 	// Verbose error handling ommitted for brevity
 
-	// Create a special simulated dealer for backtesting
-	// with initial capital of 1000
+	// Create a special simulated dealer for backtesting with initial capital of 1000
 	dealer := backtest.NewDealer()
 	dealer.SetAccountBalance(dec.New(1000))
 
@@ -39,7 +38,9 @@ func ExampleBacktest() {
 			break
 		}
 		dealer.ReceivePrice(context.Background(), price)
-		if i == 1 {
+
+		// Place an order for 1 BTC at start of the price series
+		if i == 0 {
 			dealer.PlaceOrder(context.Background(), broker.NewOrder(asset, broker.Buy, dec.New(1)))
 		}
 		i++
@@ -54,5 +55,5 @@ func ExampleBacktest() {
 	fmt.Printf("Your backtest return is %.2f%%", report.Portfolio.EquityReturn*100)
 
 	// Output:
-	// Your backtest return is 368.30%
+	// Your backtest return is 409.79%
 }
