@@ -3,6 +3,7 @@ package zero2algo
 import (
 	"context"
 	"encoding/csv"
+	"fmt"
 	"io"
 	"os"
 
@@ -19,7 +20,7 @@ func ExampleBacktest() {
 	// Create a special simulated dealer for backtesting
 	// with initial capital of 1000
 	dealer := backtest.NewDealer()
-	dealer.SetAccountBalance(dec.New(29409.99))
+	dealer.SetAccountBalance(dec.New(1000))
 
 	// Identify the asset to trade
 	asset := market.NewAsset("BTCUSD")
@@ -50,7 +51,8 @@ func ExampleBacktest() {
 	trades, _, _ := dealer.ListTrades(context.Background(), nil)
 	equity := dealer.Equity()
 	report := perf.NewPerformanceReport(trades, equity)
-	perf.PrintPerformanceReportSummary(report)
+	fmt.Printf("Your backtest return is %.2f%%", report.Portfolio.EquityReturn*100)
 
-	// Output: Print performance report summary to console
+	// Output:
+	// Your backtest return is 368.30%
 }

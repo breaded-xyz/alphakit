@@ -48,7 +48,7 @@ func NewPortfolioReport(curve broker.EquitySeries) *PortfolioReport {
 	report.PeriodEnd, report.EndEquity = tEnd.Time(), curve[tEnd].InexactFloat64()
 	report.Period = report.PeriodEnd.Sub(report.PeriodStart)
 
-	report.EquityReturn = (report.EndEquity - report.StartEquity) / report.StartEquity
+	report.EquityReturn = (report.EndEquity - report.StartEquity) / NNZ(report.StartEquity, 1)
 	report.CAGR = CAGR(report.StartEquity, report.EndEquity, int(report.Period.Hours())/24)
 
 	report.drawdowns = Drawdowns(curve)
@@ -126,7 +126,7 @@ func NN(x, y float64) float64 {
 
 // NNZ (Not Number or Zero) returns y if x is NaN or Inf or Zero.
 func NNZ(x, y float64) float64 {
-	if NN(x, y) == y {
+	if NN(x, y) == y || x == 0 {
 		return y
 	}
 	return x

@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/colngroup/zero2algo/broker"
+	"github.com/colngroup/zero2algo/dec"
 	"github.com/shopspring/decimal"
 )
 
@@ -33,6 +34,17 @@ func Drawdowns(curve broker.EquitySeries) []Drawdown {
 
 	var dds []Drawdown
 
+	closeDD := func(dd *Drawdown, endAt time.Time) {
+		dd.EndAt = endAt
+		dd.Recovery = endAt.Sub(dd.StartAt)
+		dd.Amount = dd.High.Sub(dd.Low)
+		if dd.High.IsZero() {
+			dd.Pct = dd.Amount.Div(dec.New(1)).InexactFloat64()
+		} else {
+			dd.Pct = dd.Amount.Div(dd.High).InexactFloat64()
+		}
+	}
+
 	// Iterate the series in chronological order
 	for i, k := range curve.SortKeys() {
 		t, v := k.Time(), curve[k]
@@ -50,10 +62,7 @@ func Drawdowns(curve broker.EquitySeries) []Drawdown {
 		// If a drawdown is open close it based on last equity point
 		// IsOpen field is set to flag drawdown is not a complete recovery
 		if i == len(curve)-1 && !dd.StartAt.IsZero() {
-			dd.EndAt = t
-			dd.Recovery = t.Sub(dd.StartAt)
-			dd.Amount = dd.High.Sub(dd.Low)
-			dd.Pct = dd.Amount.Div(dd.High).InexactFloat64()
+			closeDD(dd, t)
 			dd.IsOpen = true
 			continue
 		}
@@ -80,10 +89,7 @@ func Drawdowns(curve broker.EquitySeries) []Drawdown {
 			}
 
 			// Else the DD was open and has recovered from a low so close it
-			dd.EndAt = t
-			dd.Recovery = t.Sub(dd.StartAt)
-			dd.Amount = dd.High.Sub(dd.Low)
-			dd.Pct = dd.Amount.Div(dd.High).InexactFloat64()
+			closeDD(dd, t)
 
 			// Open new empty DD ready for next iteration
 			dds = append(dds, Drawdown{HighAt: t, High: v, LowAt: t, Low: v})

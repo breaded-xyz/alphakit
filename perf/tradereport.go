@@ -70,10 +70,10 @@ func NewTradeReport(trades []broker.Trade) *TradeReport {
 
 	report.TotalNetProfit = report.GrossProfit - report.GrossLoss
 	report.AvgNetProfit = report.TotalNetProfit / report.TradeCount
-	report.ProfitFactor = report.GrossProfit / report.GrossLoss
+	report.ProfitFactor = report.GrossProfit / NNZ(report.GrossLoss, 1)
 
-	report.AvgProfit = report.GrossProfit / report.winningCount
-	report.AvgLoss = report.GrossLoss / report.losingCount
+	report.AvgProfit = report.GrossProfit / NNZ(report.winningCount, 1)
+	report.AvgLoss = report.GrossLoss / NNZ(report.losingCount, 1)
 
 	report.winningPct = report.winningCount / report.TradeCount
 	report.losingPct = 1 - report.winningPct
