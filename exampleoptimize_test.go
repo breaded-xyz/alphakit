@@ -6,11 +6,11 @@ import (
 	"os"
 	"sync"
 
-	"github.com/colngroup/zero2algo/bot/hodl"
 	"github.com/colngroup/zero2algo/broker/backtest"
 	"github.com/colngroup/zero2algo/market"
 	"github.com/colngroup/zero2algo/optimize"
 	"github.com/colngroup/zero2algo/perf"
+	"github.com/colngroup/zero2algo/trader/hodl"
 )
 
 func ExampleOptimize() {

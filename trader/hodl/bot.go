@@ -3,10 +3,10 @@ package hodl
 import (
 	"context"
 
-	"github.com/colngroup/zero2algo/bot"
 	"github.com/colngroup/zero2algo/broker"
 	"github.com/colngroup/zero2algo/dec"
 	"github.com/colngroup/zero2algo/market"
+	"github.com/colngroup/zero2algo/trader"
 )
 
 const (
@@ -14,7 +14,7 @@ const (
 	SellBarIndex = "sellbarindex"
 )
 
-var _ bot.ConfigurableBot = (*Bot)(nil)
+var _ trader.ConfigurableBot = (*Bot)(nil)
 
 type Bot struct {
 	BuyBarIndex  int
@@ -35,11 +35,11 @@ func New(asset market.Asset, dealer broker.Dealer) *Bot {
 func (b *Bot) Configure(config map[string]any) error {
 	buyBarIndex, ok := config[BuyBarIndex].(int)
 	if !ok {
-		return bot.ErrInvalidConfig
+		return trader.ErrInvalidConfig
 	}
 	sellBarIndex, ok := config[SellBarIndex].(int)
 	if !ok {
-		return bot.ErrInvalidConfig
+		return trader.ErrInvalidConfig
 	}
 
 	switch {
@@ -48,9 +48,9 @@ func (b *Bot) Configure(config map[string]any) error {
 	case buyBarIndex >= 0 && sellBarIndex == 0:
 		break
 	case buyBarIndex < 0 || sellBarIndex < 0:
-		return bot.ErrInvalidConfig
+		return trader.ErrInvalidConfig
 	case buyBarIndex >= sellBarIndex:
-		return bot.ErrInvalidConfig
+		return trader.ErrInvalidConfig
 	}
 
 	b.BuyBarIndex = buyBarIndex

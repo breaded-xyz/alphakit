@@ -4,10 +4,10 @@ import (
 	"context"
 	"testing"
 
-	"github.com/colngroup/zero2algo/bot"
 	"github.com/colngroup/zero2algo/broker"
 	"github.com/colngroup/zero2algo/dec"
 	"github.com/colngroup/zero2algo/market"
+	"github.com/colngroup/zero2algo/trader"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -52,7 +52,7 @@ func TestHoldBotConfigure(t *testing.T) {
 				BuyBarIndex:  0,
 				SellBarIndex: 0,
 			},
-			wantErr: bot.ErrInvalidConfig,
+			wantErr: trader.ErrInvalidConfig,
 		},
 		{
 			name: "not int",
@@ -61,7 +61,7 @@ func TestHoldBotConfigure(t *testing.T) {
 				BuyBarIndex:  0,
 				SellBarIndex: 0,
 			},
-			wantErr: bot.ErrInvalidConfig,
+			wantErr: trader.ErrInvalidConfig,
 		},
 		{
 			name: "neg int",
@@ -70,7 +70,7 @@ func TestHoldBotConfigure(t *testing.T) {
 				BuyBarIndex:  0,
 				SellBarIndex: 0,
 			},
-			wantErr: bot.ErrInvalidConfig,
+			wantErr: trader.ErrInvalidConfig,
 		},
 		{
 			name: "key not found",
@@ -79,7 +79,7 @@ func TestHoldBotConfigure(t *testing.T) {
 				BuyBarIndex:  0,
 				SellBarIndex: 0,
 			},
-			wantErr: bot.ErrInvalidConfig,
+			wantErr: trader.ErrInvalidConfig,
 		},
 	}
 	for _, tt := range tests {
