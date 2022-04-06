@@ -21,6 +21,9 @@ func Window(series []float64, n int) []float64 {
 	return window[i:]
 }
 
-func AppendWindow(series []float64, n int, v float64) []float64 {
-	return Window(append(series, v), n-1)
+// WindowAppend appends a value to the end of the series and slices it to the window starting at n.
+// Returned slice is a copy.
+// Semantics of n are the same as Window and Lookback functions.
+func WindowAppend(series []float64, n int, v float64) []float64 {
+	return Window(append(series, v), n)
 }
