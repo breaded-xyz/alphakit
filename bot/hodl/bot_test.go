@@ -1,9 +1,10 @@
-package bot
+package hodl
 
 import (
 	"context"
 	"testing"
 
+	"github.com/colngroup/zero2algo/bot"
 	"github.com/colngroup/zero2algo/broker"
 	"github.com/colngroup/zero2algo/dec"
 	"github.com/colngroup/zero2algo/market"
@@ -14,13 +15,13 @@ func TestHoldBotConfigure(t *testing.T) {
 	tests := []struct {
 		name    string
 		give    map[string]any
-		wantBot HodlBot
+		wantBot Bot
 		wantErr error
 	}{
 		{
 			name: "buy index < sell index",
 			give: map[string]any{"buybarindex": 1, "sellbarindex": 1000},
-			wantBot: HodlBot{
+			wantBot: Bot{
 				BuyBarIndex:  1,
 				SellBarIndex: 1000,
 			},
@@ -29,7 +30,7 @@ func TestHoldBotConfigure(t *testing.T) {
 		{
 			name: "no sell",
 			give: map[string]any{"buybarindex": 10, "sellbarindex": 0},
-			wantBot: HodlBot{
+			wantBot: Bot{
 				BuyBarIndex:  10,
 				SellBarIndex: 0,
 			},
@@ -38,7 +39,7 @@ func TestHoldBotConfigure(t *testing.T) {
 		{
 			name: "default",
 			give: map[string]any{"buybarindex": 0, "sellbarindex": 0},
-			wantBot: HodlBot{
+			wantBot: Bot{
 				BuyBarIndex:  0,
 				SellBarIndex: 0,
 			},
@@ -47,43 +48,43 @@ func TestHoldBotConfigure(t *testing.T) {
 		{
 			name: "buy index >= sell index",
 			give: map[string]any{"buybarindex": 10, "sellbarindex": 5},
-			wantBot: HodlBot{
+			wantBot: Bot{
 				BuyBarIndex:  0,
 				SellBarIndex: 0,
 			},
-			wantErr: ErrInvalidConfig,
+			wantErr: bot.ErrInvalidConfig,
 		},
 		{
 			name: "not int",
 			give: map[string]any{"buybarindex": 10.5, "sellbarindex": 5},
-			wantBot: HodlBot{
+			wantBot: Bot{
 				BuyBarIndex:  0,
 				SellBarIndex: 0,
 			},
-			wantErr: ErrInvalidConfig,
+			wantErr: bot.ErrInvalidConfig,
 		},
 		{
 			name: "neg int",
 			give: map[string]any{"buybarindex": -1, "sellbarindex": 5},
-			wantBot: HodlBot{
+			wantBot: Bot{
 				BuyBarIndex:  0,
 				SellBarIndex: 0,
 			},
-			wantErr: ErrInvalidConfig,
+			wantErr: bot.ErrInvalidConfig,
 		},
 		{
 			name: "key not found",
 			give: map[string]any{"notakey": 10, "sellbarindex": 5},
-			wantBot: HodlBot{
+			wantBot: Bot{
 				BuyBarIndex:  0,
 				SellBarIndex: 0,
 			},
-			wantErr: ErrInvalidConfig,
+			wantErr: bot.ErrInvalidConfig,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			var bot HodlBot
+			var bot Bot
 			err := bot.Configure(tt.give)
 			assert.Equal(t, tt.wantErr, err)
 			assert.Equal(t, tt.wantBot, bot)
@@ -121,7 +122,7 @@ func TestHodlBotEvalAlgo(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			var bot HodlBot
+			var bot Bot
 			act := bot.evalAlgo(tt.give[0], tt.give[1], tt.give[2])
 			assert.Equal(t, tt.want, act)
 		})
@@ -133,7 +134,7 @@ func TestHodlBotReceivePrice(t *testing.T) {
 	mock := &broker.MockDealer{}
 	mock.On("PlaceOrder", context.Background(), expOrder)
 
-	bot := HodlBot{dealer: mock}
+	bot := Bot{dealer: mock}
 	err := bot.ReceivePrice(context.Background(), market.Kline{})
 	assert.NoError(t, err)
 	assert.Equal(t, 1, bot.barIndex)
@@ -145,7 +146,7 @@ func TestHodlBotClose(t *testing.T) {
 	mock := &broker.MockDealer{}
 	mock.On("PlaceOrder", context.Background(), expOrder)
 
-	bot := HodlBot{dealer: mock}
+	bot := Bot{dealer: mock}
 	err := bot.Close(context.Background())
 	assert.NoError(t, err)
 	mock.AssertExpectations(t)

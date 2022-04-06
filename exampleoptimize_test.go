@@ -6,7 +6,7 @@ import (
 	"os"
 	"sync"
 
-	"github.com/colngroup/zero2algo/bot"
+	"github.com/colngroup/zero2algo/bot/hodl"
 	"github.com/colngroup/zero2algo/broker/backtest"
 	"github.com/colngroup/zero2algo/market"
 	"github.com/colngroup/zero2algo/optimize"
@@ -21,8 +21,8 @@ func ExampleOptimize() {
 
 	// Define the set of possible values for each param
 	params := map[string][]any{
-		"buybarindex":  {0, 1, 1000},
-		"sellbarindex": {0, 1000, 2000},
+		hodl.BuyBarIndex:  {0, 1, 1000},
+		hodl.SellBarIndex: {0, 1000, 2000},
 	}
 	// Build a set of test cases, one for each permutation of params
 	cases := optimize.BuildTestCases(params)
@@ -49,8 +49,8 @@ func ExampleOptimize() {
 			dealer := backtest.NewDealer()
 
 			// Create a new bot initialized with our dealer
-			// HodlBot implements a basic buy and hold algo
-			bot := bot.NewHodlBot(asset, dealer)
+			// Hodl Bot implements a basic buy and hold algo
+			bot := hodl.New(asset, dealer)
 			// The bot is configured with the params in the test case
 			bot.Configure(c)
 
