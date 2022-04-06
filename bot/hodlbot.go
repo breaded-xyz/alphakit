@@ -75,12 +75,10 @@ func (b *HodlBot) evalAlgo(index, buybar, sellbar int) broker.OrderSide {
 	switch {
 	case index == buybar:
 		signal = broker.Buy
-		break
 	case sellbar == 0:
 		break
 	case index == sellbar:
 		signal = broker.Sell
-		break
 	}
 
 	return signal
