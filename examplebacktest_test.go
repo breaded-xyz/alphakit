@@ -14,7 +14,7 @@ import (
 	"github.com/colngroup/zero2algo/perf"
 )
 
-func ExampleBacktest() {
+func Example_zero2algo() {
 	// Verbose error handling ommitted for brevity
 
 	// Create a special simulated dealer for backtesting with initial capital of 1000

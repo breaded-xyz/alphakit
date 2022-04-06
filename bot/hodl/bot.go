@@ -1,16 +1,22 @@
-package bot
+package hodl
 
 import (
 	"context"
 
+	"github.com/colngroup/zero2algo/bot"
 	"github.com/colngroup/zero2algo/broker"
 	"github.com/colngroup/zero2algo/dec"
 	"github.com/colngroup/zero2algo/market"
 )
 
-var _ ConfigurableBot = (*HodlBot)(nil)
+const (
+	BuyBarIndex  = "buybarindex"
+	SellBarIndex = "sellbarindex"
+)
 
-type HodlBot struct {
+var _ bot.ConfigurableBot = (*Bot)(nil)
+
+type Bot struct {
 	BuyBarIndex  int
 	SellBarIndex int
 
@@ -19,21 +25,21 @@ type HodlBot struct {
 	barIndex int
 }
 
-func NewHodlBot(asset market.Asset, dealer broker.Dealer) *HodlBot {
-	return &HodlBot{
+func New(asset market.Asset, dealer broker.Dealer) *Bot {
+	return &Bot{
 		asset:  asset,
 		dealer: dealer,
 	}
 }
 
-func (b *HodlBot) Configure(config map[string]any) error {
-	buyBarIndex, ok := config["buybarindex"].(int)
+func (b *Bot) Configure(config map[string]any) error {
+	buyBarIndex, ok := config[BuyBarIndex].(int)
 	if !ok {
-		return ErrInvalidConfig
+		return bot.ErrInvalidConfig
 	}
-	sellBarIndex, ok := config["sellbarindex"].(int)
+	sellBarIndex, ok := config[SellBarIndex].(int)
 	if !ok {
-		return ErrInvalidConfig
+		return bot.ErrInvalidConfig
 	}
 
 	switch {
@@ -42,9 +48,9 @@ func (b *HodlBot) Configure(config map[string]any) error {
 	case buyBarIndex >= 0 && sellBarIndex == 0:
 		break
 	case buyBarIndex < 0 || sellBarIndex < 0:
-		return ErrInvalidConfig
+		return bot.ErrInvalidConfig
 	case buyBarIndex >= sellBarIndex:
-		return ErrInvalidConfig
+		return bot.ErrInvalidConfig
 	}
 
 	b.BuyBarIndex = buyBarIndex
@@ -53,7 +59,7 @@ func (b *HodlBot) Configure(config map[string]any) error {
 	return nil
 }
 
-func (b *HodlBot) ReceivePrice(ctx context.Context, price market.Kline) error {
+func (b *Bot) ReceivePrice(ctx context.Context, price market.Kline) error {
 	defer func() { b.barIndex++ }()
 
 	signal := b.evalAlgo(b.barIndex, b.BuyBarIndex, b.SellBarIndex)
@@ -69,7 +75,7 @@ func (b *HodlBot) ReceivePrice(ctx context.Context, price market.Kline) error {
 	return nil
 }
 
-func (b *HodlBot) evalAlgo(index, buybar, sellbar int) broker.OrderSide {
+func (b *Bot) evalAlgo(index, buybar, sellbar int) broker.OrderSide {
 	var signal broker.OrderSide
 
 	switch {
@@ -84,7 +90,7 @@ func (b *HodlBot) evalAlgo(index, buybar, sellbar int) broker.OrderSide {
 	return signal
 }
 
-func (b *HodlBot) Close(ctx context.Context) error {
+func (b *Bot) Close(ctx context.Context) error {
 	order := broker.NewOrder(b.asset, broker.Sell, dec.New(1))
 	order.ReduceOnly = true
 	if _, _, err := b.dealer.PlaceOrder(ctx, order); err != nil {
