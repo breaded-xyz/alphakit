@@ -9,17 +9,21 @@ import (
 
 type Predicter struct {
 	priceSelector ta.PriceSelector
-	maFast        ta.Indicator
-	maSlow        ta.Indicator
-	osc           ta.Osc
-	sd            ta.SD
-	mmi           ta.MMI
+
+	osc ta.Indicator
+	sd  ta.Indicator
+	mmi ta.Indicator
 
 	prev float64
 }
 
-func NewPredicter(maFast, maSlow ta.Indicator, sd ta.SD, mmi ta.MMI) *Predicter {
-	return nil
+func NewPredicter(osc, sd, mmi ta.Indicator) *Predicter {
+	return &Predicter{
+		priceSelector: ta.Close,
+		osc:           osc,
+		sd:            sd,
+		mmi:           mmi,
+	}
 }
 
 func (p *Predicter) ReceivePrice(ctx context.Context, price market.Kline) error {
