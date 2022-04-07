@@ -22,10 +22,10 @@ type ALMA struct {
 }
 
 func NewALMA(length int) *ALMA {
-	return NewALMAWithOpts(length, DefaultALMAOffset, DefaultALMASigma)
+	return NewALMAWithSigma(length, DefaultALMAOffset, DefaultALMASigma)
 }
 
-func NewALMAWithOpts(length int, offset, sigma float64) *ALMA {
+func NewALMAWithSigma(length int, offset, sigma float64) *ALMA {
 	return &ALMA{
 		length: length,
 		offset: offset,
