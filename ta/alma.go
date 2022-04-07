@@ -34,9 +34,14 @@ func NewALMAWithSigma(length int, offset, sigma float64) *ALMA {
 }
 
 func (ind *ALMA) Update(v ...float64) error {
-
 	for i := range v {
 		ind.sample = WindowAppend(ind.sample, ind.length-1, v[i])
+
+		if ind.length < 1 {
+			ind.series = append(ind.series, v[i])
+			continue
+		}
+
 		m := math.Floor(ind.offset * (float64(ind.length) - 1))
 		s := float64(ind.length) / ind.sigma
 		var norm, sum float64
