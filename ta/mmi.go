@@ -7,7 +7,7 @@ import (
 )
 
 // MMI (Market Meaness Index) is a statistical measure between 0 - 100
-// that indicates if the series exhibits auto-correlation (trendiness).
+// that indicates if the series exhibits serial correlation (trendiness).
 // Reference: https://financial-hacker.com/the-market-meanness-index/
 type MMI struct {
 	sample []float64
