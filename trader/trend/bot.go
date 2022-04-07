@@ -4,17 +4,13 @@ import (
 	"context"
 
 	"github.com/colngroup/zero2algo/market"
-	"github.com/colngroup/zero2algo/ta"
 	"github.com/colngroup/zero2algo/trader"
 )
 
 var _ trader.ConfigurableBot = (*Bot)(nil)
 
 type Bot struct {
-	maFast ta.Indicator
-	maSlow ta.Indicator
-	sd     ta.SD
-	mmi    ta.MMI
+	predicter Predicter
 }
 
 func (b *Bot) Configure(config map[string]any) error {
