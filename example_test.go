@@ -13,7 +13,7 @@ import (
 	"github.com/colngroup/zero2algo/trader/hodl"
 )
 
-func ExampleOptimize() {
+func Example() {
 	// Verbose error handling ommitted for brevity
 
 	// Identify the asset to trade
@@ -32,7 +32,7 @@ func ExampleOptimize() {
 
 	// Read a .csv file of historical prices (aka candlestick data)
 	// Cache the prices in memory to use in multiple optimization iterations
-	file, _ := os.Open("prices.csv")
+	file, _ := os.Open("example_prices.csv")
 	defer file.Close()
 	prices, _ := market.NewCSVKlineReader(csv.NewReader(file)).ReadAll()
 
@@ -72,5 +72,7 @@ func ExampleOptimize() {
 	// Rank results based on the test case with the highest sharpe ratio
 	optimal := optimize.SharpeSort(results)[0]
 	perf.PrintPerformanceReportSummary(optimal)
+
+	// Output:
 
 }

@@ -1,4 +1,4 @@
-package zero2algo
+package backtest
 
 import (
 	"context"
@@ -8,17 +8,16 @@ import (
 	"os"
 
 	"github.com/colngroup/zero2algo/broker"
-	"github.com/colngroup/zero2algo/broker/backtest"
 	"github.com/colngroup/zero2algo/dec"
 	"github.com/colngroup/zero2algo/market"
 	"github.com/colngroup/zero2algo/perf"
 )
 
-func Example_zero2algo() {
+func Example() {
 	// Verbose error handling ommitted for brevity
 
 	// Create a special simulated dealer for backtesting with initial capital of 1000
-	dealer := backtest.NewDealer()
+	dealer := NewDealer()
 	dealer.SetAccountBalance(dec.New(1000))
 
 	// Identify the asset to trade
