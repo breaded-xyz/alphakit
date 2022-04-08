@@ -1,11 +1,19 @@
 package trend
 
-import "github.com/colngroup/zero2algo/broker"
+import (
+	"context"
+
+	"github.com/colngroup/zero2algo/broker"
+	"github.com/colngroup/zero2algo/market"
+	"github.com/shopspring/decimal"
+)
 
 // Positioner offers a facade over the Dealer interface and manages the position
 // (market exposure) for a single asset on behalf of a Bot.
 type Positioner struct {
-	dealer broker.Dealer
+	dealer   broker.Dealer
+	asset    market.Asset
+	openSize decimal.Decimal
 }
 
 // EnterLong opens a new long position and closes any opened short positions.
@@ -32,6 +40,27 @@ func (p *Positioner) ExitShort() error {
 
 // LiquidateAll closes any and all open positions.
 func (p *Positioner) LiquidateAll() error {
+	return nil
+}
+
+func (p *Positioner) exit(ctx context.Context, side broker.OrderSide) error {
+	if _, err := p.dealer.CancelOrders(ctx); err != nil {
+		return err
+	}
+
+	order := broker.Order{
+		Asset:      p.asset,
+		Side:       side.Opposite(),
+		Type:       broker.Market,
+		Size:       p.openSize,
+		ReduceOnly: true,
+	}
+	_, _, err := p.dealer.PlaceOrder(ctx, order)
+	if err != nil {
+		return err
+	}
+	p.openSize = decimal.Zero
+
 	return nil
 }
 

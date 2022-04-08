@@ -36,6 +36,10 @@ func (d *Dealer) PlaceOrder(ctx context.Context, order broker.Order) (*broker.Or
 	return &order, nil, err
 }
 
+func (d *Dealer) CancelOrders(ctx context.Context) (*netapi.Response, error) {
+	return nil, nil
+}
+
 func (d *Dealer) ListPositions(ctx context.Context, opts *netapi.ListOpts) ([]broker.Position, *netapi.Response, error) {
 	return d.simulator.Positions(), nil, nil
 }

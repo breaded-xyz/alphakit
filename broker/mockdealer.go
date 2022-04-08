@@ -23,6 +23,11 @@ func (d *MockDealer) PlaceOrder(ctx context.Context, order Order) (*Order, *neta
 	return args.Get(0).(*Order), args.Get(1).(*netapi.Response), args.Error(2)
 }
 
+func (d *MockDealer) CancelOrders(ctx context.Context) (*netapi.Response, error) {
+	args := d.Called(ctx)
+	return args.Get(0).(*netapi.Response), args.Error(1)
+}
+
 func (d *MockDealer) ListPositions(ctx context.Context, opts *netapi.ListOpts) ([]Position, *netapi.Response, error) {
 	args := d.Called(ctx, opts)
 	return args.Get(0).([]Position), args.Get(1).(*netapi.Response), args.Error(2)
