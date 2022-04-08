@@ -17,8 +17,9 @@ type Bot struct {
 	EnterShort float64
 	ExitShort  float64
 
-	dealer    broker.Dealer
-	predicter Predicter
+	asset      market.Asset
+	positioner Positioner
+	predicter  Predicter
 }
 
 func (b *Bot) Configure(config map[string]any) error {
@@ -35,21 +36,17 @@ func (b *Bot) ReceivePrice(ctx context.Context, price market.Kline) error {
 		return nil
 	}
 
-	enterSide, exitSide := b.evalAlgo(b.predicter.Predict())
+	enter, exit := b.evalAlgo(b.predicter.Predict())
 
-	if exitSide != 0 {
-		if err := b.closePosition(ctx, price, exitSide); err != nil {
-			return err
-		}
-	}
-
-	if enterSide != 0 {
-		if err := b.openPosition(ctx, price, enterSide); err != nil {
-			return err
-		}
+	if err := b.executeSignal(enter, exit); err != nil {
+		return err
 	}
 
 	return nil
+}
+
+func (b *Bot) Close(ctx context.Context) error {
+	return b.positioner.LiquidateAll()
 }
 
 func (b *Bot) evalAlgo(prediction float64) (enter, exit broker.OrderSide) {
@@ -70,14 +67,20 @@ func (b *Bot) evalAlgo(prediction float64) (enter, exit broker.OrderSide) {
 	return
 }
 
-func (b *Bot) closePosition(ctx context.Context, price market.Kline, side broker.OrderSide) error {
-	return nil
-}
+func (b *Bot) executeSignal(enter, exit broker.OrderSide) error {
 
-func (b *Bot) openPosition(ctx context.Context, price market.Kline, side broker.OrderSide) error {
-	return nil
-}
+	switch {
+	case enter == 0 && exit == 0:
+		return nil
+	case enter == broker.Buy:
+		return b.positioner.EnterLong()
+	case enter == broker.Sell:
+		return b.positioner.EnterShort()
+	case exit == broker.Buy:
+		return b.positioner.ExitLong()
+	case exit == broker.Sell:
+		return b.positioner.ExitShort()
+	}
 
-func (b *Bot) Close(ctx context.Context) error {
 	return nil
 }
