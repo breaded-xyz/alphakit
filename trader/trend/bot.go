@@ -6,7 +6,10 @@ import (
 	"github.com/colngroup/zero2algo/broker"
 	"github.com/colngroup/zero2algo/dec"
 	"github.com/colngroup/zero2algo/market"
+	"github.com/colngroup/zero2algo/money"
+	"github.com/colngroup/zero2algo/ta"
 	"github.com/colngroup/zero2algo/trader"
+	"github.com/shopspring/decimal"
 )
 
 var _ trader.ConfigurableBot = (*Bot)(nil)
@@ -19,8 +22,11 @@ type Bot struct {
 	ExitShort  float64
 
 	asset      market.Asset
-	positioner PositionManager
+	dealer     broker.Dealer
 	predicter  Predicter
+	sizer      money.Sizer
+	risk       ta.Indicator
+	openedSize decimal.Decimal
 }
 
 func (b *Bot) Configure(config map[string]any) error {
@@ -32,24 +38,37 @@ func (b *Bot) ReceivePrice(ctx context.Context, price market.Kline) error {
 	if err := b.predicter.ReceivePrice(ctx, price); err != nil {
 		return err
 	}
-
 	if !b.predicter.Valid() {
 		return nil
 	}
 
 	enter, exit := b.evalAlgo(b.predicter.Predict())
+	if enter == 0 && exit == 0 {
+		return nil
+	}
 
-	//size, b.sizePosition(price)
-
-	if err := b.executeSignal(ctx, enter, exit); err != nil {
+	balance, _, err := b.dealer.GetBalance(ctx)
+	if err != nil {
 		return err
 	}
+	capital := balance.Trade
+	risk := dec.New(b.risk.Value())
+
+	if err := b.exit(ctx, exit, price.C, b.openedSize, risk); err != nil {
+		return err
+	}
+
+	size := b.sizer.Size(price.C, capital, risk)
+	if err := b.enter(ctx, enter, price.C, size, risk); err != nil {
+		return err
+	}
+	b.openedSize = size
 
 	return nil
 }
 
 func (b *Bot) Close(ctx context.Context) error {
-	return b.positioner.LiquidateAll()
+	return nil
 }
 
 func (b *Bot) evalAlgo(prediction float64) (enter, exit broker.OrderSide) {
@@ -70,20 +89,50 @@ func (b *Bot) evalAlgo(prediction float64) (enter, exit broker.OrderSide) {
 	return
 }
 
-func (b *Bot) executeSignal(ctx context.Context, enter, exit broker.OrderSide) error {
-
-	switch {
-	case enter == 0 && exit == 0:
-		return nil
-	case enter == broker.Buy:
-		return b.positioner.EnterLong(ctx, dec.New(0))
-	case enter == broker.Sell:
-		return b.positioner.EnterShort()
-	case exit == broker.Buy:
-		return b.positioner.ExitLong()
-	case exit == broker.Sell:
-		return b.positioner.ExitShort()
+func (b *Bot) enter(ctx context.Context, side broker.OrderSide, price, size, risk decimal.Decimal) error {
+	if _, err := b.dealer.CancelOrders(ctx); err != nil {
+		return err
 	}
 
+	order := broker.Order{
+		Asset: b.asset,
+		Type:  broker.Market,
+		Side:  side,
+		Size:  size,
+	}
+	if _, _, err := b.dealer.PlaceOrder(ctx, order); err != nil {
+		return err
+	}
+
+	stop := broker.Order{
+		Asset:      b.asset,
+		Type:       broker.Limit,
+		Side:       side.Opposite(),
+		Size:       size,
+		LimitPrice: price.Sub(risk),
+		ReduceOnly: true,
+	}
+	if _, _, err := b.dealer.PlaceOrder(ctx, stop); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (b *Bot) exit(ctx context.Context, side broker.OrderSide, price, size, risk decimal.Decimal) error {
+	if _, err := b.dealer.CancelOrders(ctx); err != nil {
+		return err
+	}
+
+	order := broker.Order{
+		Asset:      b.asset,
+		Type:       broker.Market,
+		Side:       side.Opposite(),
+		Size:       size,
+		ReduceOnly: true,
+	}
+	if _, _, err := b.dealer.PlaceOrder(ctx, order); err != nil {
+		return err
+	}
 	return nil
 }
