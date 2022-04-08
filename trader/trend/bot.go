@@ -19,7 +19,7 @@ type Bot struct {
 	ExitShort  float64
 
 	asset      market.Asset
-	positioner Positioner
+	positioner PositionManager
 	predicter  Predicter
 }
 
