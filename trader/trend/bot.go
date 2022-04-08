@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/colngroup/zero2algo/broker"
+	"github.com/colngroup/zero2algo/dec"
 	"github.com/colngroup/zero2algo/market"
 	"github.com/colngroup/zero2algo/trader"
 )
@@ -38,7 +39,9 @@ func (b *Bot) ReceivePrice(ctx context.Context, price market.Kline) error {
 
 	enter, exit := b.evalAlgo(b.predicter.Predict())
 
-	if err := b.executeSignal(enter, exit); err != nil {
+	//size, b.sizePosition(price)
+
+	if err := b.executeSignal(ctx, enter, exit); err != nil {
 		return err
 	}
 
@@ -67,13 +70,13 @@ func (b *Bot) evalAlgo(prediction float64) (enter, exit broker.OrderSide) {
 	return
 }
 
-func (b *Bot) executeSignal(enter, exit broker.OrderSide) error {
+func (b *Bot) executeSignal(ctx context.Context, enter, exit broker.OrderSide) error {
 
 	switch {
 	case enter == 0 && exit == 0:
 		return nil
 	case enter == broker.Buy:
-		return b.positioner.EnterLong()
+		return b.positioner.EnterLong(ctx, dec.New(0))
 	case enter == broker.Sell:
 		return b.positioner.EnterShort()
 	case exit == broker.Buy:

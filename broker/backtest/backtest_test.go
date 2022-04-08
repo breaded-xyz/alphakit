@@ -50,7 +50,7 @@ func TestLongTradeWithCosts(t *testing.T) {
 	}
 
 	exp := dec.New(-13.6913)
-	act := dealer.simulator.AccountBalance()
+	act := dealer.simulator.Balance().Trade
 	assert.True(t, act.Equal(exp))
 }
 
@@ -88,6 +88,6 @@ func TestShortTradeWithStop(t *testing.T) {
 	}
 
 	exp := dec.New(-28)
-	act := dealer.simulator.AccountBalance()
+	act := dealer.simulator.Balance().Trade
 	assert.True(t, act.Equal(exp))
 }

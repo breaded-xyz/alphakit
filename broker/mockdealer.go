@@ -13,6 +13,11 @@ type MockDealer struct {
 	mock.Mock
 }
 
+func (d *MockDealer) GetBalance(ctx context.Context) (*AccountBalance, *netapi.Response, error) {
+	args := d.Called(ctx)
+	return args.Get(0).(*AccountBalance), args.Get(1).(*netapi.Response), args.Error(2)
+}
+
 func (d *MockDealer) PlaceOrder(ctx context.Context, order Order) (*Order, *netapi.Response, error) {
 	args := d.Called(ctx, order)
 

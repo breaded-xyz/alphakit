@@ -64,7 +64,8 @@ func Example() {
 
 			// Generate a performance report for the test case and add it to the result set
 			trades, _, _ := dealer.ListTrades(context.Background(), nil)
-			results = append(results, perf.NewPerformanceReport(trades, dealer.Equity()))
+			equity := dealer.EquityHistory()
+			results = append(results, perf.NewPerformanceReport(trades, equity))
 		}(c)
 	}
 	wg.Wait()

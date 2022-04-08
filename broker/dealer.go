@@ -9,6 +9,7 @@ import (
 )
 
 type Dealer interface {
+	GetBalance(context.Context) (*AccountBalance, *netapi.Response, error)
 	PlaceOrder(context.Context, Order) (*Order, *netapi.Response, error)
 	CancelOrders(context.Context) (*netapi.Response, error)
 	ListPositions(context.Context, *netapi.ListOpts) ([]Position, *netapi.Response, error)
@@ -18,6 +19,6 @@ type Dealer interface {
 type SimulatedDealer interface {
 	Dealer
 	market.Receiver
-	Equity() EquitySeries
-	SetAccountBalance(amount decimal.Decimal)
+	EquityHistory() EquitySeries
+	SetInitialCapital(amount decimal.Decimal)
 }

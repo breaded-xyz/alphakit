@@ -18,9 +18,9 @@ var ErrInvalidOrderState = errors.New("order is not valid for processing")
 var ErrRejectedOrder = errors.New("order rejected during processing")
 
 type Simulator struct {
-	clock          Clocker
-	accountBalance decimal.Decimal
-	marketPrice    market.Kline
+	clock       Clocker
+	balance     broker.AccountBalance
+	marketPrice market.Kline
 
 	cost Coster
 
@@ -45,6 +45,10 @@ func NewSimulatorWithCost(cost Coster) *Simulator {
 	}
 }
 
+func (s *Simulator) SetInitialCapital(amount decimal.Decimal) {
+	s.balance.Trade = amount
+}
+
 func (s *Simulator) AddOrder(order broker.Order) (broker.Order, error) {
 	var empty broker.Order
 	if order.Side == 0 || order.Type == 0 || order.State() != broker.OrderPending || !order.Size.IsPositive() {
@@ -67,7 +71,7 @@ func (s *Simulator) Next(price market.Kline) error {
 	s.marketPrice = price
 
 	// Deduct funding fees if an existing position is open
-	s.accountBalance = s.accountBalance.Sub(s.cost.Funding(s.getPosition(), s.marketPrice.C, s.clock.Elapsed()))
+	s.balance.Trade = s.balance.Trade.Sub(s.cost.Funding(s.getPosition(), s.marketPrice.C, s.clock.Elapsed()))
 
 	// Iterate open orders in the sequence they were placed (FIFO)
 	// Go maps do not maintain insertion order so we must sort the keys in a slice first
@@ -85,7 +89,9 @@ func (s *Simulator) Next(price market.Kline) error {
 	}
 
 	// Add current portfolio equity to the history
-	s.equity[broker.Timestamp(s.clock.Peek().UnixMilli())] = s.equityNow()
+	equity := s.markToMarket()
+	s.equity[broker.Timestamp(s.clock.Peek().UnixMilli())] = equity
+	s.balance.Equity = equity
 
 	return nil
 }
@@ -108,14 +114,14 @@ func (s *Simulator) Trades() []broker.Trade {
 	return copied
 }
 
-func (s *Simulator) Equity() broker.EquitySeries {
+func (s *Simulator) EquityHistory() broker.EquitySeries {
 	copied := make(broker.EquitySeries, len(s.equity))
 	maps.Copy(copied, s.equity)
 	return copied
 }
 
-func (s *Simulator) AccountBalance() decimal.Decimal {
-	return s.accountBalance
+func (s *Simulator) Balance() broker.AccountBalance {
+	return s.balance
 }
 
 func (s *Simulator) processOrder(order broker.Order) (broker.Order, error) {
@@ -152,7 +158,7 @@ func (s *Simulator) processOrder(order broker.Order) (broker.Order, error) {
 		if _, err = s.processPosition(s.getPosition(), order); err != nil {
 			return order, err
 		}
-		s.accountBalance = s.accountBalance.Sub(s.cost.Transaction(order))
+		s.balance.Trade = s.balance.Trade.Sub(s.cost.Transaction(order))
 		order = s.closeOrder(order)
 	}
 
@@ -246,7 +252,7 @@ func (s *Simulator) processPosition(position broker.Position, order broker.Order
 
 		// Create a trade for the closed position and update the account balance with the profit / loss
 		trade := s.createTrade(position)
-		s.accountBalance = s.accountBalance.Add(trade.Profit)
+		s.balance.Trade = s.balance.Trade.Add(trade.Profit)
 		s.trades[position.ID] = trade
 	}
 
@@ -283,8 +289,8 @@ func (s *Simulator) createTrade(position broker.Position) broker.Trade {
 	}
 }
 
-func (s *Simulator) equityNow() decimal.Decimal {
-	equity := s.accountBalance
+func (s *Simulator) markToMarket() decimal.Decimal {
+	equity := s.balance.Trade
 	if position := s.getPosition(); position.State() == broker.PositionOpen {
 		equity = equity.Add(profit(position, s.marketPrice.C))
 	}

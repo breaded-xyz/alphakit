@@ -18,7 +18,12 @@ type Positioner struct {
 
 // EnterLong opens a new long position and closes any opened short positions.
 // Resting orders will cancelled pior to opening the new position.
-func (p *Positioner) EnterLong() error {
+func (p *Positioner) EnterLong(ctx context.Context, size decimal.Decimal) error {
+	if err := p.enter(ctx, broker.Buy, size); err != nil {
+		return err
+	}
+	p.openSize = p.openSize.Add(size)
+
 	return nil
 }
 
@@ -43,7 +48,26 @@ func (p *Positioner) LiquidateAll() error {
 	return nil
 }
 
-func (p *Positioner) exit(ctx context.Context, side broker.OrderSide) error {
+func (p *Positioner) enter(ctx context.Context, side broker.OrderSide, size decimal.Decimal) error {
+	if _, err := p.dealer.CancelOrders(ctx); err != nil {
+		return err
+	}
+
+	order := broker.Order{
+		Asset: p.asset,
+		Side:  side,
+		Type:  broker.Market,
+		Size:  size,
+	}
+	_, _, err := p.dealer.PlaceOrder(ctx, order)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (p *Positioner) exit(ctx context.Context, side broker.OrderSide, size decimal.Decimal) error {
 	if _, err := p.dealer.CancelOrders(ctx); err != nil {
 		return err
 	}
@@ -52,63 +76,13 @@ func (p *Positioner) exit(ctx context.Context, side broker.OrderSide) error {
 		Asset:      p.asset,
 		Side:       side.Opposite(),
 		Type:       broker.Market,
-		Size:       p.openSize,
+		Size:       size,
 		ReduceOnly: true,
 	}
 	_, _, err := p.dealer.PlaceOrder(ctx, order)
 	if err != nil {
 		return err
 	}
-	p.openSize = decimal.Zero
 
 	return nil
 }
-
-/*
-func (b *Bot) closePosition(ctx context.Context, price market.Kline, side broker.OrderSide) error {
-
-	position, err := b.getOpenedPosition(ctx, side)
-	if err != nil {
-		return err
-	}
-	if position == nil {
-		return nil
-	}
-
-	b.dealer.CancelAllOrders()
-
-	order := broker.Order{
-		Asset:      b.asset,
-		Side:       side.Opposite(),
-		Type:       broker.Market,
-		Size:       position.Size,
-		ReduceOnly: true,
-	}
-	placedOrder, res, err := b.dealer.PlaceOrder(ctx, order)
-	if err != nil {
-		return err
-	}
-	spew.Dump(placedOrder, res, err)
-
-	return nil
-}
-
-func (b *Bot) openPosition(ctx context.Context, price market.Kline, side broker.OrderSide) error {
-	return nil
-}
-
-func (b *Bot) getOpenedPosition(ctx context.Context, side broker.OrderSide) (*broker.Position, error) {
-	positions, _, err := b.dealer.ListPositions(ctx, nil)
-	if err != nil {
-		return nil, err
-	}
-	if positions = filter(positions, b.asset, side); len(positions) == 0 {
-		return nil, nil
-	}
-	return &positions[0], nil
-}
-
-func filter(positions []broker.Position, asset market.Asset, side broker.OrderSide) []broker.Position {
-	return nil
-}
-*/

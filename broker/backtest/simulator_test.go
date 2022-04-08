@@ -514,9 +514,9 @@ func TestCreateTrade(t *testing.T) {
 	assert.Equal(t, want, act)
 }
 
-func TestEquityNow(t *testing.T) {
+func TestSimulator_markToMarket(t *testing.T) {
 	sim := newSimulatorForTest()
-	sim.accountBalance = dec.New(10)
+	sim.SetInitialCapital(dec.New(10))
 	sim.marketPrice = market.Kline{C: dec.New(20)}
 
 	t.Run("open position - unrealized profit", func(t *testing.T) {
@@ -524,7 +524,7 @@ func TestEquityNow(t *testing.T) {
 			"1": {OpenedAt: _fixed, Side: broker.Sell, Price: dec.New(10), Size: dec.New(2)},
 		}
 		exp := dec.New(-10)
-		act := sim.equityNow()
+		act := sim.markToMarket()
 		assert.True(t, act.Equal(exp))
 	})
 
@@ -533,7 +533,7 @@ func TestEquityNow(t *testing.T) {
 			"1": {ClosedAt: _fixed, Side: broker.Sell, Price: dec.New(10), Size: dec.New(2)},
 		}
 		exp := dec.New(10)
-		act := sim.equityNow()
+		act := sim.markToMarket()
 		assert.True(t, act.Equal(exp))
 	})
 

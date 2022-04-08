@@ -31,6 +31,15 @@ func NewDealerWithCost(cost Coster) *Dealer {
 	}
 }
 
+func (d *Dealer) SetInitialCapital(amount decimal.Decimal) {
+	d.simulator.SetInitialCapital(amount)
+}
+
+func (d *Dealer) GetBalance(ctx context.Context) (*broker.AccountBalance, *netapi.Response, error) {
+	acc := d.simulator.Balance()
+	return &acc, nil, nil
+}
+
 func (d *Dealer) PlaceOrder(ctx context.Context, order broker.Order) (*broker.Order, *netapi.Response, error) {
 	order, err := d.simulator.AddOrder(order)
 	return &order, nil, err
@@ -48,12 +57,8 @@ func (d *Dealer) ListTrades(ctx context.Context, opts *netapi.ListOpts) ([]broke
 	return d.simulator.Trades(), nil, nil
 }
 
-func (d *Dealer) Equity() broker.EquitySeries {
-	return d.simulator.Equity()
-}
-
-func (d *Dealer) SetAccountBalance(amount decimal.Decimal) {
-	d.simulator.accountBalance = amount
+func (d *Dealer) EquityHistory() broker.EquitySeries {
+	return d.simulator.EquityHistory()
 }
 
 func (d *Dealer) ReceivePrice(ctx context.Context, price market.Kline) error {

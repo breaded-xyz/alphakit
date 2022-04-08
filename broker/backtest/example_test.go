@@ -18,7 +18,7 @@ func Example() {
 
 	// Create a special simulated dealer for backtesting with initial capital of 1000
 	dealer := NewDealer()
-	dealer.SetAccountBalance(dec.New(1000))
+	dealer.SetInitialCapital(dec.New(1000))
 
 	// Identify the asset to trade
 	asset := market.NewAsset("BTCUSD")
@@ -49,7 +49,7 @@ func Example() {
 
 	// Generate a performance report from the dealer execution history
 	trades, _, _ := dealer.ListTrades(context.Background(), nil)
-	equity := dealer.Equity()
+	equity := dealer.EquityHistory()
 	report := perf.NewPerformanceReport(trades, equity)
 	fmt.Printf("Your backtest return is %.2f%%", report.Portfolio.EquityReturn*100)
 }
