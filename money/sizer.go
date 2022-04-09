@@ -13,5 +13,5 @@ type FixedSizer struct {
 }
 
 func (s *FixedSizer) Size(price, capital, risk decimal.Decimal) decimal.Decimal {
-	return price.Div(s.FixedCapital)
+	return s.FixedCapital.Div(price)
 }
