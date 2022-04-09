@@ -8,3 +8,29 @@ var dec decimal.Decimal
 	case float64:
 		return decimal.NewFromFloat(float64(v))
 	}
+
+
+func closeTime(start1, start2 time.Time) time.Time {
+	if start1.IsZero() {
+		return start2
+	}
+	interval := start2.Sub(start1)
+	return start2.Add(interval)
+}
+
+func TestCloseTime(t *testing.T) {
+	interval := time.Hour * 4
+	start1 := time.Now()
+	start2 := start1.Add(interval)
+
+	t.Run("valid start times", func(t *testing.T) {
+		exp := start2.Add(interval)
+		act := closeTime(start1, start2)
+		assert.EqualValues(t, exp, act)
+	})
+
+	t.Run("start 1 is zero", func(t *testing.T) {
+		act := closeTime(time.Time{}, start2)
+		assert.EqualValues(t, start2, act)
+	})
+}

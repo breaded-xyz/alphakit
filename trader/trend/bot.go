@@ -112,6 +112,9 @@ func (b *Bot) enter(ctx context.Context, side broker.OrderSide, price, size, ris
 		LimitPrice: price.Sub(risk),
 		ReduceOnly: true,
 	}
+	if !stop.LimitPrice.IsPositive() {
+		return nil
+	}
 	if _, _, err := b.dealer.PlaceOrder(ctx, stop); err != nil {
 		return err
 	}

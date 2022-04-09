@@ -4,13 +4,10 @@ import (
 	"context"
 
 	"github.com/colngroup/zero2algo/broker"
-	"github.com/colngroup/zero2algo/dec"
 	"github.com/colngroup/zero2algo/market"
 	"github.com/colngroup/zero2algo/netapi"
 	"github.com/shopspring/decimal"
 )
-
-var _defaultInitialCapital decimal.Decimal = dec.New(1000)
 
 // Enforce at compile time that the type implements the interface
 var _ broker.SimulatedDealer = (*Dealer)(nil)
@@ -46,6 +43,7 @@ func (d *Dealer) PlaceOrder(ctx context.Context, order broker.Order) (*broker.Or
 }
 
 func (d *Dealer) CancelOrders(ctx context.Context) (*netapi.Response, error) {
+	d.simulator.CancelOrders()
 	return nil, nil
 }
 

@@ -20,7 +20,7 @@ func newSimulatorForTest() *Simulator {
 	return sim
 }
 
-func TestSimulatorAddOrder(t *testing.T) {
+func TestSimulator_AddOrder(t *testing.T) {
 	tests := []struct {
 		name string
 		give broker.Order
@@ -70,7 +70,7 @@ func TestSimulatorAddOrder(t *testing.T) {
 	}
 }
 
-func TestSimulatorProcessOrder(t *testing.T) {
+func TestSimulator_processOrder(t *testing.T) {
 	tests := []struct {
 		name      string
 		give      broker.Order
@@ -142,7 +142,7 @@ func TestSimulatorProcessOrder(t *testing.T) {
 	}
 }
 
-func TestSimulatorOpenOrder(t *testing.T) {
+func TestSimulator_openOrder(t *testing.T) {
 	sim := newSimulatorForTest()
 	exp := broker.Order{
 		ID:       broker.NewIDWithTime(_fixed),
@@ -152,7 +152,7 @@ func TestSimulatorOpenOrder(t *testing.T) {
 	assert.Equal(t, exp, act)
 }
 
-func TestSimulatorFillOrder(t *testing.T) {
+func TestSimulator_fillOrder(t *testing.T) {
 	sim := newSimulatorForTest()
 	exp := broker.Order{
 		Side:        broker.Buy,
@@ -165,7 +165,7 @@ func TestSimulatorFillOrder(t *testing.T) {
 	assert.Equal(t, exp, act)
 }
 
-func TestSimulatorCloseOrder(t *testing.T) {
+func TestSimulator_closeOrder(t *testing.T) {
 	sim := newSimulatorForTest()
 	exp := broker.Order{
 		ClosedAt: _fixed,
@@ -174,7 +174,7 @@ func TestSimulatorCloseOrder(t *testing.T) {
 	assert.Equal(t, exp, act)
 }
 
-func TestSimulatorGetPosition(t *testing.T) {
+func TestSimulator_getPosition(t *testing.T) {
 	tests := []struct {
 		name string
 		give map[broker.DealID]broker.Position
@@ -209,7 +209,7 @@ func TestSimulatorGetPosition(t *testing.T) {
 	}
 }
 
-func TestSimulatorProcessPosition(t *testing.T) {
+func TestSimulator_processPosition(t *testing.T) {
 	tests := []struct {
 		name         string
 		giveOrder    broker.Order
@@ -282,7 +282,7 @@ func TestSimulatorProcessPosition(t *testing.T) {
 	}
 }
 
-func TestSimulatorOpenPosition(t *testing.T) {
+func TestSimulator_openPosition(t *testing.T) {
 
 	sim := newSimulatorForTest()
 
@@ -307,7 +307,7 @@ func TestSimulatorOpenPosition(t *testing.T) {
 	assert.Equal(t, exp, act)
 }
 
-func TestSimulatorReceivePrice(t *testing.T) {
+func TestSimulator_ReceivePrice(t *testing.T) {
 
 	sim := NewSimulator()
 	sim.clock.Start(time.Now(), time.Millisecond)
@@ -413,23 +413,6 @@ func TestMatchOrder(t *testing.T) {
 	}
 }
 
-func TestCloseTime(t *testing.T) {
-	interval := time.Hour * 4
-	start1 := time.Now()
-	start2 := start1.Add(interval)
-
-	t.Run("valid start times", func(t *testing.T) {
-		exp := start2.Add(interval)
-		act := closeTime(start1, start2)
-		assert.EqualValues(t, exp, act)
-	})
-
-	t.Run("start 1 is zero", func(t *testing.T) {
-		act := closeTime(time.Time{}, start2)
-		assert.EqualValues(t, start2, act)
-	})
-}
-
 func TestProfit(t *testing.T) {
 	tests := []struct {
 		name string
@@ -485,7 +468,7 @@ func TestProfit(t *testing.T) {
 	}
 }
 
-func TestCreateTrade(t *testing.T) {
+func TestSimulator_createTrade(t *testing.T) {
 
 	sim := newSimulatorForTest()
 

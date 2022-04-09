@@ -8,6 +8,7 @@ import (
 	"github.com/colngroup/zero2algo/dec"
 	"github.com/colngroup/zero2algo/market"
 	"github.com/shopspring/decimal"
+	"golang.org/x/exp/constraints"
 	"golang.org/x/exp/maps"
 	"golang.org/x/exp/slices"
 )
@@ -96,22 +97,25 @@ func (s *Simulator) Next(price market.Kline) error {
 	return nil
 }
 
+func (s *Simulator) CancelOrders() {
+	for k := range s.orders {
+		order := s.orders[k]
+		if order.State() == broker.OrderOpen {
+			order.ClosedAt = s.clock.Now()
+		}
+	}
+}
+
 func (s *Simulator) Orders() []broker.Order {
-	return maps.Values(s.orders)
+	return copySortMap(s.orders)
 }
 
 func (s *Simulator) Positions() []broker.Position {
-	return maps.Values(s.positions)
+	return copySortMap(s.positions)
 }
 
 func (s *Simulator) Trades() []broker.Trade {
-	copied := make([]broker.Trade, len(s.trades))
-	ks := maps.Keys(s.trades)
-	slices.Sort(ks)
-	for i := range ks {
-		copied[i] = s.trades[ks[i]]
-	}
-	return copied
+	return copySortMap(s.trades)
 }
 
 func (s *Simulator) EquityHistory() broker.EquitySeries {
@@ -312,14 +316,6 @@ func matchOrder(order broker.Order, quote market.Kline) decimal.Decimal {
 	return matchedPrice
 }
 
-func closeTime(start1, start2 time.Time) time.Time {
-	if start1.IsZero() {
-		return start2
-	}
-	interval := start2.Sub(start1)
-	return start2.Add(interval)
-}
-
 func profit(position broker.Position, price decimal.Decimal) decimal.Decimal {
 	profit := price.Sub(position.Price).Mul(position.Size)
 	if position.Side == broker.Sell {
@@ -332,4 +328,14 @@ func equalClock(t1, t2 time.Time) bool {
 	t1H, t1M, t1S := t1.Clock()
 	t2H, t2M, t2S := t2.Clock()
 	return t1H == t2H && t1M == t2M && t1S == t2S
+}
+
+func copySortMap[K constraints.Ordered, V any](m map[K]V) []V {
+	copied := make([]V, len(m))
+	ks := maps.Keys(m)
+	slices.Sort(ks)
+	for i := range ks {
+		copied[i] = m[ks[i]]
+	}
+	return copied
 }
