@@ -74,6 +74,4 @@ func Example() {
 	optimal := optimize.SharpeSort(results)[0]
 	perf.PrintPerformanceReportSummary(optimal)
 
-	// Output:
-
 }
