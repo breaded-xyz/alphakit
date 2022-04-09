@@ -3,6 +3,7 @@ package broker
 import (
 	"time"
 
+	"golang.org/x/exp/constraints"
 	"golang.org/x/exp/maps"
 	"golang.org/x/exp/slices"
 )
@@ -22,10 +23,15 @@ func (ts TimeSeries[V]) SortKeys() []Timestamp {
 }
 
 func (ts TimeSeries[V]) SortValuesByTime() []V {
-	ks := ts.SortKeys()
-	sorted := make([]V, len(ks))
+	return SortedMapValues(ts)
+}
+
+func SortedMapValues[K constraints.Ordered, V any](m map[K]V) []V {
+	sorted := make([]V, len(m))
+	ks := maps.Keys(m)
+	slices.Sort(ks)
 	for i := range ks {
-		sorted[i] = ts[ks[i]]
+		sorted[i] = m[ks[i]]
 	}
 	return sorted
 }

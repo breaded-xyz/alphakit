@@ -8,7 +8,6 @@ import (
 	"github.com/colngroup/zero2algo/dec"
 	"github.com/colngroup/zero2algo/market"
 	"github.com/shopspring/decimal"
-	"golang.org/x/exp/constraints"
 	"golang.org/x/exp/maps"
 	"golang.org/x/exp/slices"
 )
@@ -107,15 +106,15 @@ func (s *Simulator) CancelOrders() {
 }
 
 func (s *Simulator) Orders() []broker.Order {
-	return copySortMap(s.orders)
+	return broker.SortedMapValues(s.orders)
 }
 
 func (s *Simulator) Positions() []broker.Position {
-	return copySortMap(s.positions)
+	return broker.SortedMapValues(s.positions)
 }
 
 func (s *Simulator) Trades() []broker.Trade {
-	return copySortMap(s.trades)
+	return broker.SortedMapValues(s.trades)
 }
 
 func (s *Simulator) EquityHistory() broker.EquitySeries {
@@ -328,14 +327,4 @@ func equalClock(t1, t2 time.Time) bool {
 	t1H, t1M, t1S := t1.Clock()
 	t2H, t2M, t2S := t2.Clock()
 	return t1H == t2H && t1M == t2M && t1S == t2S
-}
-
-func copySortMap[K constraints.Ordered, V any](m map[K]V) []V {
-	copied := make([]V, len(m))
-	ks := maps.Keys(m)
-	slices.Sort(ks)
-	for i := range ks {
-		copied[i] = m[ks[i]]
-	}
-	return copied
 }

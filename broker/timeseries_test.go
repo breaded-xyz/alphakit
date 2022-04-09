@@ -7,7 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestTimestampTime(t *testing.T) {
+func TestTimestamp_Time(t *testing.T) {
 
 	var tstamp Timestamp
 	exp := time.Date(2022, time.January, 1, 12, 45, 30, 0, time.Local)
@@ -17,7 +17,7 @@ func TestTimestampTime(t *testing.T) {
 	assert.Equal(t, exp, act)
 }
 
-func TestTimeSeriesSortKeys(t *testing.T) {
+func TestTimeSeries_SortKeys(t *testing.T) {
 
 	exp := []Timestamp{1, 2, 3, 4, 5}
 	give := TimeSeries[int]{
@@ -31,7 +31,7 @@ func TestTimeSeriesSortKeys(t *testing.T) {
 	assert.Equal(t, exp, act)
 }
 
-func TestTimeSeriesSortValuesByTime(t *testing.T) {
+func TestTimeSeries_SortValuesByTime(t *testing.T) {
 
 	exp := []int{1, 2, 3, 4, 5}
 	give := TimeSeries[int]{
@@ -43,4 +43,15 @@ func TestTimeSeriesSortValuesByTime(t *testing.T) {
 	}
 	act := give.SortValuesByTime()
 	assert.Equal(t, exp, act)
+}
+
+func TestSortedMapKeys(t *testing.T) {
+	m := map[int]string{
+		2: "2",
+		0: "0",
+		1: "1",
+	}
+	want := []string{"0", "1", "2"}
+	act := SortedMapValues(m)
+	assert.Equal(t, want, act)
 }
