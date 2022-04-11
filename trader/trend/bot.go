@@ -101,7 +101,7 @@ func (b *Bot) getOpenPosition(ctx context.Context, side broker.OrderSide) (broke
 	if err != nil {
 		return empty, err
 	}
-	opens := broker.FilterPositions(positions, b.asset, side, broker.PositionOpen)
+	opens := filterPositions(positions, b.asset, side, broker.PositionOpen)
 	if len(opens) == 0 {
 		return empty, err
 	}
@@ -171,4 +171,17 @@ func (b *Bot) enter(ctx context.Context, side broker.OrderSide, price, size, ris
 	bracket.Stop = *stopPlaced
 
 	return bracket, nil
+}
+
+func filterPositions(positions []broker.Position, asset market.Asset, side broker.OrderSide, state broker.PositionState) []broker.Position {
+
+	filtered := make([]broker.Position, 0, len(positions))
+	for i := range positions {
+		p := positions[i]
+		if p.Asset.Equal(asset) && p.Side == side && p.State() == state {
+			filtered = append(filtered, p)
+		}
+	}
+
+	return filtered
 }
