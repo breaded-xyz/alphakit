@@ -9,3 +9,7 @@ func NewAsset(symbol string) Asset {
 		Symbol: symbol,
 	}
 }
+
+func (a *Asset) Equal(other Asset) bool {
+	return a.Symbol == other.Symbol
+}

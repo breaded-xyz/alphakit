@@ -41,19 +41,20 @@ func (b *Bot) ReceivePrice(ctx context.Context, price market.Kline) error {
 		return nil
 	}
 
-	enter, exit := b.signal(b.predicter.Predict())
-	if enter == 0 && exit == 0 {
+	enterSide, exitSide := b.signal(b.predicter.Predict())
+	if enterSide == 0 && exitSide == 0 {
 		return nil
 	}
 
-	openPosition, err := b.getOpenPosition(ctx, exit)
+	position, err := b.getOpenPosition(ctx, exitSide)
 	if err != nil {
 		return err
 	}
 
-	_, err = b.exit(ctx, exit, price.C, openPosition.Size)
-	if err != nil {
-		return err
+	if position.State() == broker.PositionOpen {
+		if _, err := b.exit(ctx, exitSide, price.C, position.Size); err != nil {
+			return err
+		}
 	}
 
 	balance, _, err := b.dealer.GetBalance(ctx)
@@ -63,7 +64,7 @@ func (b *Bot) ReceivePrice(ctx context.Context, price market.Kline) error {
 	capital := balance.Trade
 	risk := dec.New(b.risk.Value())
 	size := b.sizer.Size(price.C, capital, risk)
-	_, err = b.enter(ctx, enter, price.C, size, risk)
+	_, err = b.enter(ctx, enterSide, price.C, size, risk)
 	if err != nil {
 		return err
 	}
@@ -93,13 +94,26 @@ func (b *Bot) signal(prediction float64) (enter, exit broker.OrderSide) {
 	return
 }
 
-func (b *Bot) getOpenPosition(ctx context.Context, side broker.OrderSide) (*broker.Position, error) {
-	return nil, nil
+func (b *Bot) getOpenPosition(ctx context.Context, side broker.OrderSide) (broker.Position, error) {
+	var empty broker.Position
+
+	positions, _, err := b.dealer.ListPositions(ctx, nil)
+	if err != nil {
+		return empty, err
+	}
+	opens := broker.FilterPositions(positions, b.asset, side, broker.PositionOpen)
+	if len(opens) == 0 {
+		return empty, err
+	}
+
+	return opens[len(opens)-1], nil
 }
 
-func (b *Bot) exit(ctx context.Context, side broker.OrderSide, price, size decimal.Decimal) (*broker.Order, error) {
+func (b *Bot) exit(ctx context.Context, side broker.OrderSide, price, size decimal.Decimal) (broker.Order, error) {
+	var empty broker.Order
+
 	if _, err := b.dealer.CancelOrders(ctx); err != nil {
-		return nil, err
+		return empty, err
 	}
 
 	order := broker.Order{
@@ -111,9 +125,13 @@ func (b *Bot) exit(ctx context.Context, side broker.OrderSide, price, size decim
 	}
 	placed, _, err := b.dealer.PlaceOrder(ctx, order)
 	if err != nil {
-		return nil, err
+		return empty, err
 	}
-	return placed, err
+	if placed == nil {
+		return empty, nil
+	}
+
+	return *placed, err
 }
 
 func (b *Bot) enter(ctx context.Context, side broker.OrderSide, price, size, risk decimal.Decimal) (broker.BracketOrder, error) {
