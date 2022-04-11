@@ -1,11 +1,13 @@
 package trend
 
 import (
+	"context"
 	"testing"
 	"time"
 
 	"github.com/colngroup/zero2algo/broker"
 	"github.com/colngroup/zero2algo/market"
+	"github.com/colngroup/zero2algo/netapi"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -150,4 +152,23 @@ func TestBot_signal(t *testing.T) {
 			assert.Equal(t, tt.wantExit, actExit)
 		})
 	}
+}
+
+func TestBot_getOpenPosition(t *testing.T) {
+	fixed := time.Date(2022, time.January, 01, 0, 0, 0, 0, time.Local)
+	givePositions := []broker.Position{
+		{ID: "1", OpenedAt: fixed, Side: broker.Buy},
+		{ID: "2", OpenedAt: fixed, Side: broker.Sell},
+		{ID: "3", OpenedAt: fixed, ClosedAt: time.Now(), Side: broker.Buy},
+	}
+	var mockDealer broker.MockDealer
+	mockDealer.On("ListPositions", context.Background(), (*netapi.ListOpts)(nil)).Return(givePositions, (*netapi.Response)(nil), nil)
+
+	giveSide := broker.Sell
+	want := broker.Position{ID: "2", OpenedAt: fixed, Side: broker.Sell}
+
+	bot := Bot{dealer: &mockDealer}
+	act, _ := bot.getOpenPosition(context.Background(), giveSide)
+	assert.Equal(t, act, want)
+
 }
