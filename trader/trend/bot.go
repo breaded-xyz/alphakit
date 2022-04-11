@@ -4,10 +4,8 @@ import (
 	"context"
 
 	"github.com/colngroup/zero2algo/broker"
-	"github.com/colngroup/zero2algo/dec"
 	"github.com/colngroup/zero2algo/market"
 	"github.com/colngroup/zero2algo/money"
-	"github.com/colngroup/zero2algo/ta"
 	"github.com/colngroup/zero2algo/trader"
 	"github.com/shopspring/decimal"
 )
@@ -25,7 +23,7 @@ type Bot struct {
 	dealer    broker.Dealer
 	predicter Predicter
 	sizer     money.Sizer
-	risk      ta.Indicator
+	risk      Risker
 }
 
 func (b *Bot) Configure(config map[string]any) error {
@@ -34,10 +32,13 @@ func (b *Bot) Configure(config map[string]any) error {
 
 func (b *Bot) ReceivePrice(ctx context.Context, price market.Kline) error {
 
+	if err := b.risk.ReceivePrice(ctx, price); err != nil {
+		return err
+	}
 	if err := b.predicter.ReceivePrice(ctx, price); err != nil {
 		return err
 	}
-	if !b.predicter.Valid() {
+	if !(b.predicter.Valid() && b.risk.Valid()) {
 		return nil
 	}
 
@@ -62,7 +63,7 @@ func (b *Bot) ReceivePrice(ctx context.Context, price market.Kline) error {
 		return err
 	}
 	capital := balance.Trade
-	risk := dec.New(b.risk.Value())
+	risk := b.risk.Risk()
 	size := b.sizer.Size(price.C, capital, risk)
 	_, err = b.enter(ctx, enterSide, price.C, size, risk)
 	if err != nil {
