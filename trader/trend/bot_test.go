@@ -67,20 +67,87 @@ func TestBot_filterPositions(t *testing.T) {
 
 func TestBot_signal(t *testing.T) {
 	tests := []struct {
-		name string
-		give any
-		want any
+		name           string
+		giveEnterLong  float64
+		giveEnterShort float64
+		giveExitLong   float64
+		giveExitShort  float64
+		givePrediction float64
+		wantEnter      broker.OrderSide
+		wantExit       broker.OrderSide
 	}{
 		{
-			name: "",
-			give: nil,
-			want: nil,
+			name:           "default zero state",
+			giveEnterLong:  1.0,
+			giveEnterShort: -1.0,
+			giveExitLong:   -0.7,
+			giveExitShort:  0.7,
+			givePrediction: 0,
+			wantEnter:      0,
+			wantExit:       0,
+		},
+		{
+			name:           "flat",
+			giveEnterLong:  1.0,
+			giveEnterShort: -1.0,
+			giveExitLong:   -0.7,
+			giveExitShort:  0.7,
+			givePrediction: 0.5,
+			wantEnter:      0,
+			wantExit:       0,
+		},
+		{
+			name:           "go long",
+			giveEnterLong:  1.0,
+			giveEnterShort: -1.0,
+			giveExitLong:   -0.7,
+			giveExitShort:  0.7,
+			givePrediction: 1.0,
+			wantEnter:      broker.Buy,
+			wantExit:       broker.Sell,
+		},
+		{
+			name:           "go short",
+			giveEnterLong:  1.0,
+			giveEnterShort: -1.0,
+			giveExitLong:   -0.7,
+			giveExitShort:  0.7,
+			givePrediction: -1.0,
+			wantEnter:      broker.Sell,
+			wantExit:       broker.Buy,
+		},
+		{
+			name:           "exit long only",
+			giveEnterLong:  1.0,
+			giveEnterShort: -1.0,
+			giveExitLong:   -0.7,
+			giveExitShort:  0.7,
+			givePrediction: -0.7,
+			wantEnter:      0,
+			wantExit:       broker.Buy,
+		},
+		{
+			name:           "exit short only",
+			giveEnterLong:  1.0,
+			giveEnterShort: -1.0,
+			giveExitLong:   -0.7,
+			giveExitShort:  0.7,
+			givePrediction: 0.7,
+			wantEnter:      0,
+			wantExit:       broker.Sell,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			var act any
-			assert.Equal(t, tt.want, act)
+			bot := Bot{
+				EnterLong:  tt.giveEnterLong,
+				ExitLong:   tt.giveExitLong,
+				EnterShort: tt.giveEnterShort,
+				ExitShort:  tt.giveExitShort,
+			}
+			actEnter, actExit := bot.signal(tt.givePrediction)
+			assert.Equal(t, tt.wantEnter, actEnter)
+			assert.Equal(t, tt.wantExit, actExit)
 		})
 	}
 }

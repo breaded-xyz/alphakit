@@ -85,13 +85,13 @@ func (b *Bot) signal(prediction float64) (enter, exit broker.OrderSide) {
 		return broker.Buy, broker.Sell
 	case prediction >= b.ExitShort:
 		return 0, broker.Sell
-	case prediction <= b.ExitLong:
-		return 0, broker.Buy
 	case prediction <= b.EnterShort:
 		return broker.Sell, broker.Buy
+	case prediction <= b.ExitLong:
+		return 0, broker.Buy
 	}
 
-	return
+	return enter, exit
 }
 
 func (b *Bot) getOpenPosition(ctx context.Context, side broker.OrderSide) (broker.Position, error) {
