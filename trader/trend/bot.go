@@ -158,8 +158,12 @@ func (b *Bot) enter(ctx context.Context, side broker.OrderSide, price, size, ris
 		Type:       broker.Limit,
 		Side:       side.Opposite(),
 		Size:       size,
-		LimitPrice: price.Sub(risk),
 		ReduceOnly: true,
+	}
+	if side == broker.Buy {
+		stop.LimitPrice = price.Sub(risk)
+	} else {
+		stop.LimitPrice = price.Add(risk)
 	}
 	if !stop.LimitPrice.IsPositive() {
 		return bracket, nil

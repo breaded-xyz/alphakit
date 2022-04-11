@@ -6,10 +6,128 @@ import (
 	"time"
 
 	"github.com/colngroup/zero2algo/broker"
+	"github.com/colngroup/zero2algo/dec"
 	"github.com/colngroup/zero2algo/market"
 	"github.com/colngroup/zero2algo/netapi"
+	"github.com/shopspring/decimal"
 	"github.com/stretchr/testify/assert"
 )
+
+func TestBot_exit(t *testing.T) {
+	tests := []struct {
+		name      string
+		giveSide  broker.OrderSide
+		givePrice decimal.Decimal
+		giveSize  decimal.Decimal
+		want      broker.Order
+	}{
+		{
+			name:      "exit ok",
+			giveSide:  broker.Buy,
+			givePrice: dec.New(10),
+			giveSize:  dec.New(2),
+			want: broker.Order{
+				Side:       broker.Sell,
+				Type:       broker.Market,
+				Size:       dec.New(2),
+				ReduceOnly: true,
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			var dealer broker.MockDealer
+			dealer.On("CancelOrders", context.Background()).Return((*netapi.Response)(nil), nil)
+			dealer.On("PlaceOrder", context.Background(), tt.want).Return(&tt.want, (*netapi.Response)(nil), nil)
+			bot := Bot{dealer: &dealer}
+			act, err := bot.exit(context.Background(), tt.giveSide, tt.givePrice, tt.giveSize)
+			assert.NoError(t, err)
+			assert.Equal(t, tt.want, act)
+			dealer.AssertExpectations(t)
+		})
+	}
+}
+
+func TestBot_enter(t *testing.T) {
+	tests := []struct {
+		name      string
+		giveSide  broker.OrderSide
+		givePrice decimal.Decimal
+		giveSize  decimal.Decimal
+		giveRisk  decimal.Decimal
+		want      broker.BracketOrder
+	}{
+		{
+			name:      "enter short",
+			giveSide:  broker.Sell,
+			givePrice: dec.New(10),
+			giveSize:  dec.New(2),
+			giveRisk:  dec.New(1),
+			want: broker.BracketOrder{
+				Enter: broker.Order{
+					Side: broker.Sell,
+					Type: broker.Market,
+					Size: dec.New(2),
+				},
+				Stop: broker.Order{
+					Side:       broker.Buy,
+					Type:       broker.Limit,
+					LimitPrice: dec.New(11),
+					Size:       dec.New(2),
+					ReduceOnly: true,
+				},
+			},
+		},
+		{
+			name:      "enter long",
+			giveSide:  broker.Buy,
+			givePrice: dec.New(10),
+			giveSize:  dec.New(2),
+			giveRisk:  dec.New(1),
+			want: broker.BracketOrder{
+				Enter: broker.Order{
+					Side: broker.Buy,
+					Type: broker.Market,
+					Size: dec.New(2),
+				},
+				Stop: broker.Order{
+					Side:       broker.Sell,
+					Type:       broker.Limit,
+					LimitPrice: dec.New(9),
+					Size:       dec.New(2),
+					ReduceOnly: true,
+				},
+			},
+		},
+		{
+			name:      "enter max risk no stop",
+			giveSide:  broker.Buy,
+			givePrice: dec.New(10),
+			giveSize:  dec.New(2),
+			giveRisk:  dec.New(10),
+			want: broker.BracketOrder{
+				Enter: broker.Order{
+					Side: broker.Buy,
+					Type: broker.Market,
+					Size: dec.New(2),
+				},
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			var dealer broker.MockDealer
+			dealer.On("CancelOrders", context.Background()).Return((*netapi.Response)(nil), nil)
+			dealer.On("PlaceOrder", context.Background(), tt.want.Enter).Return(&tt.want.Enter, (*netapi.Response)(nil), nil).Once()
+			dealer.On("PlaceOrder", context.Background(), tt.want.Stop).Return(&tt.want.Stop, (*netapi.Response)(nil), nil).Maybe()
+			bot := Bot{dealer: &dealer}
+			act, err := bot.enter(context.Background(), tt.giveSide, tt.givePrice, tt.giveSize, tt.giveRisk)
+			assert.NoError(t, err)
+			assert.Equal(t, tt.want, act)
+			dealer.AssertExpectations(t)
+		})
+	}
+}
 
 func TestBot_filterPositions(t *testing.T) {
 	fixed := time.Date(2022, time.January, 01, 0, 0, 0, 0, time.Local)
@@ -161,14 +279,14 @@ func TestBot_getOpenPosition(t *testing.T) {
 		{ID: "2", OpenedAt: fixed, Side: broker.Sell},
 		{ID: "3", OpenedAt: fixed, ClosedAt: time.Now(), Side: broker.Buy},
 	}
-	var mockDealer broker.MockDealer
-	mockDealer.On("ListPositions", context.Background(), (*netapi.ListOpts)(nil)).Return(givePositions, (*netapi.Response)(nil), nil)
+	var dealer broker.MockDealer
+	dealer.On("ListPositions", context.Background(), (*netapi.ListOpts)(nil)).Return(givePositions, (*netapi.Response)(nil), nil)
 
 	giveSide := broker.Sell
 	want := broker.Position{ID: "2", OpenedAt: fixed, Side: broker.Sell}
 
-	bot := Bot{dealer: &mockDealer}
+	bot := Bot{dealer: &dealer}
 	act, _ := bot.getOpenPosition(context.Background(), giveSide)
 	assert.Equal(t, act, want)
-
+	dealer.AssertExpectations(t)
 }
