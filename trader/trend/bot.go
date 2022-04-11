@@ -147,11 +147,11 @@ func (b *Bot) enter(ctx context.Context, side broker.OrderSide, price, size, ris
 		Side:  side,
 		Size:  size,
 	}
-	primaryPlaced, _, err := b.dealer.PlaceOrder(ctx, order)
+	enterPlaced, _, err := b.dealer.PlaceOrder(ctx, order)
 	if err != nil {
 		return empty, err
 	}
-	bracket = broker.BracketOrder{Primary: *primaryPlaced}
+	bracket = broker.BracketOrder{Enter: *enterPlaced}
 
 	stop := broker.Order{
 		Asset:      b.asset,
