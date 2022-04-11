@@ -96,13 +96,17 @@ func (s *Simulator) Next(price market.Kline) error {
 	return nil
 }
 
-func (s *Simulator) CancelOrders() {
+func (s *Simulator) CancelOrders() []broker.Order {
+	cancelled := make([]broker.Order, 0, len(s.orders))
 	for k := range s.orders {
 		order := s.orders[k]
 		if order.State() == broker.OrderOpen {
 			order.ClosedAt = s.clock.Now()
+			cancelled = append(cancelled, order)
+			s.orders[k] = order
 		}
 	}
+	return cancelled
 }
 
 func (s *Simulator) Orders() []broker.Order {

@@ -344,7 +344,26 @@ func TestSimulator_ReceivePrice(t *testing.T) {
 	})
 }
 
-func TestMatchOrder(t *testing.T) {
+func TestSimulator_CancelOrders(t *testing.T) {
+	giveOrders := map[broker.DealID]broker.Order{
+		"1": {ID: "1", OpenedAt: _fixed},
+		"2": {ID: "2", OpenedAt: _fixed, ClosedAt: _fixed},
+		"3": {ID: "3", OpenedAt: _fixed},
+	}
+
+	want := []broker.Order{
+		{ID: "1", OpenedAt: _fixed, ClosedAt: _fixed},
+		{ID: "3", OpenedAt: _fixed, ClosedAt: _fixed},
+	}
+
+	sim := newSimulatorForTest()
+	sim.orders = giveOrders
+
+	act := sim.CancelOrders()
+	assert.Equal(t, want, act)
+}
+
+func TestSimulator_matchOrder(t *testing.T) {
 	tests := []struct {
 		name      string
 		giveOrder broker.Order
@@ -413,7 +432,7 @@ func TestMatchOrder(t *testing.T) {
 	}
 }
 
-func TestProfit(t *testing.T) {
+func TestSimulator_profit(t *testing.T) {
 	tests := []struct {
 		name string
 		give broker.Position
