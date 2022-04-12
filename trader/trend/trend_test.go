@@ -5,6 +5,7 @@ import (
 	"encoding/csv"
 	"io/fs"
 	"os"
+	"path"
 	"path/filepath"
 	"testing"
 
@@ -16,6 +17,8 @@ import (
 	"github.com/colngroup/zero2algo/ta"
 	"github.com/davecgh/go-spew/spew"
 )
+
+const testdataPath string = "../../testdata/"
 
 func TestTrendBot(t *testing.T) {
 	asset := market.NewAsset("BTCUSDT")
@@ -46,7 +49,7 @@ func TestTrendBot(t *testing.T) {
 		sizer:  &money.FixedSizer{FixedCapital: dec.New(1000)},
 	}
 
-	filepath.WalkDir("../../testdata/prices",
+	filepath.WalkDir(path.Join(testdataPath, "btcusdt-1h-2021-Q1.csv"),
 		func(path string, d fs.DirEntry, err error) error {
 
 			file, _ := os.Open(path)
