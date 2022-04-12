@@ -14,7 +14,6 @@ import (
 	"github.com/colngroup/zero2algo/perf"
 	"github.com/colngroup/zero2algo/risk"
 	"github.com/colngroup/zero2algo/ta"
-	"github.com/davecgh/go-spew/spew"
 )
 
 const testdataPath string = "../../testdata/"
@@ -58,6 +57,5 @@ func TestTrendBot(t *testing.T) {
 	trades, _, _ := dealer.ListTrades(context.Background(), nil)
 	equity := dealer.EquityHistory()
 	report := perf.NewPerformanceReport(trades, equity)
-
-	spew.Dump(report)
+	perf.PrintPerformanceReportSummary(report)
 }

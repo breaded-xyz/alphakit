@@ -13,6 +13,7 @@ import (
 func TestPredicter_ReceivePrice(t *testing.T) {
 	var giveOsc, giveSD, giveMMI ta.MockIndicator
 	giveOsc.On("Update", []float64{10}).Return(error(nil))
+	giveOsc.On("Value").Return(10.0)
 	giveSD.On("Update", []float64{10}).Return(error(nil))
 	giveMMI.On("Update", []float64{7}).Return(error(nil))
 	givePrice := market.Kline{C: dec.New(10)}
