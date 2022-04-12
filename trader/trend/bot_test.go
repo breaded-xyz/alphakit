@@ -13,7 +13,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestBot_exit(t *testing.T) {
+func TestBot_executeExitOrder(t *testing.T) {
 	tests := []struct {
 		name      string
 		giveSide  broker.OrderSide
@@ -40,7 +40,7 @@ func TestBot_exit(t *testing.T) {
 			dealer.On("CancelOrders", context.Background()).Return((*netapi.Response)(nil), nil)
 			dealer.On("PlaceOrder", context.Background(), tt.want).Return(&tt.want, (*netapi.Response)(nil), nil)
 			bot := Bot{dealer: &dealer}
-			act, err := bot.exit(context.Background(), tt.giveSide, tt.givePrice, tt.giveSize)
+			act, err := bot.executeExitOrder(context.Background(), tt.giveSide, tt.giveSize)
 			assert.NoError(t, err)
 			assert.Equal(t, tt.want, act)
 			dealer.AssertExpectations(t)
@@ -48,7 +48,7 @@ func TestBot_exit(t *testing.T) {
 	}
 }
 
-func TestBot_enter(t *testing.T) {
+func TestBot_executeEnterOrder(t *testing.T) {
 	tests := []struct {
 		name      string
 		giveSide  broker.OrderSide
@@ -121,7 +121,7 @@ func TestBot_enter(t *testing.T) {
 			dealer.On("PlaceOrder", context.Background(), tt.want.Enter).Return(&tt.want.Enter, (*netapi.Response)(nil), nil).Once()
 			dealer.On("PlaceOrder", context.Background(), tt.want.Stop).Return(&tt.want.Stop, (*netapi.Response)(nil), nil).Maybe()
 			bot := Bot{dealer: &dealer}
-			act, err := bot.enter(context.Background(), tt.giveSide, tt.givePrice, tt.giveSize, tt.giveRisk)
+			act, err := bot.executeEnterOrder(context.Background(), tt.giveSide, tt.givePrice, tt.giveSize, tt.giveRisk)
 			assert.NoError(t, err)
 			assert.Equal(t, tt.want, act)
 			dealer.AssertExpectations(t)

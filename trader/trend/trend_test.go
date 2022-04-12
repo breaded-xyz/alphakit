@@ -3,10 +3,8 @@ package trend
 import (
 	"context"
 	"encoding/csv"
-	"io/fs"
 	"os"
 	"path"
-	"path/filepath"
 	"testing"
 
 	"github.com/colngroup/zero2algo/broker/backtest"
@@ -14,6 +12,7 @@ import (
 	"github.com/colngroup/zero2algo/market"
 	"github.com/colngroup/zero2algo/money"
 	"github.com/colngroup/zero2algo/perf"
+	"github.com/colngroup/zero2algo/risk"
 	"github.com/colngroup/zero2algo/ta"
 	"github.com/davecgh/go-spew/spew"
 )
@@ -21,8 +20,6 @@ import (
 const testdataPath string = "../../testdata/"
 
 func TestTrendBot(t *testing.T) {
-	asset := market.NewAsset("BTCUSDT")
-
 	dealer := backtest.NewDealer()
 	dealer.SetInitialCapital(dec.New(1000))
 
@@ -36,37 +33,26 @@ func TestTrendBot(t *testing.T) {
 		ExitLong:   -0.9,
 		EnterShort: -1,
 		ExitShort:  0.6,
-		asset:      asset,
+		asset:      market.NewAsset("BTCUSDT"),
 		dealer:     dealer,
 		predicter:  predicter,
-		//risker:     NewSDRisk(512, 1.5),
-		//sizer: &money.SafeFSizer{
-		//	InitialCapital: dec.New(1000),
-		//	F:              0.5,
-		//	ScaleF:         0.5,
-		//},
-		risker: NewMaxRisk(),
-		sizer:  &money.FixedSizer{FixedCapital: dec.New(1000)},
+		risker:     risk.NewFullRisk(),
+		sizer:      &money.FixedSizer{FixedCapital: dec.New(1000)},
 	}
 
-	filepath.WalkDir(path.Join(testdataPath, "btcusdt-1h-2021-Q1.csv"),
-		func(path string, d fs.DirEntry, err error) error {
+	file, _ := os.Open(path.Join(testdataPath, "btcusdt-1h-2021-Q1.csv"))
+	defer file.Close()
 
-			file, _ := os.Open(path)
-			defer file.Close()
-			prices, _ := market.NewCSVKlineReader(csv.NewReader(file)).ReadAll()
+	prices, _ := market.NewCSVKlineReader(csv.NewReader(file)).ReadAll()
+	for _, price := range prices {
+		if err := dealer.ReceivePrice(context.Background(), price); err != nil {
+			t.Fatal(err)
+		}
+		if err := bot.ReceivePrice(context.Background(), price); err != nil {
+			t.Fatal(err)
+		}
+	}
 
-			for _, price := range prices {
-				if err := dealer.ReceivePrice(context.Background(), price); err != nil {
-					t.Fatal(err)
-				}
-				if err := bot.ReceivePrice(context.Background(), price); err != nil {
-					t.Fatal(err)
-				}
-			}
-
-			return nil
-		})
 	bot.Close(context.Background())
 
 	trades, _, _ := dealer.ListTrades(context.Background(), nil)
