@@ -36,5 +36,26 @@ func (r *SDRisk) Risk() decimal.Decimal {
 }
 
 func (r *SDRisk) Valid() bool {
-	return r.Valid()
+	return r.sd.Valid()
+}
+
+type MaxRisk struct {
+	price decimal.Decimal
+}
+
+func NewMaxRisk() *MaxRisk {
+	return &MaxRisk{}
+}
+
+func (r *MaxRisk) ReceivePrice(ctx context.Context, price market.Kline) error {
+	r.price = price.C
+	return nil
+}
+
+func (r *MaxRisk) Risk() decimal.Decimal {
+	return r.price
+}
+
+func (r *MaxRisk) Valid() bool {
+	return true
 }

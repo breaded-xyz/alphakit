@@ -35,7 +35,7 @@ func (p *Predicter) ReceivePrice(ctx context.Context, price market.Kline) error 
 	if err := p.osc.Update(v); err != nil {
 		return err
 	}
-	if err := p.sd.Update(v); err != nil {
+	if err := p.sd.Update(p.osc.Value()); err != nil {
 		return err
 	}
 	if err := p.mmi.Update(vDiff); err != nil {

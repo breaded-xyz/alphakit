@@ -15,7 +15,7 @@ const (
 )
 
 func (s OrderSide) String() string {
-	return [...]string{"Buy", "Sell"}[s]
+	return [...]string{"None", "Buy", "Sell"}[s]
 }
 
 func (s OrderSide) Opposite() OrderSide {
@@ -36,7 +36,7 @@ const (
 )
 
 func (s OrderType) String() string {
-	return [...]string{"Market", "Limit"}[s]
+	return [...]string{"None", "Market", "Limit"}[s]
 }
 
 type OrderState int

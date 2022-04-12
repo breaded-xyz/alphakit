@@ -43,31 +43,39 @@ func (b *Bot) ReceivePrice(ctx context.Context, price market.Kline) error {
 	}
 
 	enterSide, exitSide := b.signal(b.predicter.Predict())
-	if enterSide == 0 && exitSide == 0 {
-		return nil
-	}
 
-	position, err := b.getOpenPosition(ctx, exitSide)
-	if err != nil {
-		return err
-	}
-
-	if position.State() == broker.PositionOpen {
-		if _, err := b.exit(ctx, exitSide, price.C, position.Size); err != nil {
+	if exitSide != 0 {
+		position, err := b.getOpenPosition(ctx, exitSide)
+		if err != nil {
 			return err
+		}
+		if position.State() == broker.PositionOpen {
+			if _, err := b.exit(ctx, exitSide, price.C, position.Size); err != nil {
+				return err
+			}
 		}
 	}
 
-	balance, _, err := b.dealer.GetBalance(ctx)
-	if err != nil {
-		return err
-	}
-	capital := balance.Trade
-	risk := b.risker.Risk()
-	size := b.sizer.Size(price.C, capital, risk)
-	_, err = b.enter(ctx, enterSide, price.C, size, risk)
-	if err != nil {
-		return err
+	if enterSide != 0 {
+		position, err := b.getOpenPosition(ctx, enterSide)
+		if err != nil {
+			return err
+		}
+		if position.State() == broker.PositionOpen {
+			return nil
+		}
+
+		balance, _, err := b.dealer.GetBalance(ctx)
+		if err != nil {
+			return err
+		}
+		capital := balance.Trade
+		risk := b.risker.Risk()
+		size := b.sizer.Size(price.C, capital, risk)
+		_, err = b.enter(ctx, enterSide, price.C, size, risk)
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil

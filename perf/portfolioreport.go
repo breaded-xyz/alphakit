@@ -51,12 +51,13 @@ func NewPortfolioReport(curve broker.EquitySeries) *PortfolioReport {
 	report.EquityReturn = (report.EndEquity - report.StartEquity) / NNZ(report.StartEquity, 1)
 	report.CAGR = CAGR(report.StartEquity, report.EndEquity, int(report.Period.Hours())/24)
 
-	report.drawdowns = Drawdowns(curve)
+	daily := ReduceToEOD(curve)
+	report.drawdowns = Drawdowns(daily)
 	report.mdd = MaxDrawdown(report.drawdowns)
 	report.MaxDrawdown = report.mdd.Pct
 	report.MDDRecovery = report.mdd.Recovery
 
-	returns := DiffOfReturns(ReduceToEOD(curve))
+	returns := DiffOfReturns(daily)
 	report.Sharpe = SharpeRatio(returns, SharpeAnnualRiskFreeRate)
 	report.Calmar = CalmarRatio(report.CAGR, report.MaxDrawdown)
 
