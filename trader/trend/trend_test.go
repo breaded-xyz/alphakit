@@ -57,5 +57,5 @@ func TestTrendBot(t *testing.T) {
 	trades, _, _ := dealer.ListTrades(context.Background(), nil)
 	equity := dealer.EquityHistory()
 	report := perf.NewPerformanceReport(trades, equity)
-	perf.PrintPerformanceReportSummary(report)
+	perf.PrintSummary(report)
 }

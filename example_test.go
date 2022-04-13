@@ -71,7 +71,7 @@ func Example() {
 	wg.Wait()
 
 	// Rank results based on the test case with the highest sharpe ratio
-	optimal := optimize.SharpeSort(results)[0]
-	perf.PrintPerformanceReportSummary(optimal)
+	optimize.SharpeSort(results)
+	perf.PrintSummary(results[len(results)-1])
 
 }

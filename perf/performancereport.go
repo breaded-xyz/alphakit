@@ -37,7 +37,7 @@ func NewPerformanceReport(trades []broker.Trade, equity broker.EquitySeries) Per
 	}
 }
 
-func PrintPerformanceReportSummary(r PerformanceReport) {
+func PrintSummary(r PerformanceReport) {
 	table := tablewriter.NewWriter(os.Stdout)
 	table.SetHeader(_summaryReportHeader)
 	table.Append([]string{
