@@ -26,6 +26,7 @@ var _summaryReportHeader = []string{
 }
 
 type PerformanceReport struct {
+	Strategy  string
 	Trade     *TradeReport
 	Portfolio *PortfolioReport
 }

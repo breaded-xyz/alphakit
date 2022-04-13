@@ -13,6 +13,14 @@ type SafeFSizer struct {
 	ScaleF         float64
 }
 
+func NewSafeFSizer(initialCapital decimal.Decimal, f, scaleF float64) *SafeFSizer {
+	return &SafeFSizer{
+		InitialCapital: initialCapital,
+		F:              f,
+		ScaleF:         scaleF,
+	}
+}
+
 func (s *SafeFSizer) Size(price, capital, risk decimal.Decimal) decimal.Decimal {
 
 	sqrtGrowthFactor := 1.0

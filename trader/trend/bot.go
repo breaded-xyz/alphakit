@@ -4,9 +4,11 @@ import (
 	"context"
 
 	"github.com/colngroup/zero2algo/broker"
+	"github.com/colngroup/zero2algo/dec"
 	"github.com/colngroup/zero2algo/market"
 	"github.com/colngroup/zero2algo/money"
 	"github.com/colngroup/zero2algo/risk"
+	"github.com/colngroup/zero2algo/ta"
 	"github.com/colngroup/zero2algo/trader"
 	"github.com/shopspring/decimal"
 )
@@ -20,30 +22,35 @@ type Bot struct {
 	EnterShort float64
 	ExitShort  float64
 
-	asset     market.Asset
-	dealer    broker.Dealer
-	predicter Predicter
-	risker    risk.Risker
-	sizer     money.Sizer
+	Predicter *Predicter
+	Risker    risk.Risker
+	Sizer     money.Sizer
+
+	asset  market.Asset
+	dealer broker.Dealer
 }
 
-func (b *Bot) Configure(config map[string]any) error {
-	return nil
+func NewBot() *Bot {
+	return &Bot{}
+}
+
+func (b *Bot) SetDealer(dealer broker.Dealer) {
+	b.dealer = dealer
 }
 
 func (b *Bot) ReceivePrice(ctx context.Context, price market.Kline) error {
 
-	if err := b.risker.ReceivePrice(ctx, price); err != nil {
+	if err := b.Risker.ReceivePrice(ctx, price); err != nil {
 		return err
 	}
-	if err := b.predicter.ReceivePrice(ctx, price); err != nil {
+	if err := b.Predicter.ReceivePrice(ctx, price); err != nil {
 		return err
 	}
-	if !(b.predicter.Valid() && b.risker.Valid()) {
+	if !(b.Predicter.Valid() && b.Risker.Valid()) {
 		return nil
 	}
 
-	enterSide, exitSide := b.signal(b.predicter.Predict())
+	enterSide, exitSide := b.signal(b.Predicter.Predict())
 
 	if err := b.exit(ctx, exitSide); err != nil {
 		return err
@@ -162,8 +169,8 @@ func (b *Bot) enter(ctx context.Context, enterSide broker.OrderSide, price decim
 		return err
 	}
 	capital := balance.Trade
-	unitaryRisk := b.risker.Risk()
-	size := b.sizer.Size(price, capital, unitaryRisk)
+	unitaryRisk := b.Risker.Risk()
+	size := b.Sizer.Size(price, capital, unitaryRisk)
 	_, err = b.executeEnterOrder(ctx, enterSide, price, size, unitaryRisk)
 	if err != nil {
 		return err
@@ -212,6 +219,43 @@ func (b *Bot) executeEnterOrder(ctx context.Context, side broker.OrderSide, pric
 	bracket.Stop = *stopPlaced
 
 	return bracket, nil
+}
+
+func (b *Bot) Configure(config map[string]any) error {
+
+	b.asset = market.NewAsset(config["asset"].(string))
+
+	b.EnterLong = config["enterLong"].(float64)
+	b.EnterShort = config["enterShort"].(float64)
+	b.ExitLong = config["exitLong"].(float64)
+	b.ExitShort = config["exitShort"].(float64)
+
+	maFastLength := config["maFastLength"].(int)
+	maSlowLength := config["maSlowLength"].(int)
+	if maFastLength >= maSlowLength {
+		return trader.ErrInvalidConfig
+	}
+	maOsc := ta.NewOsc(ta.NewALMA(maFastLength), ta.NewALMA(maSlowLength))
+	maSDFilter := ta.NewSDWithFactor(config["maSDFilterLength"].(int), config["maSDFilterFactor"].(float64))
+	mmi := ta.NewMMIWithSmoother(config["mmiLength"].(int), ta.NewALMA(config["mmiSmootherLength"].(int)))
+	b.Predicter = NewPredicter(maOsc, maSDFilter, mmi)
+
+	riskSDLength := config["riskerSDLength"].(int)
+	if riskSDLength > 0 {
+		b.Risker = risk.NewSDRisk(config["riskerSDLength"].(int), config["riskerSDFactor"].(float64))
+	} else {
+		b.Risker = risk.NewFullRisk()
+	}
+
+	initialCapital := dec.New(config["initialCapital"].(float64))
+	sizerF := config["sizerF"].(float64)
+	if sizerF > 0 {
+		b.Sizer = money.NewSafeFSizer(initialCapital, config["sizerF"].(float64), config["sizerScaleF"].(float64))
+	} else {
+		b.Sizer = money.NewFixedSizer(initialCapital)
+	}
+
+	return nil
 }
 
 func filterPositions(positions []broker.Position, asset market.Asset, side broker.OrderSide, state broker.PositionState) []broker.Position {

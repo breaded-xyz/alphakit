@@ -19,6 +19,7 @@ type Dealer interface {
 type SimulatedDealer interface {
 	Dealer
 	market.Receiver
+	Configure(map[string]any) error
 	EquityHistory() EquitySeries
 	SetInitialCapital(amount decimal.Decimal)
 }

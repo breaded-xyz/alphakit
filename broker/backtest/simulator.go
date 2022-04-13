@@ -36,6 +36,7 @@ func NewSimulator() *Simulator {
 
 func NewSimulatorWithCost(cost Coster) *Simulator {
 	return &Simulator{
+		balance:   broker.AccountBalance{},
 		clock:     NewClock(),
 		cost:      cost,
 		orders:    make(map[broker.DealID]broker.Order),
@@ -43,6 +44,17 @@ func NewSimulatorWithCost(cost Coster) *Simulator {
 		trades:    make(map[broker.DealID]broker.Trade),
 		equity:    make(broker.EquitySeries),
 	}
+}
+
+func (s *Simulator) Configure(config map[string]any) error {
+	s.SetInitialCapital(dec.New(config["initialCapital"].(float64)))
+	s.cost = &PerpCost{
+		SpreadPct:      dec.New(config["spreadPct"].(float64)),
+		SlippagePct:    dec.New(config["slippagePct"].(float64)),
+		TransactionPct: dec.New(config["transactionPct"].(float64)),
+		FundingHourPct: dec.New(config["fundingHourPct"].(float64)),
+	}
+	return nil
 }
 
 func (s *Simulator) SetInitialCapital(amount decimal.Decimal) {

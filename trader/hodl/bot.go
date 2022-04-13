@@ -32,6 +32,10 @@ func New(asset market.Asset, dealer broker.Dealer) *Bot {
 	}
 }
 
+func (b *Bot) SetDealer(dealer broker.Dealer) {
+	b.dealer = dealer
+}
+
 func (b *Bot) Configure(config map[string]any) error {
 	buyBarIndex, ok := config[BuyBarIndex].(int)
 	if !ok {

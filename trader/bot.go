@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 
+	"github.com/colngroup/zero2algo/broker"
 	"github.com/colngroup/zero2algo/market"
 )
 
@@ -11,6 +12,7 @@ var ErrInvalidConfig = errors.New("invalid bot config")
 
 type Bot interface {
 	market.Receiver
+	SetDealer(broker.Dealer)
 	Close(context.Context) error
 }
 

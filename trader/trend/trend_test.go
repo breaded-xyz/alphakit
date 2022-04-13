@@ -22,7 +22,7 @@ func TestTrendBot(t *testing.T) {
 	dealer := backtest.NewDealer()
 	dealer.SetInitialCapital(dec.New(1000))
 
-	predicter := *NewPredicter(
+	predicter := NewPredicter(
 		ta.NewOsc(ta.NewALMA(1), ta.NewALMA(256)),
 		ta.NewSDWithFactor(512, 1.5),
 		ta.NewMMIWithSmoother(200, ta.NewALMA(200)))
@@ -34,9 +34,9 @@ func TestTrendBot(t *testing.T) {
 		ExitShort:  0.6,
 		asset:      market.NewAsset("BTCUSDT"),
 		dealer:     dealer,
-		predicter:  predicter,
-		risker:     risk.NewFullRisk(),
-		sizer:      &money.FixedSizer{FixedCapital: dec.New(1000)},
+		Predicter:  predicter,
+		Risker:     risk.NewFullRisk(),
+		Sizer:      &money.FixedSizer{FixedCapital: dec.New(1000)},
 	}
 
 	file, _ := os.Open(path.Join(testdataPath, "btcusdt-1h-2021-Q1.csv"))
