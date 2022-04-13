@@ -4,7 +4,6 @@ import (
 	"testing"
 
 	"github.com/colngroup/zero2algo/dec"
-	"github.com/davecgh/go-spew/spew"
 	"github.com/shopspring/decimal"
 	"github.com/stretchr/testify/assert"
 )
@@ -59,7 +58,6 @@ func TestSafeFSizer_Size(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			act := tt.giveSizer.Size(tt.givePrice, tt.giveCapital, tt.giveRisk)
 			assert.Equal(t, tt.want, act)
-			spew.Dump(act)
 		})
 	}
 

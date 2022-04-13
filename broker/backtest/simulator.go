@@ -7,7 +7,6 @@ import (
 	"github.com/colngroup/zero2algo/broker"
 	"github.com/colngroup/zero2algo/dec"
 	"github.com/colngroup/zero2algo/market"
-	"github.com/davecgh/go-spew/spew"
 	"github.com/shopspring/decimal"
 	"golang.org/x/exp/maps"
 	"golang.org/x/exp/slices"
@@ -229,7 +228,6 @@ func (s *Simulator) processPosition(position broker.Position, order broker.Order
 		// Do not open a new position with a 'reduce-only' order
 		// Reduce-only is typically used for stop loss orders and is only permitted to close a position
 		if order.ReduceOnly {
-			spew.Dump("ReduceOnly", order)
 			return position, ErrRejectedOrder
 		}
 
@@ -249,7 +247,6 @@ func (s *Simulator) processPosition(position broker.Position, order broker.Order
 		// State transition condition:
 		// A new order can only close an opened position in full and never partially reduce or increase
 		if !(order.Side == position.Side.Opposite() && order.FilledSize.Equal(position.Size)) {
-			spew.Dump("Order mismatch", position, order)
 			return position, ErrRejectedOrder
 		}
 
