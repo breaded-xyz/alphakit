@@ -4,22 +4,26 @@ import (
 	"github.com/schwarmco/go-cartesian-product"
 )
 
+type TestCase map[string]any
+
+type ParamRange map[string][]any
+
 type keyValuePair struct {
 	k string
 	v any
 }
 
-func BuildTestCases(paramRanges map[string][]any) []map[string]any {
+func BuildBacktestCases(in ParamRange) []TestCase {
 
-	testCases := make([]map[string]any, 0)
+	testCases := make([]TestCase, 0)
 
 	// Prepare a slice of sets to pass to the cartesian func
 	// Each element in a set is a key-value pair (param name, param value)
 	inputSets := make([][]any, 0)
-	for k, vArr := range paramRanges {
+	for paramName, paramValues := range in {
 		set := make([]any, 0)
-		for _, v := range vArr {
-			kv := keyValuePair{k, v}
+		for i := range paramValues {
+			kv := keyValuePair{paramName, paramValues[i]}
 			set = append(set, kv)
 		}
 		inputSets = append(inputSets, set)
@@ -30,8 +34,9 @@ func BuildTestCases(paramRanges map[string][]any) []map[string]any {
 	productCh := cartesian.Iter(inputSets...)
 	for product := range productCh {
 		tCase := make(map[string]any, len(product))
-		for _, kv := range product {
-			tCase[kv.(keyValuePair).k] = kv.(keyValuePair).v
+		for i := range product {
+			kv := product[i].(keyValuePair)
+			tCase[kv.k] = kv.v
 		}
 		testCases = append(testCases, tCase)
 	}
