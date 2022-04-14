@@ -9,8 +9,10 @@ import (
 )
 
 var (
-	//_priceDir = "/Users/richklee/Dropbox/dev-share/github.com/thecolngroup/go-alpha/prices/binance/spot/BTCUSDT-H1/ALL"
-	_priceDir = "/Users/richklee/Dropbox/dev-share/github.com/thecolngroup/go-alpha/prices/binance/spot/ETHUSDT-H1/Y18192021"
+	_outputDir = ".out"
+
+	_priceDir = "/Users/richklee/Dropbox/dev-share/github.com/thecolngroup/go-alpha/prices/binance/spot/BTCUSDT-H1/Y17181920"
+	//_priceDir = "/Users/richklee/Dropbox/dev-share/github.com/thecolngroup/go-alpha/prices/binance/spot/ETHUSDT-H1/Y18192021"
 
 	_dealerMakeFunc = func() broker.SimulatedDealer {
 		return backtest.NewDealer()
@@ -18,29 +20,6 @@ var (
 
 	_botMakeFunc = func() trader.ConfigurableBot {
 		return trend.NewBot()
-	}
-
-	_params = optimize.ParamRange{
-		"asset":             {"btcusdt"},
-		"initialCapital":    {1000.0},
-		"spreadPct":         {0.0},
-		"slippagePct":       {0.0},
-		"transactionPct":    {0.0},
-		"fundingHourPct":    {0.0},
-		"enterLong":         {1.0},
-		"enterShort":        {-1.0},
-		"exitLong":          {-1.0},
-		"exitShort":         {1.0},
-		"maFastLength":      {8},
-		"maSlowLength":      {64},
-		"maSDFilterLength":  {512},
-		"maSDFilterFactor":  {1.5},
-		"mmiLength":         {300},
-		"mmiSmootherLength": {300},
-		"riskerSDLength":    {0},
-		"riskerSDFactor":    {1.0},
-		"sizerF":            {0.0},
-		"sizerScaleF":       {1.0},
 	}
 
 	/*_params = optimize.ParamRange{
@@ -52,8 +31,32 @@ var (
 		"fundingHourPct":    {0.0},
 		"enterLong":         {1.0},
 		"enterShort":        {-1.0},
-		"exitLong":          {-1.0, -0.9, -0.6},
-		"exitShort":         {1.0, 0.9, 0.6},
+		"exitLong":          {-0.9},
+		"exitShort":         {0.6},
+		"maFastLength":      {1, 8},
+		"maSlowLength":      {256, 512},
+		"maSDFilterLength":  {512},
+		"maSDFilterFactor":  {1.5},
+		"mmiLength":         {200},
+		"mmiSmootherLength": {200},
+		"riskerSDLength":    {0},
+		"riskerSDFactor":    {1.0},
+		"sizerF":            {0.0},
+		"sizerScaleF":       {1.0},
+	}*/
+
+	_params = optimize.ParamRange{
+		"inSample":          {true},
+		"asset":             {"btcusdt"},
+		"initialCapital":    {1000.0},
+		"spreadPct":         {0.0},
+		"slippagePct":       {0.0},
+		"transactionPct":    {0.0},
+		"fundingHourPct":    {0.0},
+		"enterLong":         {1.0},
+		"enterShort":        {-1.0},
+		"exitLong":          {-1.0},
+		"exitShort":         {1.0},
 		"maFastLength":      {1, 8, 16, 32, 64, 128},
 		"maSlowLength":      {32, 64, 128, 256, 512},
 		"maSDFilterLength":  {128, 256, 512},
@@ -64,5 +67,5 @@ var (
 		"riskerSDFactor":    {1.0},
 		"sizerF":            {0.0},
 		"sizerScaleF":       {1.0},
-	}*/
+	}
 )
