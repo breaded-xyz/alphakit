@@ -177,25 +177,25 @@ func TestSimulator_closeOrder(t *testing.T) {
 func TestSimulator_getPosition(t *testing.T) {
 	tests := []struct {
 		name string
-		give map[broker.DealID]broker.Position
+		give []broker.Position
 		want broker.PositionState
 	}{
 		{
 			name: "no positions",
-			give: map[broker.DealID]broker.Position{},
+			give: []broker.Position{},
 			want: broker.PositionPending,
 		},
 		{
 			name: "latest position is closed",
-			give: map[broker.DealID]broker.Position{
-				"1": {OpenedAt: _fixed},
-				"2": {ClosedAt: _fixed},
+			give: []broker.Position{
+				{ID: "1", OpenedAt: _fixed},
+				{ID: "2", ClosedAt: _fixed},
 			},
 			want: broker.PositionPending,
 		},
 		{
 			name: "latest position is open",
-			give: map[broker.DealID]broker.Position{"1": {ID: "1", OpenedAt: _fixed}},
+			give: []broker.Position{{ID: "1", OpenedAt: _fixed}},
 			want: broker.PositionOpen,
 		},
 	}
@@ -311,15 +311,10 @@ func TestSimulator_ReceivePrice(t *testing.T) {
 
 	sim := NewSimulator()
 	sim.clock.Start(time.Now(), time.Millisecond)
-
-	k1 := broker.NewIDWithTime(sim.clock.Now())
-	sim.orders[k1] = broker.Order{ID: k1, Type: broker.Limit, LimitPrice: dec.New(15), OpenedAt: sim.clock.Now()}
-
-	k2 := broker.NewIDWithTime(sim.clock.Now())
-	sim.orders[k2] = broker.Order{ID: k2, Type: broker.Limit, LimitPrice: dec.New(15), OpenedAt: sim.clock.Now()}
-
-	k3 := broker.NewIDWithTime(sim.clock.Now())
-	sim.orders[k3] = broker.Order{ID: k3, Type: broker.Limit, LimitPrice: dec.New(10), OpenedAt: sim.clock.Now()}
+	sim.orders = make([]broker.Order, 3)
+	sim.orders[0] = broker.Order{ID: "0", Type: broker.Limit, LimitPrice: dec.New(15), OpenedAt: sim.clock.Now()}
+	sim.orders[1] = broker.Order{ID: "1", Type: broker.Limit, LimitPrice: dec.New(15), OpenedAt: sim.clock.Now()}
+	sim.orders[2] = broker.Order{ID: "2", Type: broker.Limit, LimitPrice: dec.New(10), OpenedAt: sim.clock.Now()}
 
 	price := market.Kline{
 		Start: sim.clock.Now().Add(time.Hour * 1),
@@ -338,17 +333,13 @@ func TestSimulator_ReceivePrice(t *testing.T) {
 		}
 	})
 
-	t.Run("orders are processed in sequence they were created", func(t *testing.T) {
-		assert.True(t, sim.orders[k1].ClosedAt.Before(sim.orders[k2].ClosedAt))
-		assert.True(t, sim.orders[k2].ClosedAt.Before(sim.orders[k3].ClosedAt))
-	})
 }
 
 func TestSimulator_CancelOrders(t *testing.T) {
-	giveOrders := map[broker.DealID]broker.Order{
-		"1": {ID: "1", OpenedAt: _fixed},
-		"2": {ID: "2", OpenedAt: _fixed, ClosedAt: _fixed},
-		"3": {ID: "3", OpenedAt: _fixed},
+	giveOrders := []broker.Order{
+		{ID: "1", OpenedAt: _fixed},
+		{ID: "2", OpenedAt: _fixed, ClosedAt: _fixed},
+		{ID: "3", OpenedAt: _fixed},
 	}
 
 	want := []broker.Order{
@@ -522,8 +513,8 @@ func TestSimulator_markToMarket(t *testing.T) {
 	sim.marketPrice = market.Kline{C: dec.New(20)}
 
 	t.Run("open position - unrealized profit", func(t *testing.T) {
-		sim.positions = map[broker.DealID]broker.Position{
-			"1": {OpenedAt: _fixed, Side: broker.Sell, Price: dec.New(10), Size: dec.New(2)},
+		sim.positions = []broker.Position{{
+			ID: "1", OpenedAt: _fixed, Side: broker.Sell, Price: dec.New(10), Size: dec.New(2)},
 		}
 		exp := dec.New(-10)
 		act := sim.markToMarket()
@@ -531,8 +522,8 @@ func TestSimulator_markToMarket(t *testing.T) {
 	})
 
 	t.Run("closed position - just account balance", func(t *testing.T) {
-		sim.positions = map[broker.DealID]broker.Position{
-			"1": {ClosedAt: _fixed, Side: broker.Sell, Price: dec.New(10), Size: dec.New(2)},
+		sim.positions = []broker.Position{
+			{ID: "1", ClosedAt: _fixed, Side: broker.Sell, Price: dec.New(10), Size: dec.New(2)},
 		}
 		exp := dec.New(10)
 		act := sim.markToMarket()
