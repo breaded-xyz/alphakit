@@ -9,7 +9,6 @@ import (
 	"github.com/colngroup/zero2algo/market"
 	"github.com/shopspring/decimal"
 	"golang.org/x/exp/maps"
-	"golang.org/x/exp/slices"
 )
 
 const _defaultTockInterval = time.Millisecond
@@ -65,7 +64,6 @@ func (s *Simulator) AddOrder(order broker.Order) (broker.Order, error) {
 	if order.Side == 0 || order.Type == 0 || order.State() != broker.OrderPending || !order.Size.IsPositive() {
 		return empty, ErrInvalidOrderState
 	}
-
 	order, err := s.processOrder(order)
 	if err != nil {
 		return empty, err
@@ -132,7 +130,9 @@ func (s *Simulator) Orders() []broker.Order {
 }
 
 func (s *Simulator) Positions() []broker.Position {
-	return broker.SortedMapValues(s.positions)
+	var copied []broker.Position
+	copy(copied, s.positions)
+	return copied
 }
 
 func (s *Simulator) Trades() []broker.Trade {
@@ -180,9 +180,11 @@ func (s *Simulator) processOrder(order broker.Order) (broker.Order, error) {
 		}
 
 	case broker.OrderFilled:
-		if _, err = s.processPosition(s.getPosition(), order); err != nil {
+		position, err := s.processPosition(s.getPosition(), order)
+		if err != nil {
 			return order, err
 		}
+		s.setPosition(position)
 		s.balance.Trade = s.balance.Trade.Sub(s.cost.Transaction(order))
 		order = s.closeOrder(order)
 	}
@@ -224,14 +226,19 @@ func (s *Simulator) getPosition() broker.Position {
 	if len(s.positions) == 0 {
 		return empty
 	}
-
-	ks := maps.Keys(s.positions)
-	slices.Sort(ks)
-	position = s.positions[ks[len(ks)-1]]
+	position = s.positions[len(s.positions)-1]
 	if position.State() == broker.PositionClosed {
 		return empty
 	}
 	return position
+}
+
+func (s *Simulator) setPosition(position broker.Position) {
+	if len(s.positions) == 0 {
+		s.positions = append(s.positions, position)
+	} else {
+		s.positions[len(s.positions)-1] = position
+	}
 }
 
 func (s *Simulator) processPosition(position broker.Position, order broker.Order) (broker.Position, error) {
@@ -279,7 +286,6 @@ func (s *Simulator) processPosition(position broker.Position, order broker.Order
 		s.trades[position.ID] = trade
 	}
 
-	s.positions[position.ID] = position
 	return position, nil
 }
 
