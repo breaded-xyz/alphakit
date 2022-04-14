@@ -9,7 +9,8 @@ import (
 )
 
 var (
-	_priceDir = "/Users/richklee/Dropbox/dev-share/github.com/thecolngroup/go-alpha/prices/binance/spot/BTCUSDT-H1/2021"
+	//_priceDir = "/Users/richklee/Dropbox/dev-share/github.com/thecolngroup/go-alpha/prices/binance/spot/BTCUSDT-H1/ALL"
+	_priceDir = "/Users/richklee/Dropbox/dev-share/github.com/thecolngroup/go-alpha/prices/binance/spot/ETHUSDT-H1/Y18192021"
 
 	_dealerMakeFunc = func() broker.SimulatedDealer {
 		return backtest.NewDealer()
@@ -20,6 +21,29 @@ var (
 	}
 
 	_params = optimize.ParamRange{
+		"asset":             {"btcusdt"},
+		"initialCapital":    {1000.0},
+		"spreadPct":         {0.0},
+		"slippagePct":       {0.0},
+		"transactionPct":    {0.0},
+		"fundingHourPct":    {0.0},
+		"enterLong":         {1.0},
+		"enterShort":        {-1.0},
+		"exitLong":          {-1.0},
+		"exitShort":         {1.0},
+		"maFastLength":      {8},
+		"maSlowLength":      {64},
+		"maSDFilterLength":  {512},
+		"maSDFilterFactor":  {1.5},
+		"mmiLength":         {300},
+		"mmiSmootherLength": {300},
+		"riskerSDLength":    {0},
+		"riskerSDFactor":    {1.0},
+		"sizerF":            {0.0},
+		"sizerScaleF":       {1.0},
+	}
+
+	/*_params = optimize.ParamRange{
 		"asset":             {"btcusdt"},
 		"initialCapital":    {1000.0},
 		"spreadPct":         {0.0},
@@ -40,5 +64,5 @@ var (
 		"riskerSDFactor":    {1.0},
 		"sizerF":            {0.0},
 		"sizerScaleF":       {1.0},
-	}
+	}*/
 )

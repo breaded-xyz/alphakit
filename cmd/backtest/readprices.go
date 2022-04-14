@@ -19,6 +19,9 @@ func readPrices(path string) ([]market.Kline, error) {
 		if d.IsDir() {
 			return nil
 		}
+		if filepath.Ext(path) != ".csv" {
+			return nil
+		}
 		file, err := os.Open(path)
 		if err != nil {
 			return err

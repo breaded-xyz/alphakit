@@ -9,6 +9,7 @@ import (
 	"github.com/colngroup/zero2algo/optimize"
 	"github.com/colngroup/zero2algo/perf"
 	"github.com/colngroup/zero2algo/trader"
+	"github.com/gammazero/workerpool"
 )
 
 func main() {
@@ -24,35 +25,44 @@ func run(args []string) error {
 	}
 
 	testCases := optimize.BuildBacktestCases(_params)
-	testCaseCount := len(testCases)
 
 	results := make([]perf.PerformanceReport, 0, len(testCases))
-	for i := range testCases {
-		tCase := testCases[i]
 
-		dealer := _dealerMakeFunc()
-		if err := dealer.Configure(tCase); err != nil {
-			return err
-		}
+	wp := workerpool.New(16)
 
-		bot := _botMakeFunc()
-		bot.SetDealer(dealer)
-		if err := bot.Configure(tCase); err != nil {
-			if errors.Is(err, trader.ErrInvalidConfig) {
-				continue
+	for _, tCase := range testCases {
+
+		tCase := tCase
+
+		wp.Submit(func() {
+
+			dealer := _dealerMakeFunc()
+			if err := dealer.Configure(tCase); err != nil {
+				//ch <- err
 			}
-			return err
-		}
 
-		result, err := execBacktest(bot, dealer, prices)
-		if err != nil {
-			return err
-		}
-		result.Strategy = fmt.Sprintf("%+v", tCase)
-		results = append(results, result)
+			bot := _botMakeFunc()
+			bot.SetDealer(dealer)
+			if err := bot.Configure(tCase); err != nil {
+				if errors.Is(err, trader.ErrInvalidConfig) {
+					return
+				}
+				//ch <- err
+			}
 
-		fmt.Printf("%d/%d complete: %s\n", i+1, testCaseCount, result.Strategy)
+			result, err := execBacktest(bot, dealer, prices)
+			if err != nil {
+				//ch <- err
+			}
+			result.Strategy = fmt.Sprintf("%+v", tCase)
+			results = append(results, result)
+
+			fmt.Printf("Done: %s\n", result.Strategy)
+		})
+
 	}
+
+	wp.StopWait()
 
 	optimize.SharpeSort(results)
 	top := results[len(results)-1]
