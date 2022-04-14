@@ -5,11 +5,13 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"sync"
 
 	"github.com/colngroup/zero2algo/optimize"
 	"github.com/colngroup/zero2algo/perf"
 	"github.com/colngroup/zero2algo/trader"
 	"github.com/gammazero/workerpool"
+	"github.com/schollz/progressbar/v3"
 )
 
 func main() {
@@ -19,26 +21,30 @@ func main() {
 }
 
 func run(args []string) error {
+	print("Reading prices... ")
 	prices, err := readPrices(_priceDir)
 	if err != nil {
 		return err
 	}
+	print("done\n")
 
+	print("Generating backtest cases...\n")
 	testCases := optimize.BuildBacktestCases(_params)
+	bar := progressbar.Default(int64(len(testCases)), "Running backtests")
 
 	results := make([]perf.PerformanceReport, 0, len(testCases))
-
 	wp := workerpool.New(16)
-
-	for _, tCase := range testCases {
-
-		tCase := tCase
-
+	var mu sync.Mutex
+	for i := range testCases {
+		i := i
 		wp.Submit(func() {
-
+			tCase := testCases[i]
 			dealer := _dealerMakeFunc()
 			if err := dealer.Configure(tCase); err != nil {
-				//ch <- err
+				if errors.Is(err, trader.ErrInvalidConfig) {
+					return
+				}
+				panic(err)
 			}
 
 			bot := _botMakeFunc()
@@ -47,27 +53,35 @@ func run(args []string) error {
 				if errors.Is(err, trader.ErrInvalidConfig) {
 					return
 				}
-				//ch <- err
+				panic(err)
 			}
 
 			result, err := execBacktest(bot, dealer, prices)
 			if err != nil {
-				//ch <- err
+				panic(err)
 			}
-			result.Strategy = fmt.Sprintf("%+v", tCase)
+			result.Description = fmt.Sprintf("%+v", tCase)
+
+			mu.Lock()
 			results = append(results, result)
+			mu.Unlock()
 
-			fmt.Printf("Done: %s\n", result.Strategy)
+			bar.Add(1)
 		})
-
 	}
 
 	wp.StopWait()
+	bar.Finish()
 
 	optimize.SharpeSort(results)
+	print("Top strategy by Sharpe:\n")
 	top := results[len(results)-1]
 	perf.PrintSummary(top)
-	fmt.Println(top.Strategy)
+	fmt.Println(top.Description)
+
+	if err := writeReports(_outputDir, results); err != nil {
+		return err
+	}
 
 	return nil
 }
