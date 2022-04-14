@@ -9,7 +9,6 @@ import (
 	"github.com/colngroup/zero2algo/market"
 	"github.com/shopspring/decimal"
 	"golang.org/x/exp/maps"
-	"golang.org/x/exp/slices"
 )
 
 const _defaultTockInterval = time.Millisecond
@@ -24,9 +23,9 @@ type Simulator struct {
 
 	cost Coster
 
-	orders    map[broker.DealID]broker.Order
-	positions map[broker.DealID]broker.Position
-	trades    map[broker.DealID]broker.Trade
+	orders    []broker.Order
+	positions []broker.Position
+	trades    []broker.Trade
 	equity    broker.EquitySeries
 }
 
@@ -36,13 +35,10 @@ func NewSimulator() *Simulator {
 
 func NewSimulatorWithCost(cost Coster) *Simulator {
 	return &Simulator{
-		balance:   broker.AccountBalance{},
-		clock:     NewClock(),
-		cost:      cost,
-		orders:    make(map[broker.DealID]broker.Order),
-		positions: make(map[broker.DealID]broker.Position),
-		trades:    make(map[broker.DealID]broker.Trade),
-		equity:    make(broker.EquitySeries),
+		balance: broker.AccountBalance{},
+		clock:   NewClock(),
+		cost:    cost,
+		equity:  make(broker.EquitySeries),
 	}
 }
 
@@ -66,7 +62,14 @@ func (s *Simulator) AddOrder(order broker.Order) (broker.Order, error) {
 	if order.Side == 0 || order.Type == 0 || order.State() != broker.OrderPending || !order.Size.IsPositive() {
 		return empty, ErrInvalidOrderState
 	}
-	return s.processOrder(order)
+	order, err := s.processOrder(order)
+	if err != nil {
+		return empty, err
+	}
+
+	s.orders = append(s.orders, order)
+
+	return order, nil
 }
 
 func (s *Simulator) Next(price market.Kline) error {
@@ -83,21 +86,18 @@ func (s *Simulator) Next(price market.Kline) error {
 	s.marketPrice = price
 
 	// Deduct funding fees if an existing position is open
-	s.balance.Trade = s.balance.Trade.Sub(s.cost.Funding(s.getPosition(), s.marketPrice.C, s.clock.Elapsed()))
+	s.balance.Trade = s.balance.Trade.Sub(s.cost.Funding(s.position(), s.marketPrice.C, s.clock.Elapsed()))
 
-	// Iterate open orders in the sequence they were placed (FIFO)
-	// Go maps do not maintain insertion order so we must sort the keys in a slice first
-	// The map key is a ULID seeded from a time and supports lexicographic sorting
-	ks := maps.Keys(s.orders)
-	slices.Sort(ks)
-	for _, k := range ks {
-		order := s.orders[k]
+	for i := range s.orders {
+		order := s.orders[i]
 		if order.State() != broker.OrderOpen {
 			continue
 		}
-		if _, err := s.processOrder(order); err != nil {
+		order, err := s.processOrder(order)
+		if err != nil {
 			return err
 		}
+		s.orders[i] = order
 	}
 
 	// Add current portfolio equity to the history
@@ -110,27 +110,33 @@ func (s *Simulator) Next(price market.Kline) error {
 
 func (s *Simulator) CancelOrders() []broker.Order {
 	cancelled := make([]broker.Order, 0, len(s.orders))
-	for k := range s.orders {
-		order := s.orders[k]
+	for i := range s.orders {
+		order := s.orders[i]
 		if order.State() == broker.OrderOpen {
 			order.ClosedAt = s.clock.Now()
 			cancelled = append(cancelled, order)
-			s.orders[k] = order
+			s.orders[i] = order
 		}
 	}
 	return cancelled
 }
 
 func (s *Simulator) Orders() []broker.Order {
-	return broker.SortedMapValues(s.orders)
+	copied := make([]broker.Order, len(s.orders))
+	copy(copied, s.orders)
+	return s.orders
 }
 
 func (s *Simulator) Positions() []broker.Position {
-	return broker.SortedMapValues(s.positions)
+	copied := make([]broker.Position, len(s.positions))
+	copy(copied, s.positions)
+	return copied
 }
 
 func (s *Simulator) Trades() []broker.Trade {
-	return broker.SortedMapValues(s.trades)
+	copied := make([]broker.Trade, len(s.trades))
+	copy(copied, s.trades)
+	return copied
 }
 
 func (s *Simulator) EquityHistory() broker.EquitySeries {
@@ -174,14 +180,14 @@ func (s *Simulator) processOrder(order broker.Order) (broker.Order, error) {
 		}
 
 	case broker.OrderFilled:
-		if _, err = s.processPosition(s.getPosition(), order); err != nil {
+		position, err := s.processPosition(s.position(), order)
+		if err != nil {
 			return order, err
 		}
+		s.upsertPosition(position)
 		s.balance.Trade = s.balance.Trade.Sub(s.cost.Transaction(order))
 		order = s.closeOrder(order)
 	}
-
-	s.orders[order.ID] = order
 	return order, nil
 }
 
@@ -215,19 +221,29 @@ func (s *Simulator) closeOrder(order broker.Order) broker.Order {
 	return order
 }
 
-func (s *Simulator) getPosition() broker.Position {
+func (s *Simulator) position() broker.Position {
 	var empty, position broker.Position
 	if len(s.positions) == 0 {
 		return empty
 	}
-
-	ks := maps.Keys(s.positions)
-	slices.Sort(ks)
-	position = s.positions[ks[len(ks)-1]]
+	position = s.positions[len(s.positions)-1]
 	if position.State() == broker.PositionClosed {
 		return empty
 	}
 	return position
+}
+
+func (s *Simulator) upsertPosition(position broker.Position) {
+	if len(s.positions) == 0 {
+		s.positions = append(s.positions, position)
+		return
+	}
+	last := s.positions[len(s.positions)-1]
+	if position.ID == last.ID {
+		s.positions[len(s.positions)-1] = position
+		return
+	}
+	s.positions = append(s.positions, position)
 }
 
 func (s *Simulator) processPosition(position broker.Position, order broker.Order) (broker.Position, error) {
@@ -272,10 +288,9 @@ func (s *Simulator) processPosition(position broker.Position, order broker.Order
 		// Create a trade for the closed position and update the account balance with the profit / loss
 		trade := s.createTrade(position)
 		s.balance.Trade = s.balance.Trade.Add(trade.Profit)
-		s.trades[position.ID] = trade
+		s.trades = append(s.trades, trade)
 	}
 
-	s.positions[position.ID] = position
 	return position, nil
 }
 
@@ -310,7 +325,7 @@ func (s *Simulator) createTrade(position broker.Position) broker.Trade {
 
 func (s *Simulator) markToMarket() decimal.Decimal {
 	equity := s.balance.Trade
-	if position := s.getPosition(); position.State() == broker.PositionOpen {
+	if position := s.position(); position.State() == broker.PositionOpen {
 		equity = equity.Add(profit(position, s.marketPrice.C))
 	}
 	return equity
