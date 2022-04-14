@@ -24,8 +24,8 @@ type Simulator struct {
 	cost Coster
 
 	orders    []broker.Order
-	positions map[broker.DealID]broker.Position
-	trades    map[broker.DealID]broker.Trade
+	positions []broker.Position
+	trades    []broker.Trade
 	equity    broker.EquitySeries
 }
 
@@ -35,12 +35,10 @@ func NewSimulator() *Simulator {
 
 func NewSimulatorWithCost(cost Coster) *Simulator {
 	return &Simulator{
-		balance:   broker.AccountBalance{},
-		clock:     NewClock(),
-		cost:      cost,
-		positions: make(map[broker.DealID]broker.Position),
-		trades:    make(map[broker.DealID]broker.Trade),
-		equity:    make(broker.EquitySeries),
+		balance: broker.AccountBalance{},
+		clock:   NewClock(),
+		cost:    cost,
+		equity:  make(broker.EquitySeries),
 	}
 }
 
@@ -88,7 +86,7 @@ func (s *Simulator) Next(price market.Kline) error {
 	s.marketPrice = price
 
 	// Deduct funding fees if an existing position is open
-	s.balance.Trade = s.balance.Trade.Sub(s.cost.Funding(s.getPosition(), s.marketPrice.C, s.clock.Elapsed()))
+	s.balance.Trade = s.balance.Trade.Sub(s.cost.Funding(s.position(), s.marketPrice.C, s.clock.Elapsed()))
 
 	for i := range s.orders {
 		order := s.orders[i]
@@ -130,13 +128,15 @@ func (s *Simulator) Orders() []broker.Order {
 }
 
 func (s *Simulator) Positions() []broker.Position {
-	var copied []broker.Position
+	copied := make([]broker.Position, len(s.positions))
 	copy(copied, s.positions)
 	return copied
 }
 
 func (s *Simulator) Trades() []broker.Trade {
-	return broker.SortedMapValues(s.trades)
+	copied := make([]broker.Trade, len(s.trades))
+	copy(copied, s.trades)
+	return copied
 }
 
 func (s *Simulator) EquityHistory() broker.EquitySeries {
@@ -180,11 +180,11 @@ func (s *Simulator) processOrder(order broker.Order) (broker.Order, error) {
 		}
 
 	case broker.OrderFilled:
-		position, err := s.processPosition(s.getPosition(), order)
+		position, err := s.processPosition(s.position(), order)
 		if err != nil {
 			return order, err
 		}
-		s.setPosition(position)
+		s.upsertPosition(position)
 		s.balance.Trade = s.balance.Trade.Sub(s.cost.Transaction(order))
 		order = s.closeOrder(order)
 	}
@@ -221,7 +221,7 @@ func (s *Simulator) closeOrder(order broker.Order) broker.Order {
 	return order
 }
 
-func (s *Simulator) getPosition() broker.Position {
+func (s *Simulator) position() broker.Position {
 	var empty, position broker.Position
 	if len(s.positions) == 0 {
 		return empty
@@ -233,12 +233,17 @@ func (s *Simulator) getPosition() broker.Position {
 	return position
 }
 
-func (s *Simulator) setPosition(position broker.Position) {
+func (s *Simulator) upsertPosition(position broker.Position) {
 	if len(s.positions) == 0 {
 		s.positions = append(s.positions, position)
-	} else {
-		s.positions[len(s.positions)-1] = position
+		return
 	}
+	last := s.positions[len(s.positions)-1]
+	if position.ID == last.ID {
+		s.positions[len(s.positions)-1] = position
+		return
+	}
+	s.positions = append(s.positions, position)
 }
 
 func (s *Simulator) processPosition(position broker.Position, order broker.Order) (broker.Position, error) {
@@ -283,7 +288,7 @@ func (s *Simulator) processPosition(position broker.Position, order broker.Order
 		// Create a trade for the closed position and update the account balance with the profit / loss
 		trade := s.createTrade(position)
 		s.balance.Trade = s.balance.Trade.Add(trade.Profit)
-		s.trades[position.ID] = trade
+		s.trades = append(s.trades, trade)
 	}
 
 	return position, nil
@@ -320,7 +325,7 @@ func (s *Simulator) createTrade(position broker.Position) broker.Trade {
 
 func (s *Simulator) markToMarket() decimal.Decimal {
 	equity := s.balance.Trade
-	if position := s.getPosition(); position.State() == broker.PositionOpen {
+	if position := s.position(); position.State() == broker.PositionOpen {
 		equity = equity.Add(profit(position, s.marketPrice.C))
 	}
 	return equity

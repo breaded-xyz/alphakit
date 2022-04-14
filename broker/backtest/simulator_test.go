@@ -203,7 +203,7 @@ func TestSimulator_getPosition(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			sim := newSimulatorForTest()
 			sim.positions = tt.give
-			act := sim.getPosition()
+			act := sim.position()
 			assert.Equal(t, tt.want, act.State())
 		})
 	}
