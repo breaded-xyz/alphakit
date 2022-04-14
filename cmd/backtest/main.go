@@ -27,7 +27,7 @@ func run(args []string) error {
 	}
 	print("done\n")
 
-	print("Enqueuing backtest cases...\n")
+	print("Generating backtest cases...\n")
 	testCases := optimize.BuildBacktestCases(_params)
 	bar := progressbar.Default(int64(len(testCases)), "Running backtests")
 
