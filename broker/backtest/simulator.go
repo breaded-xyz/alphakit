@@ -24,7 +24,7 @@ type Simulator struct {
 
 	cost Coster
 
-	orders    map[broker.DealID]broker.Order
+	orders    []broker.Order
 	positions map[broker.DealID]broker.Position
 	trades    map[broker.DealID]broker.Trade
 	equity    broker.EquitySeries
@@ -39,7 +39,6 @@ func NewSimulatorWithCost(cost Coster) *Simulator {
 		balance:   broker.AccountBalance{},
 		clock:     NewClock(),
 		cost:      cost,
-		orders:    make(map[broker.DealID]broker.Order),
 		positions: make(map[broker.DealID]broker.Position),
 		trades:    make(map[broker.DealID]broker.Trade),
 		equity:    make(broker.EquitySeries),
@@ -66,7 +65,15 @@ func (s *Simulator) AddOrder(order broker.Order) (broker.Order, error) {
 	if order.Side == 0 || order.Type == 0 || order.State() != broker.OrderPending || !order.Size.IsPositive() {
 		return empty, ErrInvalidOrderState
 	}
-	return s.processOrder(order)
+
+	order, err := s.processOrder(order)
+	if err != nil {
+		return empty, err
+	}
+
+	s.orders = append(s.orders, order)
+
+	return order, nil
 }
 
 func (s *Simulator) Next(price market.Kline) error {
@@ -85,19 +92,16 @@ func (s *Simulator) Next(price market.Kline) error {
 	// Deduct funding fees if an existing position is open
 	s.balance.Trade = s.balance.Trade.Sub(s.cost.Funding(s.getPosition(), s.marketPrice.C, s.clock.Elapsed()))
 
-	// Iterate open orders in the sequence they were placed (FIFO)
-	// Go maps do not maintain insertion order so we must sort the keys in a slice first
-	// The map key is a ULID seeded from a time and supports lexicographic sorting
-	ks := maps.Keys(s.orders)
-	slices.Sort(ks)
-	for _, k := range ks {
-		order := s.orders[k]
+	for i := range s.orders {
+		order := s.orders[i]
 		if order.State() != broker.OrderOpen {
 			continue
 		}
-		if _, err := s.processOrder(order); err != nil {
+		order, err := s.processOrder(order)
+		if err != nil {
 			return err
 		}
+		s.orders[i] = order
 	}
 
 	// Add current portfolio equity to the history
@@ -110,19 +114,21 @@ func (s *Simulator) Next(price market.Kline) error {
 
 func (s *Simulator) CancelOrders() []broker.Order {
 	cancelled := make([]broker.Order, 0, len(s.orders))
-	for k := range s.orders {
-		order := s.orders[k]
+	for i := range s.orders {
+		order := s.orders[i]
 		if order.State() == broker.OrderOpen {
 			order.ClosedAt = s.clock.Now()
 			cancelled = append(cancelled, order)
-			s.orders[k] = order
+			s.orders[i] = order
 		}
 	}
 	return cancelled
 }
 
 func (s *Simulator) Orders() []broker.Order {
-	return broker.SortedMapValues(s.orders)
+	copied := make([]broker.Order, len(s.orders))
+	copy(copied, s.orders)
+	return s.orders
 }
 
 func (s *Simulator) Positions() []broker.Position {
@@ -180,8 +186,6 @@ func (s *Simulator) processOrder(order broker.Order) (broker.Order, error) {
 		s.balance.Trade = s.balance.Trade.Sub(s.cost.Transaction(order))
 		order = s.closeOrder(order)
 	}
-
-	s.orders[order.ID] = order
 	return order, nil
 }
 
