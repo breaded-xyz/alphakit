@@ -11,6 +11,8 @@
 # Output of the go coverage tool, specifically when used with LiteIDE
 *.out
 
+bin/
+
 # Local system files and folders
 .DS_store
 .*/
