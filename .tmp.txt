@@ -1,3 +1,5 @@
+Benchmark-8   	       1	3427434834 ns/op	1602052856 B/op	 2920981 allocs/op
+
 var dec decimal.Decimal
 
 	switch (any)(v).(type) {

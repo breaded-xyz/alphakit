@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"sync"
 
 	"github.com/colngroup/zero2algo/optimize"
 	"github.com/colngroup/zero2algo/perf"
@@ -33,6 +34,7 @@ func run(args []string) error {
 
 	results := make([]perf.PerformanceReport, 0, len(testCases))
 	wp := workerpool.New(16)
+	var mu sync.Mutex
 	for i := range testCases {
 		i := i
 		wp.Submit(func() {
@@ -59,7 +61,10 @@ func run(args []string) error {
 				panic(err)
 			}
 			result.Description = fmt.Sprintf("%+v", tCase)
+
+			mu.Lock()
 			results = append(results, result)
+			mu.Unlock()
 
 			bar.Add(1)
 		})

@@ -64,7 +64,7 @@ var (
 		"exitLong":          {-0.9},
 		"exitShort":         {0.6},
 		"maFastLength":      {1},
-		"maSlowLength":      {256},
+		"maSlowLength":      {128, 256, 386, 512},
 		"maSDFilterLength":  {512},
 		"maSDFilterFactor":  {1.5},
 		"mmiLength":         {200},
