@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/colngroup/zero2algo/broker"
+	"github.com/colngroup/zero2algo/conv"
 	"github.com/colngroup/zero2algo/dec"
 	"github.com/colngroup/zero2algo/market"
 	"github.com/colngroup/zero2algo/money"
@@ -225,32 +226,32 @@ func (b *Bot) Configure(config map[string]any) error {
 
 	b.asset = market.NewAsset(config["asset"].(string))
 
-	b.EnterLong = config["enterLong"].(float64)
-	b.EnterShort = config["enterShort"].(float64)
-	b.ExitLong = config["exitLong"].(float64)
-	b.ExitShort = config["exitShort"].(float64)
+	b.EnterLong = config["enterlong"].(float64)
+	b.EnterShort = config["entershort"].(float64)
+	b.ExitLong = config["exitlong"].(float64)
+	b.ExitShort = config["exitshort"].(float64)
 
-	maFastLength := config["maFastLength"].(int)
-	maSlowLength := config["maSlowLength"].(int)
+	maFastLength := conv.ToInt(config["mafastlength"])
+	maSlowLength := conv.ToInt(config["maslowlength"])
 	if maFastLength >= maSlowLength {
 		return trader.ErrInvalidConfig
 	}
 	maOsc := ta.NewOsc(ta.NewALMA(maFastLength), ta.NewALMA(maSlowLength))
-	maSDFilter := ta.NewSDWithFactor(config["maSDFilterLength"].(int), config["maSDFilterFactor"].(float64))
-	mmi := ta.NewMMIWithSmoother(config["mmiLength"].(int), ta.NewALMA(config["mmiSmootherLength"].(int)))
+	maSDFilter := ta.NewSDWithFactor(conv.ToInt(config["masdfilterlength"]), config["masdfilterfactor"].(float64))
+	mmi := ta.NewMMIWithSmoother(conv.ToInt(config["mmilength"]), ta.NewALMA(conv.ToInt(config["mmismootherlength"])))
 	b.Predicter = NewPredicter(maOsc, maSDFilter, mmi)
 
-	riskSDLength := config["riskerSDLength"].(int)
+	riskSDLength := conv.ToInt(config["riskersdlength"])
 	if riskSDLength > 0 {
-		b.Risker = risk.NewSDRisk(config["riskerSDLength"].(int), config["riskerSDFactor"].(float64))
+		b.Risker = risk.NewSDRisk(conv.ToInt(config["riskersdlength"]), config["riskersdfactor"].(float64))
 	} else {
 		b.Risker = risk.NewFullRisk()
 	}
 
-	initialCapital := dec.New(config["initialCapital"].(float64))
-	sizerF := config["sizerF"].(float64)
+	initialCapital := dec.New(config["initialcapital"].(float64))
+	sizerF := config["sizerf"].(float64)
 	if sizerF > 0 {
-		b.Sizer = money.NewSafeFSizer(initialCapital, config["sizerF"].(float64), config["sizerScaleF"].(float64))
+		b.Sizer = money.NewSafeFSizer(initialCapital, sizerF, config["sizerscalef"].(float64))
 	} else {
 		b.Sizer = money.NewFixedSizer(initialCapital)
 	}

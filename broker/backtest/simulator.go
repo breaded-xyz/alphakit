@@ -43,12 +43,12 @@ func NewSimulatorWithCost(cost Coster) *Simulator {
 }
 
 func (s *Simulator) Configure(config map[string]any) error {
-	s.SetInitialCapital(dec.New(config["initialCapital"].(float64)))
+	s.SetInitialCapital(dec.New(config["initialcapital"].(float64)))
 	s.cost = &PerpCost{
-		SpreadPct:      dec.New(config["spreadPct"].(float64)),
-		SlippagePct:    dec.New(config["slippagePct"].(float64)),
-		TransactionPct: dec.New(config["transactionPct"].(float64)),
-		FundingHourPct: dec.New(config["fundingHourPct"].(float64)),
+		SpreadPct:      dec.New(config["spreadpct"].(float64)),
+		SlippagePct:    dec.New(config["slippagepct"].(float64)),
+		TransactionPct: dec.New(config["transactionpct"].(float64)),
+		FundingHourPct: dec.New(config["fundinghourpct"].(float64)),
 	}
 	return nil
 }

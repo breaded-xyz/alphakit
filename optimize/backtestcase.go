@@ -1,37 +1,46 @@
 package optimize
 
 import (
+	"reflect"
+
 	"github.com/schwarmco/go-cartesian-product"
 )
 
 type TestCase map[string]any
-
-type ParamRange map[string][]any
 
 type keyValuePair struct {
 	k string
 	v any
 }
 
-func BuildBacktestCases(in ParamRange) []TestCase {
+func BuildBacktestCases(in map[string]any) []TestCase {
 
 	testCases := make([]TestCase, 0)
 
 	// Prepare a slice of sets to pass to the cartesian func
 	// Each element in a set is a key-value pair (param name, param value)
-	inputSets := make([][]any, 0)
-	for paramName, paramValues := range in {
+	// All elements in a set share the same key name
+	cartesianInputSets := make([][]any, 0)
+	for paramName, paramValue := range in {
 		set := make([]any, 0)
-		for i := range paramValues {
-			kv := keyValuePair{paramName, paramValues[i]}
+
+		// Marshal scalar values into a slice
+		if reflect.ValueOf(paramValue).Kind() != reflect.Slice {
+			paramValue = []any{paramValue}
+		}
+		paramValue := paramValue.([]any)
+
+		// Make a key-value pair for each param in the range
+		for i := range paramValue {
+			kv := keyValuePair{paramName, paramValue[i]}
 			set = append(set, kv)
 		}
-		inputSets = append(inputSets, set)
+		cartesianInputSets = append(cartesianInputSets, set)
 	}
 
 	// Produce the cartesian products passing in the input sets
 	// Marshal each product (a slice of key-value pairs) back to a test case map
-	productCh := cartesian.Iter(inputSets...)
+	productCh := cartesian.Iter(cartesianInputSets...)
 	for product := range productCh {
 		tCase := make(map[string]any, len(product))
 		for i := range product {

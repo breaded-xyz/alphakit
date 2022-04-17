@@ -20,9 +20,9 @@ func Example() {
 	asset := market.NewAsset("BTCUSD")
 
 	// Define the set of possible values for each param
-	params := map[string][]any{
-		hodl.BuyBarIndex:  {0, 1, 1000},
-		hodl.SellBarIndex: {0, 1000, 2000},
+	params := map[string]any{
+		hodl.BuyBarIndex:  []any{0, 1, 1000},
+		hodl.SellBarIndex: []any{0, 1000, 2000},
 	}
 	// Build a set of test cases, one for each permutation of params
 	cases := optimize.BuildBacktestCases(params)

@@ -7,12 +7,15 @@ import (
 	"os"
 	"sync"
 
+	"github.com/colngroup/zero2algo/broker/backtest"
 	"github.com/colngroup/zero2algo/optimize"
 	"github.com/colngroup/zero2algo/perf"
 	"github.com/colngroup/zero2algo/trader"
 	"github.com/gammazero/workerpool"
 	"github.com/schollz/progressbar/v3"
 )
+
+const _outputDir = ".out"
 
 func main() {
 	if err := run(os.Args[1:]); err != nil {
@@ -22,14 +25,21 @@ func main() {
 
 func run(args []string) error {
 	print("Reading prices... ")
-	prices, err := readPrices(_priceDir)
+	prices, err := readPrices(args[0])
+	if err != nil {
+		return err
+	}
+	print("done\n")
+
+	print("Reading config... ")
+	config, err := readConfig(args[1])
 	if err != nil {
 		return err
 	}
 	print("done\n")
 
 	print("Generating backtest cases...\n")
-	testCases := optimize.BuildBacktestCases(_params)
+	testCases := optimize.BuildBacktestCases(config)
 	bar := progressbar.Default(int64(len(testCases)), "Running backtests")
 
 	results := make([]perf.PerformanceReport, 0, len(testCases))
@@ -39,7 +49,7 @@ func run(args []string) error {
 		i := i
 		wp.Submit(func() {
 			tCase := testCases[i]
-			dealer := _dealerMakeFunc()
+			dealer := backtest.NewDealer()
 			if err := dealer.Configure(tCase); err != nil {
 				if errors.Is(err, trader.ErrInvalidConfig) {
 					return
@@ -47,7 +57,7 @@ func run(args []string) error {
 				panic(err)
 			}
 
-			bot := _botMakeFunc()
+			bot := _typeRegistry[config["bot"].(string)].(botMakerFunc)()
 			bot.SetDealer(dealer)
 			if err := bot.Configure(tCase); err != nil {
 				if errors.Is(err, trader.ErrInvalidConfig) {

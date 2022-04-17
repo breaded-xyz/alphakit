@@ -7,7 +7,11 @@ import (
 )
 
 func Test(t *testing.T) {
-	err := run(nil)
+	args := []string{
+		"../../testdata/",
+		"./study.toml",
+	}
+	err := run(args)
 	assert.NoError(t, err)
 }
 
