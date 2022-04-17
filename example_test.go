@@ -25,7 +25,7 @@ func Example() {
 		hodl.SellBarIndex: []any{0, 1000, 2000},
 	}
 	// Build a set of test cases, one for each permutation of params
-	cases := optimize.BuildBacktestCases(params)
+	cases := optimize.BruteCaseBuilder(params)
 
 	// Slice to store each report created by execution of a test case
 	results := make([]perf.PerformanceReport, 0, len(cases))

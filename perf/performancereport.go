@@ -26,6 +26,7 @@ var _summaryReportHeader = []string{
 
 type PerformanceReport struct {
 	Description string           `json:"description"`
+	Properties  map[string]any   `json:",inline"`
 	Trade       *TradeReport     `json:",inline"`
 	Portfolio   *PortfolioReport `json:",inline"`
 }

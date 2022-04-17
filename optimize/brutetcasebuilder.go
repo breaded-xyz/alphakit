@@ -13,8 +13,7 @@ type keyValuePair struct {
 	v any
 }
 
-func BuildBacktestCases(in map[string]any) []TestCase {
-
+func BruteCaseBuilder(in map[string]any) []TestCase {
 	testCases := make([]TestCase, 0)
 
 	// Prepare a slice of sets to pass to the cartesian func

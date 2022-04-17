@@ -6,7 +6,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestBuildBacktestCases(t *testing.T) {
+func TestBruteCaseBuilder(t *testing.T) {
 	give := map[string]any{
 		"capital": 1000,
 		"fast":    []any{0, 10, 20},
@@ -22,6 +22,6 @@ func TestBuildBacktestCases(t *testing.T) {
 		{"capital": 1000, "fast": 20, "slow": 100},
 	}
 
-	act := BuildBacktestCases(give)
+	act := BruteCaseBuilder(give)
 	assert.ElementsMatch(t, want, act)
 }

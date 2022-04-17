@@ -39,7 +39,7 @@ func run(args []string) error {
 	print("done\n")
 
 	print("Generating backtest cases...\n")
-	testCases := optimize.BuildBacktestCases(config)
+	testCases := optimize.BruteCaseBuilder(config)
 	bar := progressbar.Default(int64(len(testCases)), "Running backtests")
 
 	results := make([]perf.PerformanceReport, 0, len(testCases))

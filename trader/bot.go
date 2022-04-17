@@ -20,3 +20,5 @@ type ConfigurableBot interface {
 	Bot
 	Configure(config map[string]any) error
 }
+
+type BotMakerFunc func() ConfigurableBot
