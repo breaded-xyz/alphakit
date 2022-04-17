@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"github.com/colngroup/zero2algo/broker"
-	"github.com/gonum/stat"
 )
 
 const (
@@ -38,35 +37,6 @@ func ReduceEOD(curve broker.EquitySeries) broker.EquitySeries {
 	return reduced
 }
 
-// CAGR Compound Annual Growth Rate
-func CAGR(initial, final float64, days int) float64 {
-	growthRate := (final - initial) / initial
-	x := 1 + growthRate
-	y := 365.0 / float64(days)
-	return math.Pow(x, y) - 1
-}
-
-// SharpeRatio is the annualised value using daily risk free rate and daily returns
-func SharpeRatio(daily []float64, riskFreeRate float64) float64 {
-	xr := make([]float64, len(daily)) // Excess returns
-	for i := range daily {
-		xr[i] = daily[i] - riskFreeRate
-	}
-
-	mxr := stat.Mean(xr, nil)                         // Mean excess returns
-	sd := stat.StdDev(xr, nil)                        // SD excess returns
-	dsr := mxr / sd                                   // Daily Sharpe
-	return dsr * math.Sqrt(SharpeDailyToAnnualFactor) // Scale daily to annual
-}
-
-func CalmarRatio(cagr, mdd float64) float64 {
-	return cagr / mdd
-}
-
-func KellyCriterion(profitFactor, winP float64) float64 {
-	return (profitFactor*winP - (1 - winP)) / profitFactor
-}
-
 // NN (Not Number) returns y if x is NaN or Inf.
 func NN(x, y float64) float64 {
 	if math.IsNaN(x) || math.IsInf(x, 0) {
@@ -81,4 +51,8 @@ func NNZ(x, y float64) float64 {
 		return y
 	}
 	return x
+}
+
+func Round2DP(x float64) float64 {
+	return math.Round(x*100) / 100
 }

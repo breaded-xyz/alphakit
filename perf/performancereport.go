@@ -18,9 +18,8 @@ var _summaryReportHeader = []string{
 	"trades",
 	"win",
 	"cagr",
-	"pr",
+	"prr",
 	"mdd",
-	"kelly",
 	"sharpe",
 	"calmar",
 }
@@ -47,9 +46,8 @@ func PrintSummary(r PerformanceReport) {
 		strconv.Itoa(int(r.Trade.TradeCount)),
 		fmt.Sprintf("%.2f%%", r.Trade.PercentProfitable*100),
 		fmt.Sprintf("%.2f%%", r.Portfolio.CAGR*100),
-		fmt.Sprintf("%.2f", r.Trade.ProfitFactor),
+		fmt.Sprintf("%.2f", r.Trade.PRR),
 		fmt.Sprintf("%.2f%%", r.Portfolio.MaxDrawdown*100),
-		fmt.Sprintf("%.2f", r.Trade.Kelly),
 		fmt.Sprintf("%.2f", r.Portfolio.Sharpe),
 		fmt.Sprintf("%.2f", r.Portfolio.Calmar),
 	})

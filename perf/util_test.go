@@ -39,34 +39,6 @@ func TestReduceEoD(t *testing.T) {
 	assert.Equal(t, want, act)
 }
 
-func TestCAGR(t *testing.T) {
-	giveInitial := 1000.0
-	giveFinal := 2500.0
-	giveDays := 190
-	want := 4.81
-	act := CAGR(giveInitial, giveFinal, giveDays)
-	assert.Equal(t, want, round2DP(act))
-}
-
-func TestKellyCriterion(t *testing.T) {
-	giveProfitFactor := 1.6
-	giveWinP := 0.7
-	want := 0.51
-	act := KellyCriterion(giveProfitFactor, giveWinP)
-	assert.Equal(t, want, round2DP(act))
-}
-
-func TestSharpeRatio(t *testing.T) {
-	give := []float64{0.1, 0.2, -0.15, 0.1, 0.8, -0.3, 0.2}
-	exp := 6.20
-	act := SharpeRatio(give, SharpeAnnualRiskFreeRate)
-	assert.Equal(t, exp, round2DP(act))
-}
-
-func round2DP(x float64) float64 {
-	return math.Round(x*100) / 100
-}
-
 func TestNNZ(t *testing.T) {
 	tests := []struct {
 		name  string

@@ -14,6 +14,7 @@ type TradeReport struct {
 	GrossProfit    float64
 	GrossLoss      float64
 	ProfitFactor   float64
+	PRR            float64
 
 	PercentProfitable  float64
 	MaxProfit, MaxLoss float64
@@ -25,6 +26,7 @@ type TradeReport struct {
 
 	Kelly    float64
 	OptimalF float64
+	StatN    float64
 
 	TotalTimeInMarketSec float64
 	AvgHoldSec           float64
@@ -71,6 +73,7 @@ func NewTradeReport(trades []broker.Trade) *TradeReport {
 	report.TotalNetProfit = report.GrossProfit - report.GrossLoss
 	report.AvgNetProfit = report.TotalNetProfit / report.TradeCount
 	report.ProfitFactor = report.GrossProfit / NNZ(report.GrossLoss, 1)
+	report.PRR = PRR(report.GrossProfit, report.GrossLoss, report.winningCount, report.losingCount)
 
 	report.AvgProfit = report.GrossProfit / NNZ(report.winningCount, 1)
 	report.AvgLoss = report.GrossLoss / NNZ(report.losingCount, 1)
@@ -83,6 +86,8 @@ func NewTradeReport(trades []broker.Trade) *TradeReport {
 
 	report.Kelly = KellyCriterion(report.ProfitFactor, report.winningPct)
 	report.OptimalF = OptimalF(profits)
+
+	report.StatN = StatN(profits)
 
 	return &report
 }
