@@ -6,7 +6,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestCartesianBuilder(t *testing.T) {
+func TestBruteCaseBuilder(t *testing.T) {
 	give := map[string]any{
 		"capital": 1000,
 		"fast":    []any{0, 10, 20},

@@ -6,15 +6,15 @@ import (
 	"github.com/schwarmco/go-cartesian-product"
 )
 
-type TestCase map[string]any
+type CartesianProduct map[string]any
 
 type keyValuePair struct {
 	k string
 	v any
 }
 
-func BruteCaseBuilder(in map[string]any) []TestCase {
-	testCases := make([]TestCase, 0)
+func CartesianBuilder(in map[string]any) []CartesianProduct {
+	testCases := make([]CartesianProduct, 0)
 
 	// Prepare a slice of sets to pass to the cartesian func
 	// Each element in a set is a key-value pair (param name, param value)

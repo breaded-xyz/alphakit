@@ -1,17 +1,13 @@
 package main
 
 import (
-	"errors"
+	"context"
 	"fmt"
 	"log"
 	"os"
-	"sync"
 
-	"github.com/colngroup/zero2algo/broker/backtest"
 	"github.com/colngroup/zero2algo/optimize"
 	"github.com/colngroup/zero2algo/perf"
-	"github.com/colngroup/zero2algo/trader"
-	"github.com/gammazero/workerpool"
 	"github.com/schollz/progressbar/v3"
 )
 
@@ -25,7 +21,7 @@ func main() {
 
 func run(args []string) error {
 	print("Reading prices... ")
-	prices, err := readPrices(args[0])
+	_, err := readPrices(args[0])
 	if err != nil {
 		return err
 	}
@@ -38,53 +34,27 @@ func run(args []string) error {
 	}
 	print("done\n")
 
-	print("Generating backtest cases...\n")
-	testCases := optimize.BruteCaseBuilder(config)
-	bar := progressbar.Default(int64(len(testCases)), "Running backtests")
+	print("Preparing optimizer...\n")
+	optimizer := optimize.NewBruteOptimizer()
+	err = optimizer.Configure(config)
+	if err != nil {
+		return err
+	}
+	cycles, err := optimizer.Prepare(config)
+	if err != nil {
+		return err
+	}
+	print("done\n")
 
-	results := make([]perf.PerformanceReport, 0, len(testCases))
-	wp := workerpool.New(16)
-	var mu sync.Mutex
-	for i := range testCases {
-		i := i
-		wp.Submit(func() {
-			tCase := testCases[i]
-			dealer := backtest.NewDealer()
-			if err := dealer.Configure(tCase); err != nil {
-				if errors.Is(err, trader.ErrInvalidConfig) {
-					return
-				}
-				panic(err)
-			}
-
-			bot := _typeRegistry[config["bot"].(string)].(botMakerFunc)()
-			bot.SetDealer(dealer)
-			if err := bot.Configure(tCase); err != nil {
-				if errors.Is(err, trader.ErrInvalidConfig) {
-					return
-				}
-				panic(err)
-			}
-
-			result, err := execBacktest(bot, dealer, prices)
-			if err != nil {
-				panic(err)
-			}
-			result.Description = fmt.Sprintf("%+v", tCase)
-
-			mu.Lock()
-			results = append(results, result)
-			mu.Unlock()
-
-			bar.Add(1)
-		})
+	bar := progressbar.Default(int64(cycles), "Running backtests")
+	results := make([]perf.PerformanceReport, 0, cycles)
+	_, err = optimizer.Start(context.Background())
+	if err != nil {
+		return err
 	}
 
-	wp.StopWait()
 	bar.Finish()
 
-	optimize.SharpeSort(results)
-	print("Top strategy by Sharpe:\n")
 	top := results[len(results)-1]
 	perf.PrintSummary(top)
 	fmt.Println(top.Description)
