@@ -1,4 +1,4 @@
-package main
+package studyrun
 
 import (
 	"github.com/colngroup/zero2algo/trader"

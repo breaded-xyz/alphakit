@@ -1,4 +1,4 @@
-package main
+package studyrun
 
 import (
 	"encoding/csv"
@@ -9,7 +9,7 @@ import (
 	"github.com/colngroup/zero2algo/market"
 )
 
-func readPrices(path string) ([]market.Kline, error) {
+func ReadPrices(path string) ([]market.Kline, error) {
 	var prices []market.Kline
 
 	err := filepath.WalkDir(path, func(path string, d fs.DirEntry, err error) error {

@@ -1,4 +1,4 @@
-package main
+package studyrun
 
 import (
 	"encoding/csv"
@@ -13,7 +13,7 @@ import (
 
 const _filenameFriendlyTimeFormat = "20060102T150405"
 
-func writeReports(path string, reports []perf.PerformanceReport) error {
+func WriteReports(path string, reports []perf.PerformanceReport) error {
 	prefix := time.Now().UTC().Format(_filenameFriendlyTimeFormat)
 	out := filepath.Join(path, fmt.Sprintf("%s-performancereport.csv", prefix))
 	if err := saveStructToCSV(out, reports); err != nil {

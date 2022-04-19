@@ -14,7 +14,7 @@ type keyValuePair struct {
 }
 
 func CartesianBuilder(in map[string]any) []CartesianProduct {
-	testCases := make([]CartesianProduct, 0)
+	products := make([]CartesianProduct, 0)
 
 	// Prepare a slice of sets to pass to the cartesian func
 	// Each element in a set is a key-value pair (param name, param value)
@@ -46,8 +46,8 @@ func CartesianBuilder(in map[string]any) []CartesianProduct {
 			kv := product[i].(keyValuePair)
 			tCase[kv.k] = kv.v
 		}
-		testCases = append(testCases, tCase)
+		products = append(products, tCase)
 	}
 
-	return testCases
+	return products
 }

@@ -1,4 +1,4 @@
-package main
+package studyrun
 
 import (
 	"os"
@@ -8,7 +8,7 @@ import (
 
 const _configFormat = "toml"
 
-func readConfig(filename string) (map[string]any, error) {
+func ReadConfig(filename string) (map[string]any, error) {
 	file, err := os.Open(filename)
 	if err != nil {
 		return nil, err

@@ -11,6 +11,7 @@ import (
 	"github.com/colngroup/zero2algo/optimize"
 	"github.com/colngroup/zero2algo/perf"
 	"github.com/colngroup/zero2algo/trader/hodl"
+	"golang.org/x/exp/slices"
 )
 
 func Example() {
@@ -71,7 +72,7 @@ func Example() {
 	wg.Wait()
 
 	// Rank results based on the test case with the highest sharpe ratio
-	optimize.SharpeSort(results)
+	slices.SortFunc(results, optimize.SharpeRanker)
 	perf.PrintSummary(results[len(results)-1])
 
 }

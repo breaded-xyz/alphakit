@@ -40,3 +40,72 @@ func TestCloseTime(t *testing.T) {
 		assert.EqualValues(t, start2, act)
 	})
 }
+
+type Percent float64
+
+type AssetPricesMap map[market.Asset][]market.Kline
+
+type StudyCase map[string]any
+
+type StepResult struct {
+	Report perf.PerformanceReport
+}
+
+type MakeBotFunc func() trader.ConfigurableBot
+type MakeDealerFunc func() broker.SimulatedDealer
+
+type Runner struct {
+	cases []StudyCase
+}
+
+func NewRunner() *Runner {
+	return nil
+}
+
+func (o *Runner) Prepare(cases []StudyCase, samples AssetPricesMap, split Percent, warmup int) (int, error) {
+	return 0, nil
+}
+
+func (o *Runner) Start(ctx context.Context) (chan<- StepResult, error) {
+
+	return nil, nil
+}
+
+/*wp := workerpool.New(16)
+var mu sync.Mutex
+for i := range testCases {
+	i := i
+	wp.Submit(func() {
+		tCase := testCases[i]
+		dealer := backtest.NewDealer()
+		if err := dealer.Configure(tCase); err != nil {
+			if errors.Is(err, trader.ErrInvalidConfig) {
+				return
+			}
+			panic(err)
+		}
+
+		bot := _typeRegistry[config["bot"].(string)].(botMakerFunc)()
+		bot.SetDealer(dealer)
+		if err := bot.Configure(tCase); err != nil {
+			if errors.Is(err, trader.ErrInvalidConfig) {
+				return
+			}
+			panic(err)
+		}
+
+		result, err := execBacktest(bot, dealer, prices)
+		if err != nil {
+			panic(err)
+		}
+		result.Description = fmt.Sprintf("%+v", tCase)
+
+		mu.Lock()
+		results = append(results, result)
+		mu.Unlock()
+
+		bar.Add(1)
+	})
+}
+
+wp.StopWait()*/

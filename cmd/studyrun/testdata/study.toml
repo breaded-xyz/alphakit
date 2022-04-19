@@ -1,16 +1,23 @@
 title = "Test Study"
 asset = "btcusdt"
-barSize = "H1"
+resolution = "H1"
 
-# Dealer config
+[samples]
+btcusdt = ""
+ethusdt = ""
+
+[dealer]
 initialCapital = 1000.0
 slippagePct = 0.0005
 spreadPct = 0.00025
 transactionPct = 0.0005
 fundingHourPct = 0.000025
 
-# Bot config
+[bot]
 bot = "trend.bot"
+initialCapital = 1000.0
+sizerF = 0.0
+sizerScaleF = 1.0
 enterLong = 1.0
 enterShort = -1.0
 exitLong = -1.0
@@ -23,5 +30,3 @@ mmiLength = 300
 mmiSmootherLength = 300
 riskerSDLength = 0
 riskerSDFactor = 1.0
-sizerF = 0.0
-sizerScaleF = 1.0
