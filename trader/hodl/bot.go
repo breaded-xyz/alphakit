@@ -36,6 +36,10 @@ func (b *Bot) SetDealer(dealer broker.Dealer) {
 	b.dealer = dealer
 }
 
+func (b *Bot) Warmup(ctx context.Context, prices []market.Kline) error {
+	return nil
+}
+
 func (b *Bot) Configure(config map[string]any) error {
 	buyBarIndex, ok := config[BuyBarIndex].(int)
 	if !ok {

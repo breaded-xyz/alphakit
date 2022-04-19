@@ -1,4 +1,4 @@
-package conv
+package util
 
 func ToInt(v any) int {
 	var i int

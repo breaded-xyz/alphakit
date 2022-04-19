@@ -12,6 +12,7 @@ var ErrInvalidConfig = errors.New("invalid bot config")
 
 type Bot interface {
 	market.Receiver
+	Warmup(context.Context, []market.Kline) error
 	SetDealer(broker.Dealer)
 	Close(context.Context) error
 }

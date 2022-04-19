@@ -4,8 +4,8 @@ import (
 	"context"
 
 	"github.com/colngroup/zero2algo/broker"
-	"github.com/colngroup/zero2algo/conv"
 	"github.com/colngroup/zero2algo/dec"
+	"github.com/colngroup/zero2algo/internal/util"
 	"github.com/colngroup/zero2algo/market"
 	"github.com/colngroup/zero2algo/money"
 	"github.com/colngroup/zero2algo/risk"
@@ -39,12 +39,18 @@ func (b *Bot) SetDealer(dealer broker.Dealer) {
 	b.dealer = dealer
 }
 
+func (b *Bot) Warmup(ctx context.Context, prices []market.Kline) error {
+	for i := range prices {
+		if err := b.updateIndicators(ctx, prices[i]); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 func (b *Bot) ReceivePrice(ctx context.Context, price market.Kline) error {
 
-	if err := b.Risker.ReceivePrice(ctx, price); err != nil {
-		return err
-	}
-	if err := b.Predicter.ReceivePrice(ctx, price); err != nil {
+	if err := b.updateIndicators(ctx, price); err != nil {
 		return err
 	}
 	if !(b.Predicter.Valid() && b.Risker.Valid()) {
@@ -73,6 +79,16 @@ func (b *Bot) Close(ctx context.Context) error {
 		return err
 	}
 
+	return nil
+}
+
+func (b *Bot) updateIndicators(ctx context.Context, price market.Kline) error {
+	if err := b.Risker.ReceivePrice(ctx, price); err != nil {
+		return err
+	}
+	if err := b.Predicter.ReceivePrice(ctx, price); err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -231,19 +247,19 @@ func (b *Bot) Configure(config map[string]any) error {
 	b.ExitLong = config["exitlong"].(float64)
 	b.ExitShort = config["exitshort"].(float64)
 
-	maFastLength := conv.ToInt(config["mafastlength"])
-	maSlowLength := conv.ToInt(config["maslowlength"])
+	maFastLength := util.ToInt(config["mafastlength"])
+	maSlowLength := util.ToInt(config["maslowlength"])
 	if maFastLength >= maSlowLength {
 		return trader.ErrInvalidConfig
 	}
 	maOsc := ta.NewOsc(ta.NewALMA(maFastLength), ta.NewALMA(maSlowLength))
-	maSDFilter := ta.NewSDWithFactor(conv.ToInt(config["masdfilterlength"]), config["masdfilterfactor"].(float64))
-	mmi := ta.NewMMIWithSmoother(conv.ToInt(config["mmilength"]), ta.NewALMA(conv.ToInt(config["mmismootherlength"])))
+	maSDFilter := ta.NewSDWithFactor(util.ToInt(config["masdfilterlength"]), config["masdfilterfactor"].(float64))
+	mmi := ta.NewMMIWithSmoother(util.ToInt(config["mmilength"]), ta.NewALMA(util.ToInt(config["mmismootherlength"])))
 	b.Predicter = NewPredicter(maOsc, maSDFilter, mmi)
 
-	riskSDLength := conv.ToInt(config["riskersdlength"])
+	riskSDLength := util.ToInt(config["riskersdlength"])
 	if riskSDLength > 0 {
-		b.Risker = risk.NewSDRisk(conv.ToInt(config["riskersdlength"]), config["riskersdfactor"].(float64))
+		b.Risker = risk.NewSDRisk(util.ToInt(config["riskersdlength"]), config["riskersdfactor"].(float64))
 	} else {
 		b.Risker = risk.NewFullRisk()
 	}

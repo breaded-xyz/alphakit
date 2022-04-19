@@ -1,6 +1,7 @@
 package optimize
 
 import (
+	"github.com/colngroup/zero2algo/internal/util"
 	"github.com/colngroup/zero2algo/market"
 )
 
@@ -14,10 +15,12 @@ import (
 // Included is an example method for a 'brute-force peak objective' approach which
 // tests all given parameter combinations and selects the highest ranked (peak) param set.
 // Method:
+//
 // Setup:
 // - Generate 1 or more price data samples (inc. over/under sampling)
 // - Split sample into in-sample (training) and out-of-sample (validation) datasets
 // - Generate 1 or more param sets using the cartesian product of given ranges that define the param space
+//
 // Training:
 // - Execute each algo param set over the in-sample price data
 // - Average the performance for each param set over the in-sample data
@@ -44,4 +47,8 @@ type ParamSetReport struct {
 	PRR    float64
 	Sharpe float64
 	Calmar float64
+}
+
+func NewParamSet() ParamSet {
+	return ParamSet{ID: ParamSetID(util.NewID())}
 }

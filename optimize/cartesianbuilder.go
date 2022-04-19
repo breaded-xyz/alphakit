@@ -38,15 +38,15 @@ func CartesianBuilder(in map[string]any) []CartesianProduct {
 	}
 
 	// Produce the cartesian products passing in the input sets
-	// Marshal each product (a slice of key-value pairs) back to a test case map
+	// Marshal each product (a slice of key-value pairs) back to a param set
 	productCh := cartesian.Iter(cartesianInputSets...)
 	for product := range productCh {
-		tCase := make(map[string]any, len(product))
+		pSet := make(map[string]any, len(product))
 		for i := range product {
 			kv := product[i].(keyValuePair)
-			tCase[kv.k] = kv.v
+			pSet[kv.k] = kv.v
 		}
-		products = append(products, tCase)
+		products = append(products, pSet)
 	}
 
 	return products

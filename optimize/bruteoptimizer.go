@@ -11,55 +11,68 @@ import (
 	"github.com/colngroup/zero2algo/trader"
 )
 
-type CaseResult struct {
-	CAGR   float64
-	PRR    float64
-	Sharpe float64
-	Calmar float64
-}
+type ParamRange map[string]any
 
-type Step struct {
-	Result perf.PerformanceReport
+type OptimizerStep struct {
+	Params ParamSet
+	Result ParamSetReport
 }
 
 type BruteOptimizer struct {
-	Params         map[string]any
-	Samples        [][]market.Kline
 	SampleSplitPct float64
-	Warmup         int
+	WarmupBarCount int
 	MakeBot        func() trader.ConfigurableBot
 	MakeDealer     func() broker.SimulatedDealer
 
-	testCases map[string]map[string]any
-	results   map[string]CaseResult
+	study *Study
 }
 
-func (o *BruteOptimizer) Prepare() {}
+func (o *BruteOptimizer) Prepare(in ParamRange, samples [][]market.Kline) (int, error) {
 
-func (o *BruteOptimizer) Start(ctx context.Context) (chan<- Step, error) {
+	products := CartesianBuilder(in)
+	for i := range products {
+		pSet := NewParamSet()
+		pSet.Params = products[i]
+		o.study.ParamSets[pSet.ID] = pSet
+	}
 
-	resultCh := make(chan Step)
+	o.study.Samples = samples
+
+	steps := len(o.study.ParamSets) * len(samples) // Training phase
+	steps += len(samples)                          // Validation phase for single optima
+
+	return steps, nil
+}
+
+func (o *BruteOptimizer) Start(ctx context.Context) (chan<- OptimizerStep, error) {
+
+	resultCh := make(chan OptimizerStep)
 
 	// Run training phase
 	// Select top rank params based on average metrics
 	// Run OOS backtest
 
-	for k := range o.testCases {
-		testCase := o.testCases[k]
-		sampleReports := make([]perf.PerformanceReport, 0, len(o.Samples))
-	testCase:
-		for i := range o.Samples {
-			sample := o.Samples[i]
+	for k := range o.study.ParamSets {
+		pSet := o.study.ParamSets[k]
+		perSampleReports := make([]perf.PerformanceReport, 0, len(o.study.Samples))
+	pSetBacktest:
+		for i := range o.study.Samples {
+			sample := o.study.Samples[i]
 
 			dealer := o.MakeDealer()
 			bot := o.MakeBot()
-			if err := bot.Configure(testCase); err != nil {
+			if err := bot.Configure(pSet.Params); err != nil {
 				if errors.Is(err, trader.ErrInvalidConfig) {
-					continue testCase
+					continue pSetBacktest
 				}
 				panic(err)
 			}
-			for i := range sample {
+
+			if err := bot.Warmup(ctx, sample[:o.WarmupBarCount]); err != nil {
+				panic(err)
+			}
+
+			for i := range sample[o.WarmupBarCount:] {
 				price := sample[i]
 				if err := dealer.ReceivePrice(ctx, price); err != nil {
 					panic(err)
@@ -72,20 +85,18 @@ func (o *BruteOptimizer) Start(ctx context.Context) (chan<- Step, error) {
 			trades, _, _ := dealer.ListTrades(context.Background(), nil)
 			equity := dealer.EquityHistory()
 			result := perf.NewPerformanceReport(trades, equity)
-			sampleReports = append(sampleReports, result)
-			resultCh <- Step{
-				Result: result,
-			}
+			perSampleReports = append(perSampleReports, result)
+			resultCh <- OptimizerStep{}
 		}
 		// Create testCase Report
-		o.results[k] = newCaseResult(sampleReports)
+		o.study.InSample[pSet.ID] = newParamSetReport(perSampleReports)
 	}
 
 	return nil, nil
 }
 
-func newCaseResult(reports []perf.PerformanceReport) CaseResult {
-	return CaseResult{}
+func newParamSetReport(reports []perf.PerformanceReport) ParamSetReport {
+	return ParamSetReport{}
 }
 
 func splitSample(sample []market.Kline, splitPct float64) (a, b []market.Kline) {
