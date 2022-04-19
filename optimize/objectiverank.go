@@ -4,7 +4,7 @@ import (
 	"github.com/colngroup/zero2algo/perf"
 )
 
-type ObjectiveRanker func(a, b perf.PerformanceReport) bool
+type ObjectiveRanker func(a, b ParamSetReport) bool
 
 func SharpeRanker(a, b perf.PerformanceReport) bool {
 	return a.Portfolio.Sharpe < b.Portfolio.Sharpe

@@ -29,10 +29,13 @@ import (
 // - Execute the highest ranked ("trained") algo param over the out-of-sample price data
 // - Accept or reject the hypothesis based on statistical significance of the performance report
 type Study struct {
-	Samples   [][]market.Kline
-	ParamSets map[ParamSetID]ParamSet
-	InSample  map[ParamSetID]ParamSetReport
-	OutSample map[ParamSetID]ParamSetReport
+	Samples [][]market.Kline
+
+	Training        map[ParamSetID]ParamSet
+	TrainingResults map[ParamSetID]ParamSetReport
+
+	Optima        map[ParamSetID]ParamSet
+	OptimaResults map[ParamSetID]ParamSetReport
 }
 
 type ParamSet struct {
