@@ -32,10 +32,11 @@ type OptimizerStep struct {
 
 // BruteOptimizer implements a 'brute-force peak objective' optimization approach which
 // tests all given parameter combinations and selects the highest ranked (peak) param set.
-// The outline method:
+// Optima is selected by the given ObjectiveRanker func.
+// Optimization method in 3 stages:
 // Prepare:
 // - Accept 1 or more price data samples
-// - Split sample into in-sample (training) and out-of-sample (validation) datasets
+// - Split sample price data into in-sample (training) and out-of-sample (validation) datasets
 // - Generate 1 or more param sets using the cartesian product of given ranges that define the param space
 // Train:
 // - Execute each algo param set over the in-sample price data
