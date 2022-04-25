@@ -22,4 +22,4 @@ type ConfigurableBot interface {
 	Configure(config map[string]any) error
 }
 
-type BotMakerFunc func() ConfigurableBot
+type MakeBot func(config map[string]any) (Bot, error)

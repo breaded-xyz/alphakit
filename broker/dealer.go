@@ -23,3 +23,5 @@ type SimulatedDealer interface {
 	EquityHistory() EquitySeries
 	SetInitialCapital(amount decimal.Decimal)
 }
+
+type MakeSimulatedDealer func(config map[string]any) (SimulatedDealer, error)
