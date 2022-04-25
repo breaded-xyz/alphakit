@@ -1,15 +1,11 @@
 package optimize
 
-import (
-	"github.com/colngroup/zero2algo/perf"
-)
+type ObjectiveRanker func(a, b Report) bool
 
-type ObjectiveRanker func(a, b ParamSetReport) bool
-
-func SharpeRanker(a, b perf.PerformanceReport) bool {
-	return a.Portfolio.Sharpe < b.Portfolio.Sharpe
+func SharpeRanker(a, b Report) bool {
+	return a.Sharpe < b.Sharpe
 }
 
-func PRRRanker(a, b perf.PerformanceReport) bool {
-	return a.Trade.PRR < b.Trade.PRR
+func PRRRanker(a, b Report) bool {
+	return a.PRR < b.PRR
 }

@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"math"
+	"sync"
 
 	"github.com/colngroup/zero2algo/broker"
 	"github.com/colngroup/zero2algo/market"
@@ -16,16 +17,25 @@ import (
 type Phase int
 
 const (
-	Training Phase = iota
+	Training Phase = iota + 1
 	Validation
 )
 
 type ParamRange map[string]any
 
 type OptimizerStep struct {
-	Params ParamSet
-	Result ParamSetReport
-	Err    error
+	Phase    Phase
+	ParamSet ParamSet
+	Result   perf.PerformanceReport
+	Err      error
+}
+
+type optimizerJob struct {
+	ParamSet       ParamSet
+	Sample         []market.Kline
+	WarmupBarCount int
+	MakeBot        func() trader.ConfigurableBot
+	MakeDealer     func() broker.SimulatedDealer
 }
 
 // BruteOptimizer implements a 'brute-force peak objective' optimization approach which
@@ -40,7 +50,7 @@ type OptimizerStep struct {
 // - Rank the param sets based on the performance objective (Profit Factor, T-Score etc)
 // Validate:
 // - Execute the highest ranked ("trained") algo param over the out-of-sample price data
-// - Accept or reject the hypothesis based on statistical significance of the performance report
+// - Accept or reject the hypothesis based on statistical significance of the study report
 type BruteOptimizer struct {
 	SampleSplitPct float64
 	WarmupBarCount int
@@ -48,7 +58,7 @@ type BruteOptimizer struct {
 	MakeDealer     func() broker.SimulatedDealer
 	RankFunc       ObjectiveRanker
 
-	study *Study
+	study Study
 }
 
 func (o *BruteOptimizer) Prepare(in ParamRange, samples [][]market.Kline) (int, error) {
@@ -57,7 +67,7 @@ func (o *BruteOptimizer) Prepare(in ParamRange, samples [][]market.Kline) (int, 
 	for i := range products {
 		pSet := NewParamSet()
 		pSet.Params = products[i]
-		o.study.Training[pSet.ID] = pSet
+		o.study.Training = append(o.study.Training, pSet)
 	}
 
 	o.study.Samples = samples
@@ -68,111 +78,160 @@ func (o *BruteOptimizer) Prepare(in ParamRange, samples [][]market.Kline) (int, 
 	return steps, nil
 }
 
-func (o *BruteOptimizer) Start(ctx context.Context) (chan<- OptimizerStep, error) {
+func (o *BruteOptimizer) Start(ctx context.Context) (<-chan OptimizerStep, error) {
 
-	resultCh := make(chan OptimizerStep)
+	outChan := make(chan OptimizerStep)
 
 	go func() {
-		trainingCh, err := o.startPhase(ctx, Training)
-		if err != nil {
-			resultCh <- OptimizerStep{Err: err}
+		defer close(outChan)
+
+		doneChan := make(chan struct{})
+		defer close(doneChan)
+
+		// Training phase
+		pSets, samples := prepareTraining(o.study, o.SampleSplitPct)
+		trainingOutChan := o.startPhase(ctx, doneChan, pSets, samples)
+		for step := range trainingOutChan {
+			outChan <- step
+			if step.Err != nil {
+				if errors.Is(step.Err, trader.ErrInvalidConfig) {
+					continue
+				} else {
+					return
+				}
+			}
+			report := o.study.TrainingResults[step.ParamSet.ID]
+			report.AddResult(step.Result)
+			o.study.TrainingResults[step.ParamSet.ID] = report
 		}
+		slices.SortFunc(maps.Values(o.study.TrainingResults), o.RankFunc)
+		o.study.Optima = append(o.study.Optima, o.study.Training[len(o.study.Training)-1])
 
-		select {
-		case <-trainingCh:
+		// Validation phase
+
+	}()
+
+	return outChan, nil
+}
+
+func (o *BruteOptimizer) startPhase(ctx context.Context, doneCh <-chan struct{}, pSets []ParamSet, samples [][]market.Kline) <-chan OptimizerStep {
+	outChan := make(chan OptimizerStep)
+
+	go func() {
+		defer close(outChan)
+
+		jobChan := make(chan optimizerJob)
+		jobOutChan := processJobs(ctx, doneCh, jobChan)
+
+		for i := range pSets {
+			for j := range samples {
+				jobChan <- optimizerJob{
+					ParamSet:       pSets[i],
+					Sample:         samples[j],
+					WarmupBarCount: o.WarmupBarCount,
+					MakeBot:        o.MakeBot,
+					MakeDealer:     o.MakeDealer,
+				}
+			}
 		}
+		close(jobChan)
 
-		results := maps.Values(o.study.TrainingResults)
-		slices.SortFunc(results, o.RankFunc)
-
-		validationCh, err := o.startPhase(ctx, Validation)
-		if err != nil {
-			resultCh <- OptimizerStep{Err: err}
-		}
-
-		select {
-		case <-validationCh:
+		for step := range jobOutChan {
+			outChan <- step
 		}
 	}()
 
-	return resultCh, nil
+	return outChan
 }
 
-func (o *BruteOptimizer) startPhase(ctx context.Context, phase Phase) (chan OptimizerStep, error) {
+func processJobs(ctx context.Context, doneCh <-chan struct{}, jobCh <-chan optimizerJob) <-chan OptimizerStep {
 
-	resultCh := make(chan OptimizerStep)
+	outCh := make(chan OptimizerStep)
 
-	var phasePSets map[ParamSetID]ParamSet
+	go func() {
+		defer close(outCh)
+		var wg sync.WaitGroup
+		next := true
 
-	switch phase {
-	case Training:
-		phasePSets = o.study.Training
-	case Validation:
-		phasePSets = o.study.Optima
-	default:
-		return nil, errors.New("invalid phase")
-	}
-
-	for k := range phasePSets {
-		pSet := o.study.Training[k]
-		perSampleReports := make([]perf.PerformanceReport, 0, len(o.study.Samples))
-	pSetBacktest:
-		for i := range o.study.Samples {
-			sample := splitSample(phase, o.study.Samples[i], o.SampleSplitPct)
-
-			dealer := o.MakeDealer()
-			bot := o.MakeBot()
-			if err := bot.Configure(pSet.Params); err != nil {
-				if errors.Is(err, trader.ErrInvalidConfig) {
-					continue pSetBacktest
+		for next {
+			select {
+			case <-ctx.Done():
+				next = false
+			case <-doneCh:
+				next = false
+			case job, ok := <-jobCh:
+				if !ok {
+					next = false
+					break
 				}
-				panic(err)
-			}
+				wg.Add(1)
+				go func() {
+					defer wg.Done()
+					dealer := job.MakeDealer()
+					bot := job.MakeBot()
 
-			if err := bot.Warmup(ctx, sample[:o.WarmupBarCount]); err != nil {
-				panic(err)
-			}
+					if err := bot.Configure(job.ParamSet.Params); err != nil {
+						outCh <- OptimizerStep{ParamSet: job.ParamSet, Err: err}
+					}
+					if err := bot.Warmup(ctx, job.Sample[:job.WarmupBarCount]); err != nil {
+						outCh <- OptimizerStep{ParamSet: job.ParamSet, Err: err}
+					}
 
-			for i := range sample[o.WarmupBarCount:] {
-				price := sample[i]
-				if err := dealer.ReceivePrice(ctx, price); err != nil {
-					panic(err)
-				}
-				if err := bot.ReceivePrice(ctx, price); err != nil {
-					panic(err)
-				}
+					perf, err := runBacktest(ctx, bot, dealer, job.Sample[job.WarmupBarCount:])
+					outCh <- OptimizerStep{ParamSet: job.ParamSet, Result: perf, Err: err}
+				}()
 			}
-			bot.Close(context.Background())
-			trades, _, _ := dealer.ListTrades(context.Background(), nil)
-			equity := dealer.EquityHistory()
-			result := perf.NewPerformanceReport(trades, equity)
-			perSampleReports = append(perSampleReports, result)
-			resultCh <- OptimizerStep{}
 		}
+		wg.Wait()
+	}()
 
-		o.study.TrainingResults[pSet.ID] = newParamSetReport(perSampleReports)
+	return outCh
+}
+
+func runBacktest(ctx context.Context, bot trader.Bot, dealer broker.SimulatedDealer, prices []market.Kline) (perf.PerformanceReport, error) {
+	var empty perf.PerformanceReport
+
+	for i := range prices {
+		price := prices[i]
+		if err := dealer.ReceivePrice(ctx, price); err != nil {
+			return empty, err
+		}
+		if err := bot.ReceivePrice(ctx, price); err != nil {
+			return empty, err
+		}
 	}
 
-	return resultCh, nil
+	bot.Close(ctx)
+	trades, _, err := dealer.ListTrades(context.Background(), nil)
+	if err != nil {
+		return empty, err
+	}
+	equity := dealer.EquityHistory()
+	report := perf.NewPerformanceReport(trades, equity)
+
+	return report, nil
 }
 
-func newParamSetReport(reports []perf.PerformanceReport) ParamSetReport {
-	return ParamSetReport{}
+func prepareTraining(study Study, splitPct float64) ([]ParamSet, [][]market.Kline) {
+	var trainingSamples [][]market.Kline
+	for i := range study.Samples {
+		training, _ := splitSample(study.Samples[i], splitPct)
+		trainingSamples = append(trainingSamples, training)
+	}
+	return study.Training, trainingSamples
 }
 
-func splitSample(phase Phase, sample []market.Kline, splitPct float64) []market.Kline {
+func prepareValidation(study Study, splitPct float64) ([]ParamSet, [][]market.Kline) {
+	var validationSamples [][]market.Kline
+	for i := range study.Samples {
+		_, validation := splitSample(study.Samples[i], splitPct)
+		validationSamples = append(validationSamples, validation)
+	}
+	return study.Optima, validationSamples
+}
 
+func splitSample(sample []market.Kline, splitPct float64) (a, b []market.Kline) {
 	splitIndex := float64(len(sample)) * splitPct
 	splitIndex = math.Floor(splitIndex)
-
-	var split []market.Kline
-
-	switch phase {
-	case Training:
-		split = sample[:int(splitIndex)]
-	case Validation:
-		split = sample[int(splitIndex):]
-	}
-
-	return split
+	return sample[:int(splitIndex)], sample[int(splitIndex):]
 }

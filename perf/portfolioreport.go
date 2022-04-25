@@ -44,6 +44,10 @@ func NewPortfolioReport(curve broker.EquitySeries) *PortfolioReport {
 	report.CAGR = CAGR(report.StartEquity, report.EndEquity, int(report.Period.Hours())/24)
 
 	daily := ReduceEOD(curve)
+	if len(daily) == 0 {
+		return &report
+	}
+
 	report.drawdowns = Drawdowns(daily)
 	report.mdd = MaxDrawdown(report.drawdowns)
 	report.MaxDrawdown = report.mdd.Pct
