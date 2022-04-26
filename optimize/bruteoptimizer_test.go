@@ -37,7 +37,7 @@ func TestBruteOptimizer_Prepare(t *testing.T) {
 					{{C: dec.New(10)}, {C: dec.New(20)}},
 					{{C: dec.New(50)}, {C: dec.New(60)}},
 				},
-				OptimaSamples: [][]market.Kline{
+				ValidationSamples: [][]market.Kline{
 					{{C: dec.New(30)}},
 					{{C: dec.New(60)}},
 				},

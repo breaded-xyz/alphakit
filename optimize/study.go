@@ -18,9 +18,9 @@ type Study struct {
 	TrainingSamples [][]market.Kline
 	TrainingResults map[ParamSetID]Report
 
-	OptimaPSets   []ParamSet
-	OptimaSamples [][]market.Kline
-	OptimaResults map[ParamSetID]Report
+	ValidationPSets   []ParamSet
+	ValidationSamples [][]market.Kline
+	ValidationResults map[ParamSetID]Report
 }
 
 type ParamSetID string

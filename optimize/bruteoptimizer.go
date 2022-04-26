@@ -59,7 +59,7 @@ func (o *BruteOptimizer) Prepare(in ParamRange, samples [][]market.Kline) (int, 
 	for i := range samples {
 		training, validation := splitSample(samples[i], o.SampleSplitPct)
 		o.study.TrainingSamples = append(o.study.TrainingSamples, training)
-		o.study.OptimaSamples = append(o.study.OptimaSamples, validation)
+		o.study.ValidationSamples = append(o.study.ValidationSamples, validation)
 	}
 
 	steps := len(o.study.TrainingPSets) * len(samples) // Training phase
@@ -98,10 +98,10 @@ func (o *BruteOptimizer) Start(ctx context.Context) (<-chan OptimizerStep, error
 
 		// Evaluate traning results and select top ranked pset for validation phase
 		slices.SortFunc(maps.Values(o.study.TrainingResults), o.Ranker)
-		o.study.OptimaPSets = append(o.study.OptimaPSets, o.study.TrainingPSets[len(o.study.TrainingPSets)-1])
+		o.study.ValidationPSets = append(o.study.ValidationPSets, o.study.TrainingPSets[len(o.study.TrainingPSets)-1])
 
 		// Validation phase
-		validationJobCh := o.enqueueJobs(o.study.OptimaPSets, o.study.OptimaSamples)
+		validationJobCh := o.enqueueJobs(o.study.ValidationPSets, o.study.ValidationSamples)
 		validationOutCh := processBruteJobs(ctx, doneCh, validationJobCh)
 		for step := range validationOutCh {
 			step.Phase = Validation
@@ -109,13 +109,17 @@ func (o *BruteOptimizer) Start(ctx context.Context) (<-chan OptimizerStep, error
 			if step.Err != nil {
 				return
 			}
-			report := o.study.OptimaResults[step.PSet.ID]
+			report := o.study.ValidationResults[step.PSet.ID]
 			report.AddResult(step.Result)
-			o.study.OptimaResults[step.PSet.ID] = report
+			o.study.ValidationResults[step.PSet.ID] = report
 		}
 	}()
 
 	return outCh, nil
+}
+
+func (o *BruteOptimizer) Study() Study {
+	return o.study
 }
 
 func (o *BruteOptimizer) enqueueJobs(pSets []ParamSet, samples [][]market.Kline) <-chan bruteOptimizerJob {

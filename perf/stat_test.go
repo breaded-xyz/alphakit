@@ -3,6 +3,7 @@ package perf
 import (
 	"testing"
 
+	"github.com/colngroup/zero2algo/internal/util"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -12,7 +13,7 @@ func TestCAGR(t *testing.T) {
 	giveDays := 190
 	want := 4.81
 	act := CAGR(giveInitial, giveFinal, giveDays)
-	assert.Equal(t, want, Round2DP(act))
+	assert.Equal(t, want, util.Round2DP(act))
 }
 
 func TestKellyCriterion(t *testing.T) {
@@ -20,12 +21,12 @@ func TestKellyCriterion(t *testing.T) {
 	giveWinP := 0.7
 	want := 0.51
 	act := KellyCriterion(giveProfitFactor, giveWinP)
-	assert.Equal(t, want, Round2DP(act))
+	assert.Equal(t, want, util.Round2DP(act))
 }
 
 func TestSharpeRatio(t *testing.T) {
 	give := []float64{0.1, 0.2, -0.15, 0.1, 0.8, -0.3, 0.2}
 	exp := 6.20
 	act := SharpeRatio(give, SharpeAnnualRiskFreeRate)
-	assert.Equal(t, exp, Round2DP(act))
+	assert.Equal(t, exp, util.Round2DP(act))
 }

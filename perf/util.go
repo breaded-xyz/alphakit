@@ -52,7 +52,3 @@ func NNZ(x, y float64) float64 {
 	}
 	return x
 }
-
-func Round2DP(x float64) float64 {
-	return math.Round(x*100) / 100
-}
