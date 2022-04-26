@@ -8,7 +8,7 @@ import (
 	"testing"
 
 	"github.com/colngroup/zero2algo/broker/backtest"
-	"github.com/colngroup/zero2algo/dec"
+	"github.com/colngroup/zero2algo/internal/dec"
 	"github.com/colngroup/zero2algo/market"
 	"github.com/colngroup/zero2algo/money"
 	"github.com/colngroup/zero2algo/perf"

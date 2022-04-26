@@ -8,7 +8,7 @@ import (
 	"os"
 
 	"github.com/colngroup/zero2algo/broker"
-	"github.com/colngroup/zero2algo/dec"
+	"github.com/colngroup/zero2algo/internal/dec"
 	"github.com/colngroup/zero2algo/market"
 	"github.com/colngroup/zero2algo/perf"
 )

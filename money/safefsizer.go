@@ -3,7 +3,7 @@ package money
 import (
 	"math"
 
-	"github.com/colngroup/zero2algo/dec"
+	"github.com/colngroup/zero2algo/internal/dec"
 	"github.com/shopspring/decimal"
 )
 

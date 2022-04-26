@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/colngroup/zero2algo/broker"
-	"github.com/colngroup/zero2algo/dec"
+	"github.com/colngroup/zero2algo/internal/dec"
 	"github.com/shopspring/decimal"
 	"github.com/stretchr/testify/assert"
 )

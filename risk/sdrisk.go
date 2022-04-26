@@ -3,7 +3,7 @@ package risk
 import (
 	"context"
 
-	"github.com/colngroup/zero2algo/dec"
+	"github.com/colngroup/zero2algo/internal/dec"
 	"github.com/colngroup/zero2algo/market"
 	"github.com/colngroup/zero2algo/ta"
 	"github.com/shopspring/decimal"
