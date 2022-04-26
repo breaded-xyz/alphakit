@@ -62,6 +62,10 @@ func (p *Predicter) Predict() float64 {
 		return score + 0.9
 	case ta.CrossUp(p.osc.History(), 0):
 		return score + 0.6
+	case ta.CrossUp(p.osc.History(), lower):
+		return score + 0.2
+	case ta.CrossDown(p.osc.History(), upper):
+		return -(score + 0.2)
 	case ta.CrossDown(p.osc.History(), 0):
 		return -(score + 0.6)
 	case ta.CrossDown(p.osc.History(), lower):

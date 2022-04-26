@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/colngroup/zero2algo/dec"
+	"github.com/colngroup/zero2algo/internal/util"
 	"github.com/colngroup/zero2algo/market"
 	"github.com/colngroup/zero2algo/ta"
 	"github.com/stretchr/testify/assert"
@@ -80,6 +81,20 @@ func TestPredicter_Predict(t *testing.T) {
 			want:          0.6,
 		},
 		{
+			name:          "long @ 0.3, cross up lower limit w/ MMI",
+			giveOscValues: []float64{-20, -10},
+			giveSDValues:  []float64{15, 15},
+			giveMMIValues: []float64{75, 70},
+			want:          0.3,
+		},
+		{
+			name:          "long @ 0.2, cross up lower limit w/no MMI",
+			giveOscValues: []float64{-20, -10},
+			giveSDValues:  []float64{15, 15},
+			giveMMIValues: []float64{70, 75},
+			want:          0.2,
+		},
+		{
 			name:          "short @ -1.0",
 			giveOscValues: []float64{-10, -20},
 			giveSDValues:  []float64{15, 15},
@@ -107,6 +122,20 @@ func TestPredicter_Predict(t *testing.T) {
 			giveMMIValues: []float64{70, 70},
 			want:          -0.6,
 		},
+		{
+			name:          "short @ -0.3",
+			giveOscValues: []float64{20, 10},
+			giveSDValues:  []float64{15, 15},
+			giveMMIValues: []float64{75, 70},
+			want:          -0.3,
+		},
+		{
+			name:          "short @ -0.2",
+			giveOscValues: []float64{20, 10},
+			giveSDValues:  []float64{15, 15},
+			giveMMIValues: []float64{70, 75},
+			want:          -0.2,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -116,7 +145,7 @@ func TestPredicter_Predict(t *testing.T) {
 				&ta.StubIndicator{Values: tt.giveMMIValues},
 			)
 			act := predicter.Predict()
-			assert.Equal(t, tt.want, act)
+			assert.Equal(t, tt.want, util.Round2DP(act))
 		})
 	}
 
