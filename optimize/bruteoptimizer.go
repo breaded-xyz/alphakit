@@ -91,9 +91,9 @@ func (o *BruteOptimizer) Start(ctx context.Context) (<-chan OptimizerStep, error
 					return
 				}
 			}
-			report := o.study.TrainingResults[step.ParamSet.ID]
+			report := o.study.TrainingResults[step.PSet.ID]
 			report.AddResult(step.Result)
-			o.study.TrainingResults[step.ParamSet.ID] = report
+			o.study.TrainingResults[step.PSet.ID] = report
 		}
 
 		// Evaluate traning results and select top ranked pset for validation phase
@@ -109,9 +109,9 @@ func (o *BruteOptimizer) Start(ctx context.Context) (<-chan OptimizerStep, error
 			if step.Err != nil {
 				return
 			}
-			report := o.study.OptimaResults[step.ParamSet.ID]
+			report := o.study.OptimaResults[step.PSet.ID]
 			report.AddResult(step.Result)
-			o.study.OptimaResults[step.ParamSet.ID] = report
+			o.study.OptimaResults[step.PSet.ID] = report
 		}
 	}()
 
@@ -166,17 +166,17 @@ func processBruteJobs(ctx context.Context, doneCh <-chan struct{}, jobCh <-chan 
 					defer wg.Done()
 					dealer, err := job.MakeDealer(job.ParamSet.Params)
 					if err != nil {
-						outCh <- OptimizerStep{ParamSet: job.ParamSet, Err: err}
+						outCh <- OptimizerStep{PSet: job.ParamSet, Err: err}
 					}
 					bot, err := job.MakeBot(job.ParamSet.Params)
 					if err != nil {
-						outCh <- OptimizerStep{ParamSet: job.ParamSet, Err: err}
+						outCh <- OptimizerStep{PSet: job.ParamSet, Err: err}
 					}
 					if err := bot.Warmup(ctx, job.Sample[:job.WarmupBarCount]); err != nil {
-						outCh <- OptimizerStep{ParamSet: job.ParamSet, Err: err}
+						outCh <- OptimizerStep{PSet: job.ParamSet, Err: err}
 					}
 					perf, err := runBacktest(ctx, bot, dealer, job.Sample[job.WarmupBarCount:])
-					outCh <- OptimizerStep{ParamSet: job.ParamSet, Result: perf, Err: err}
+					outCh <- OptimizerStep{PSet: job.ParamSet, Result: perf, Err: err}
 				}()
 			}
 		}

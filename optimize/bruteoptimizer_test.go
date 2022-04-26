@@ -97,8 +97,8 @@ func TestProcessBruteJobs(t *testing.T) {
 	close(giveJobCh)
 
 	want := []OptimizerStep{
-		{ParamSet: ParamSet{ID: "0", Params: map[string]any{"A": 0, "B": 1}}},
-		{ParamSet: ParamSet{ID: "1", Params: map[string]any{"Y": 25, "Z": 26}}},
+		{PSet: ParamSet{ID: "0", Params: map[string]any{"A": 0, "B": 1}}},
+		{PSet: ParamSet{ID: "1", Params: map[string]any{"Y": 25, "Z": 26}}},
 	}
 
 	var act []OptimizerStep

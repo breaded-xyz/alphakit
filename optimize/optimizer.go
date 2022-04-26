@@ -14,13 +14,17 @@ const (
 	Validation
 )
 
+func (p Phase) String() string {
+	return [...]string{"None", "Training", "Validation"}[p]
+}
+
 type ParamRange map[string]any
 
 type OptimizerStep struct {
-	Phase    Phase
-	ParamSet ParamSet
-	Result   perf.PerformanceReport
-	Err      error
+	Phase  Phase
+	PSet   ParamSet
+	Result perf.PerformanceReport
+	Err    error
 }
 
 type Optimizer interface {
