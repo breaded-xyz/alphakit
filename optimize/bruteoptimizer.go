@@ -14,22 +14,6 @@ import (
 	"golang.org/x/exp/slices"
 )
 
-type Phase int
-
-const (
-	Training Phase = iota + 1
-	Validation
-)
-
-type ParamRange map[string]any
-
-type OptimizerStep struct {
-	Phase    Phase
-	ParamSet ParamSet
-	Result   perf.PerformanceReport
-	Err      error
-}
-
 // BruteOptimizer implements a 'brute-force peak objective' optimization approach which
 // tests all given parameter combinations and selects the highest ranked (peak) param set.
 // Optima is selected by the given ObjectiveRanker func.
