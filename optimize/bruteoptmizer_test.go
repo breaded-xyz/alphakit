@@ -11,7 +11,53 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestBruteOptimizer_EnqueueJobs(t *testing.T) {
+func TestBruteOptimizer_Prepare(t *testing.T) {
+	tests := []struct {
+		name               string
+		giveParamRange     ParamRange
+		giveSamples        [][]market.Kline
+		giveSampleSplitPct float64
+		wantSteps          int
+		wantStudy          Study
+	}{
+		{
+			name:           "ok",
+			giveParamRange: map[string]any{"A": []any{1, 2}, "B": []any{10}},
+			giveSamples: [][]market.Kline{
+				{{C: dec.New(10)}, {C: dec.New(20)}, {C: dec.New(30)}, {C: dec.New(40)}},
+				{{C: dec.New(50)}, {C: dec.New(60)}, {C: dec.New(70)}}},
+			giveSampleSplitPct: 0.5,
+			wantSteps:          6,
+			wantStudy: Study{
+				TrainingPSets: []ParamSet{
+					{Params: map[string]any{"A": 1, "B": 10}},
+					{Params: map[string]any{"A": 2, "B": 10}},
+				},
+				TrainingSamples: [][]market.Kline{
+					{{C: dec.New(10)}, {C: dec.New(20)}},
+					{{C: dec.New(50)}, {C: dec.New(60)}},
+				},
+				OptimaSamples: [][]market.Kline{
+					{{C: dec.New(30)}},
+					{{C: dec.New(60)}},
+				},
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			var optimizer BruteOptimizer
+			optimizer.SampleSplitPct = tt.giveSampleSplitPct
+			actSteps, err := optimizer.Prepare(tt.giveParamRange, tt.giveSamples)
+			assert.NoError(t, err)
+			assert.Equal(t, tt.wantSteps, actSteps)
+			assert.Len(t, optimizer.study.TrainingPSets, len(tt.wantStudy.TrainingPSets))
+			assert.ElementsMatch(t, optimizer.study.TrainingSamples, tt.wantStudy.TrainingSamples)
+		})
+	}
+}
+
+func TestBruteOptimizer_enqueueJobs(t *testing.T) {
 
 	givePSets := []ParamSet{
 		{ID: "0", Params: map[string]any{"A": 0, "B": 1}},
@@ -61,4 +107,50 @@ func TestProcessBruteJobs(t *testing.T) {
 	}
 
 	assert.ElementsMatch(t, want, act)
+}
+
+func TestSplitSample(t *testing.T) {
+	tests := []struct {
+		name         string
+		giveSample   []market.Kline
+		giveSplitPct float64
+		wantASample  []market.Kline
+		wantBSample  []market.Kline
+	}{
+		{
+			name:         "ok split",
+			giveSample:   []market.Kline{{C: dec.New(10)}, {C: dec.New(20)}, {C: dec.New(30)}},
+			giveSplitPct: 0.3,
+			wantASample:  []market.Kline{{C: dec.New(10)}},
+			wantBSample:  []market.Kline{{C: dec.New(20)}, {C: dec.New(30)}},
+		},
+		{
+			name:         "50/50",
+			giveSample:   []market.Kline{{C: dec.New(10)}, {C: dec.New(20)}, {C: dec.New(30)}, {C: dec.New(40)}},
+			giveSplitPct: 0.5,
+			wantASample:  []market.Kline{{C: dec.New(10)}, {C: dec.New(20)}},
+			wantBSample:  []market.Kline{{C: dec.New(30)}, {C: dec.New(40)}},
+		},
+		{
+			name:         "no split = same samples in A & B",
+			giveSample:   []market.Kline{{C: dec.New(10)}, {C: dec.New(20)}, {C: dec.New(30)}},
+			giveSplitPct: 0,
+			wantASample:  []market.Kline{{C: dec.New(10)}, {C: dec.New(20)}, {C: dec.New(30)}},
+			wantBSample:  []market.Kline{{C: dec.New(10)}, {C: dec.New(20)}, {C: dec.New(30)}},
+		},
+		{
+			name:         "100 pct split",
+			giveSample:   []market.Kline{{C: dec.New(10)}, {C: dec.New(20)}, {C: dec.New(30)}},
+			giveSplitPct: 1,
+			wantASample:  []market.Kline{{C: dec.New(10)}, {C: dec.New(20)}, {C: dec.New(30)}},
+			wantBSample:  []market.Kline{},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			actASample, actBSample := splitSample(tt.giveSample, tt.giveSplitPct)
+			assert.Equal(t, tt.wantASample, actASample)
+			assert.Equal(t, tt.wantBSample, actBSample)
+		})
+	}
 }

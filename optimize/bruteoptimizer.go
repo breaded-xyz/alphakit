@@ -168,6 +168,7 @@ func processBruteJobs(ctx context.Context, doneCh <-chan struct{}, jobCh <-chan 
 		for next {
 			select {
 			case <-ctx.Done():
+				outCh <- OptimizerStep{Err: ctx.Err()}
 				next = false
 			case <-doneCh:
 				next = false
@@ -176,8 +177,8 @@ func processBruteJobs(ctx context.Context, doneCh <-chan struct{}, jobCh <-chan 
 					next = false
 					break
 				}
-				wg.Add(1)
 				go func() {
+					wg.Add(1)
 					defer wg.Done()
 					dealer, err := job.MakeDealer(job.ParamSet.Params)
 					if err != nil {
@@ -190,7 +191,6 @@ func processBruteJobs(ctx context.Context, doneCh <-chan struct{}, jobCh <-chan 
 					if err := bot.Warmup(ctx, job.Sample[:job.WarmupBarCount]); err != nil {
 						outCh <- OptimizerStep{ParamSet: job.ParamSet, Err: err}
 					}
-
 					perf, err := runBacktest(ctx, bot, dealer, job.Sample[job.WarmupBarCount:])
 					outCh <- OptimizerStep{ParamSet: job.ParamSet, Result: perf, Err: err}
 				}()
@@ -215,7 +215,10 @@ func runBacktest(ctx context.Context, bot trader.Bot, dealer broker.SimulatedDea
 		}
 	}
 
-	bot.Close(ctx)
+	if err := bot.Close(ctx); err != nil {
+		return empty, err
+	}
+
 	trades, _, err := dealer.ListTrades(context.Background(), nil)
 	if err != nil {
 		return empty, err
@@ -227,7 +230,11 @@ func runBacktest(ctx context.Context, bot trader.Bot, dealer broker.SimulatedDea
 }
 
 func splitSample(sample []market.Kline, splitPct float64) (a, b []market.Kline) {
+	if splitPct == 0 {
+		return sample, sample
+	}
+
 	splitIndex := float64(len(sample)) * splitPct
-	splitIndex = math.Floor(splitIndex)
+	splitIndex = math.Ceil(splitIndex)
 	return sample[:int(splitIndex)], sample[int(splitIndex):]
 }
