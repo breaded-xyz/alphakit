@@ -21,7 +21,7 @@ func TestBruteOptimizer_EnqueueJobs(t *testing.T) {
 		{{C: dec.New(10)}, {C: dec.New(20)}},
 		{{C: dec.New(30)}, {C: dec.New(40)}, {C: dec.New(50)}},
 	}
-	want := 4 // Expect 4 enqueued jobs
+	want := 4 // Expect 4 enqueued jobs in buffered channel
 
 	optimizer := BruteOptimizer{}
 	ch := optimizer.enqueueJobs(givePSets, giveSamples)
