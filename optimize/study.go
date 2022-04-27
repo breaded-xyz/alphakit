@@ -14,24 +14,29 @@ import (
 // Dependent variable: algo performance (Sharpe, CAGR et al) measured by Report
 // Control variables: price data sample, backtest simulator settings et al
 type Study struct {
-	TrainingPSets   []ParamSet
+	Training        []ParamSet
 	TrainingSamples [][]market.Kline
 	TrainingResults map[ParamSetID]Report
 
-	ValidationPSets   []ParamSet
+	Validation        []ParamSet
 	ValidationSamples [][]market.Kline
 	ValidationResults map[ParamSetID]Report
 }
 
-type ParamSetID string
-
 type ParamSet struct {
 	ID     ParamSetID
-	Params map[string]any
+	Params ParamMap
 }
 
+type ParamSetID string
+
+type ParamMap map[string]any
+
 func NewParamSet() ParamSet {
-	return ParamSet{ID: ParamSetID(util.NewID())}
+	return ParamSet{
+		ID:     ParamSetID(util.NewID()),
+		Params: make(map[string]any),
+	}
 }
 
 type Report struct {

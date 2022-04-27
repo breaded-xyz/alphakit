@@ -18,8 +18,6 @@ func (p Phase) String() string {
 	return [...]string{"None", "Training", "Validation"}[p]
 }
 
-type ParamRange map[string]any
-
 type OptimizerStep struct {
 	Phase  Phase
 	PSet   ParamSet
@@ -28,7 +26,7 @@ type OptimizerStep struct {
 }
 
 type Optimizer interface {
-	Prepare(ParamRange, [][]market.Kline) (int, error)
+	Prepare(ParamMap, [][]market.Kline) (int, error)
 	Start(context.Context) (<-chan OptimizerStep, error)
 	Study() Study
 }

@@ -14,7 +14,7 @@ import (
 func TestBruteOptimizer_Prepare(t *testing.T) {
 	tests := []struct {
 		name               string
-		giveParamRange     ParamRange
+		giveParamRange     ParamMap
 		giveSamples        [][]market.Kline
 		giveSampleSplitPct float64
 		wantSteps          int
@@ -29,7 +29,7 @@ func TestBruteOptimizer_Prepare(t *testing.T) {
 			giveSampleSplitPct: 0.5,
 			wantSteps:          6,
 			wantStudy: Study{
-				TrainingPSets: []ParamSet{
+				Training: []ParamSet{
 					{Params: map[string]any{"A": 1, "B": 10}},
 					{Params: map[string]any{"A": 2, "B": 10}},
 				},
@@ -51,7 +51,7 @@ func TestBruteOptimizer_Prepare(t *testing.T) {
 			actSteps, err := optimizer.Prepare(tt.giveParamRange, tt.giveSamples)
 			assert.NoError(t, err)
 			assert.Equal(t, tt.wantSteps, actSteps)
-			assert.Len(t, optimizer.study.TrainingPSets, len(tt.wantStudy.TrainingPSets))
+			assert.Len(t, optimizer.study.Training, len(tt.wantStudy.Training))
 			assert.ElementsMatch(t, optimizer.study.TrainingSamples, tt.wantStudy.TrainingSamples)
 		})
 	}
@@ -66,7 +66,7 @@ func TestBruteOptimizer_Start(t *testing.T) {
 		{
 			name: "select top ranked pset for validation",
 			giveStudy: Study{
-				TrainingPSets: []ParamSet{
+				Training: []ParamSet{
 					{ID: "1", Params: map[string]any{"A": 1, "B": 10}},
 					{ID: "2", Params: map[string]any{"A": 2, "B": 10}},
 				},
@@ -76,7 +76,7 @@ func TestBruteOptimizer_Start(t *testing.T) {
 				},
 			},
 			wantStudy: Study{
-				TrainingPSets: []ParamSet{
+				Training: []ParamSet{
 					{ID: "1", Params: map[string]any{"A": 1, "B": 10}},
 					{ID: "2", Params: map[string]any{"A": 2, "B": 10}},
 				},
@@ -84,7 +84,7 @@ func TestBruteOptimizer_Start(t *testing.T) {
 					"1": {PRR: 2, Subject: ParamSet{ID: "1", Params: map[string]any{"A": 1, "B": 10}}},
 					"2": {PRR: 4, Subject: ParamSet{ID: "2", Params: map[string]any{"A": 2, "B": 10}}},
 				},
-				ValidationPSets: []ParamSet{
+				Validation: []ParamSet{
 					{ID: "2", Params: map[string]any{"A": 2, "B": 10}},
 				},
 			},

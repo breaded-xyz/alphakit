@@ -47,13 +47,13 @@ type bruteOptimizerJob struct {
 	MakeDealer     broker.MakeSimulatedDealer
 }
 
-func (o *BruteOptimizer) Prepare(in ParamRange, samples [][]market.Kline) (int, error) {
+func (o *BruteOptimizer) Prepare(in ParamMap, samples [][]market.Kline) (int, error) {
 
 	products := CartesianBuilder(in)
 	for i := range products {
 		pSet := NewParamSet()
-		pSet.Params = products[i]
-		o.study.TrainingPSets = append(o.study.TrainingPSets, pSet)
+		pSet.Params = ParamMap(products[i])
+		o.study.Training = append(o.study.Training, pSet)
 	}
 
 	for i := range samples {
@@ -62,8 +62,8 @@ func (o *BruteOptimizer) Prepare(in ParamRange, samples [][]market.Kline) (int, 
 		o.study.ValidationSamples = append(o.study.ValidationSamples, validation)
 	}
 
-	steps := len(o.study.TrainingPSets) * len(samples) // Training phase
-	steps += len(samples)                              // Validation phase for optimum
+	steps := len(o.study.Training) * len(samples) // Training phase
+	steps += len(samples)                         // Validation phase for optimum
 
 	return steps, nil
 }
@@ -79,7 +79,7 @@ func (o *BruteOptimizer) Start(ctx context.Context) (<-chan OptimizerStep, error
 		defer close(doneCh)
 
 		// Training phase
-		trainigJobCh := o.enqueueJobs(o.study.TrainingPSets, o.study.TrainingSamples)
+		trainigJobCh := o.enqueueJobs(o.study.Training, o.study.TrainingSamples)
 		trainingOutCh := processBruteJobs(ctx, doneCh, trainigJobCh)
 		for step := range trainingOutCh {
 			step.Phase = Training
@@ -101,10 +101,10 @@ func (o *BruteOptimizer) Start(ctx context.Context) (<-chan OptimizerStep, error
 		ranked := maps.Values(o.study.TrainingResults)
 		slices.SortFunc(ranked, o.Ranker)
 		optima := ranked[len(ranked)-1].Subject
-		o.study.ValidationPSets = append(o.study.ValidationPSets, optima)
+		o.study.Validation = append(o.study.Validation, optima)
 
 		// Validation phase
-		validationJobCh := o.enqueueJobs(o.study.ValidationPSets, o.study.ValidationSamples)
+		validationJobCh := o.enqueueJobs(o.study.Validation, o.study.ValidationSamples)
 		validationOutCh := processBruteJobs(ctx, doneCh, validationJobCh)
 		for step := range validationOutCh {
 			step.Phase = Validation
