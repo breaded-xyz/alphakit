@@ -27,7 +27,7 @@ import (
 // - Average the performance for each param set over the in-sample data
 // - Rank the param sets based on the performance objective (Profit Factor, T-Score etc)
 // Validate:
-// - Execute the highest ranked ("trained") algo param over the out-of-sample price data
+// - Execute the highest ranked ("trained") algo param set over the out-of-sample price data
 // - Accept or reject the hypothesis based on statistical significance of the study report
 type BruteOptimizer struct {
 	SampleSplitPct float64
@@ -92,13 +92,16 @@ func (o *BruteOptimizer) Start(ctx context.Context) (<-chan OptimizerStep, error
 				}
 			}
 			report := o.study.TrainingResults[step.PSet.ID]
+			report.Subject = step.PSet
 			report.AddResult(step.Result)
 			o.study.TrainingResults[step.PSet.ID] = report
 		}
 
-		// Evaluate traning results and select top ranked pset for validation phase
-		slices.SortFunc(maps.Values(o.study.TrainingResults), o.Ranker)
-		o.study.ValidationPSets = append(o.study.ValidationPSets, o.study.TrainingPSets[len(o.study.TrainingPSets)-1])
+		// Evaluate training results and select top ranked pset for validation phase
+		ranked := maps.Values(o.study.TrainingResults)
+		slices.SortFunc(ranked, o.Ranker)
+		optima := ranked[len(ranked)-1].Subject
+		o.study.ValidationPSets = append(o.study.ValidationPSets, optima)
 
 		// Validation phase
 		validationJobCh := o.enqueueJobs(o.study.ValidationPSets, o.study.ValidationSamples)
@@ -110,6 +113,7 @@ func (o *BruteOptimizer) Start(ctx context.Context) (<-chan OptimizerStep, error
 				return
 			}
 			report := o.study.ValidationResults[step.PSet.ID]
+			report.Subject = step.PSet
 			report.AddResult(step.Result)
 			o.study.ValidationResults[step.PSet.ID] = report
 		}
@@ -165,8 +169,8 @@ func processBruteJobs(ctx context.Context, doneCh <-chan struct{}, jobCh <-chan 
 					next = false
 					break
 				}
+				wg.Add(1)
 				go func() {
-					wg.Add(1)
 					defer wg.Done()
 					dealer, err := job.MakeDealer(job.ParamSet.Params)
 					if err != nil {

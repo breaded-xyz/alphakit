@@ -35,6 +35,8 @@ func NewParamSet() ParamSet {
 }
 
 type Report struct {
+	Subject ParamSet
+
 	PRR    float64
 	CAGR   float64
 	Sharpe float64

@@ -57,6 +57,58 @@ func TestBruteOptimizer_Prepare(t *testing.T) {
 	}
 }
 
+func TestBruteOptimizer_Start(t *testing.T) {
+	tests := []struct {
+		name      string
+		giveStudy Study
+		wantStudy Study
+	}{
+		{
+			name: "select top ranked pset for validation",
+			giveStudy: Study{
+				TrainingPSets: []ParamSet{
+					{ID: "1", Params: map[string]any{"A": 1, "B": 10}},
+					{ID: "2", Params: map[string]any{"A": 2, "B": 10}},
+				},
+				TrainingResults: map[ParamSetID]Report{
+					"1": {PRR: 2, Subject: ParamSet{ID: "1", Params: map[string]any{"A": 1, "B": 10}}},
+					"2": {PRR: 4, Subject: ParamSet{ID: "2", Params: map[string]any{"A": 2, "B": 10}}},
+				},
+			},
+			wantStudy: Study{
+				TrainingPSets: []ParamSet{
+					{ID: "1", Params: map[string]any{"A": 1, "B": 10}},
+					{ID: "2", Params: map[string]any{"A": 2, "B": 10}},
+				},
+				TrainingResults: map[ParamSetID]Report{
+					"1": {PRR: 2, Subject: ParamSet{ID: "1", Params: map[string]any{"A": 1, "B": 10}}},
+					"2": {PRR: 4, Subject: ParamSet{ID: "2", Params: map[string]any{"A": 2, "B": 10}}},
+				},
+				ValidationPSets: []ParamSet{
+					{ID: "2", Params: map[string]any{"A": 2, "B": 10}},
+				},
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			optimizer := BruteOptimizer{
+				MakeBot:    func(config map[string]any) (trader.Bot, error) { return &trader.StubBot{}, nil },
+				MakeDealer: func(config map[string]any) (broker.SimulatedDealer, error) { return &broker.StubDealer{}, nil },
+				Ranker:     PRRRanker,
+				study:      tt.giveStudy,
+			}
+
+			stepCh, err := optimizer.Start(context.Background())
+			assert.NoError(t, err)
+			for range stepCh {
+			}
+			act := optimizer.Study()
+			assert.Equal(t, tt.wantStudy, act)
+		})
+	}
+}
+
 func TestBruteOptimizer_enqueueJobs(t *testing.T) {
 
 	givePSets := []ParamSet{
