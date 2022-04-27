@@ -7,12 +7,20 @@ import (
 )
 
 // Study is an optimization experiment, prepared and executed by an Optimizer.
-// The subject is a trading algo and its parameter space.
-// Hypothesis: the optimized algo params will generate positive market returns in live trading
-// Null hypothesis: algo has zero positive expectancy of returns in the tested param space
-// Independent variable (aka predictor / feature): algo parameter space defined by []ParamSet
-// Dependent variable: algo performance (Sharpe, CAGR et al) measured by Report
-// Control variables: price data sample, backtest simulator settings et al
+//
+// The experiment can be summarised as:
+//
+// - Hypothesis: the optimized algo params will generate positive market returns in live trading.
+//
+// - Null hypothesis: algo has zero positive expectancy of returns in the tested param space.
+//
+// - Independent variable (aka predictor / feature): algo parameter space defined by []ParamSet.
+//
+// - Dependent variable: algo backtest performance (Sharpe, CAGR et al) measured by Report.
+//
+// - Control variables: price data samples, backtest simulator settings etc.
+//
+// - Method: as defined by the Optimizer implementation (e.g. brute force, genetic et al) and its ObjectiveRanker func.
 type Study struct {
 	Training        []ParamSet
 	TrainingSamples [][]market.Kline
