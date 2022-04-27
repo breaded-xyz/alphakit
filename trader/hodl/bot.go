@@ -9,12 +9,7 @@ import (
 	"github.com/colngroup/zero2algo/trader"
 )
 
-const (
-	BuyBarIndex  = "buybarindex"
-	SellBarIndex = "sellbarindex"
-)
-
-var _ trader.ConfigurableBot = (*Bot)(nil)
+var _ trader.Bot = (*Bot)(nil)
 
 type Bot struct {
 	BuyBarIndex  int
@@ -37,33 +32,6 @@ func (b *Bot) SetDealer(dealer broker.Dealer) {
 }
 
 func (b *Bot) Warmup(ctx context.Context, prices []market.Kline) error {
-	return nil
-}
-
-func (b *Bot) Configure(config map[string]any) error {
-	buyBarIndex, ok := config[BuyBarIndex].(int)
-	if !ok {
-		return trader.ErrInvalidConfig
-	}
-	sellBarIndex, ok := config[SellBarIndex].(int)
-	if !ok {
-		return trader.ErrInvalidConfig
-	}
-
-	switch {
-	case buyBarIndex == 0 && sellBarIndex == 0:
-		break
-	case buyBarIndex >= 0 && sellBarIndex == 0:
-		break
-	case buyBarIndex < 0 || sellBarIndex < 0:
-		return trader.ErrInvalidConfig
-	case buyBarIndex >= sellBarIndex:
-		return trader.ErrInvalidConfig
-	}
-
-	b.BuyBarIndex = buyBarIndex
-	b.SellBarIndex = sellBarIndex
-
 	return nil
 }
 

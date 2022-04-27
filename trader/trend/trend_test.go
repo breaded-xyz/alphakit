@@ -16,7 +16,7 @@ import (
 	"github.com/colngroup/zero2algo/ta"
 )
 
-const testdataPath string = "../../testdata/"
+const testdataPath string = "../../internal/testdata/"
 
 func TestTrendBot(t *testing.T) {
 	dealer := backtest.NewDealer()

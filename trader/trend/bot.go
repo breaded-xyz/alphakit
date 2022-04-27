@@ -4,17 +4,14 @@ import (
 	"context"
 
 	"github.com/colngroup/zero2algo/broker"
-	"github.com/colngroup/zero2algo/internal/dec"
-	"github.com/colngroup/zero2algo/internal/util"
 	"github.com/colngroup/zero2algo/market"
 	"github.com/colngroup/zero2algo/money"
 	"github.com/colngroup/zero2algo/risk"
-	"github.com/colngroup/zero2algo/ta"
 	"github.com/colngroup/zero2algo/trader"
 	"github.com/shopspring/decimal"
 )
 
-var _ trader.ConfigurableBot = (*Bot)(nil)
+var _ trader.Bot = (*Bot)(nil)
 
 type Bot struct {
 	EnterLong float64
@@ -23,7 +20,7 @@ type Bot struct {
 	EnterShort float64
 	ExitShort  float64
 
-	Predicter *Predicter
+	Predicter trader.Predicter
 	Risker    risk.Risker
 	Sizer     money.Sizer
 
@@ -236,43 +233,6 @@ func (b *Bot) executeEnterOrder(ctx context.Context, side broker.OrderSide, pric
 	bracket.Stop = *stopPlaced
 
 	return bracket, nil
-}
-
-func (b *Bot) Configure(config map[string]any) error {
-
-	b.asset = market.NewAsset(config["asset"].(string))
-
-	b.EnterLong = config["enterlong"].(float64)
-	b.EnterShort = config["entershort"].(float64)
-	b.ExitLong = config["exitlong"].(float64)
-	b.ExitShort = config["exitshort"].(float64)
-
-	maFastLength := util.ToInt(config["mafastlength"])
-	maSlowLength := util.ToInt(config["maslowlength"])
-	if maFastLength >= maSlowLength {
-		return trader.ErrInvalidConfig
-	}
-	maOsc := ta.NewOsc(ta.NewALMA(maFastLength), ta.NewALMA(maSlowLength))
-	maSDFilter := ta.NewSDWithFactor(util.ToInt(config["masdfilterlength"]), config["masdfilterfactor"].(float64))
-	mmi := ta.NewMMIWithSmoother(util.ToInt(config["mmilength"]), ta.NewALMA(util.ToInt(config["mmismootherlength"])))
-	b.Predicter = NewPredicter(maOsc, maSDFilter, mmi)
-
-	riskSDLength := util.ToInt(config["riskersdlength"])
-	if riskSDLength > 0 {
-		b.Risker = risk.NewSDRisk(util.ToInt(config["riskersdlength"]), config["riskersdfactor"].(float64))
-	} else {
-		b.Risker = risk.NewFullRisk()
-	}
-
-	initialCapital := dec.New(config["initialcapital"].(float64))
-	sizerF := config["sizerf"].(float64)
-	if sizerF > 0 {
-		b.Sizer = money.NewSafeFSizer(initialCapital, sizerF, config["sizerscalef"].(float64))
-	} else {
-		b.Sizer = money.NewFixedSizer(initialCapital)
-	}
-
-	return nil
 }
 
 func filterPositions(positions []broker.Position, asset market.Asset, side broker.OrderSide, state broker.PositionState) []broker.Position {

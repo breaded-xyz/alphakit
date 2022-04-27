@@ -84,8 +84,7 @@ func TestHoldBotConfigure(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			var bot Bot
-			err := bot.Configure(tt.give)
+			bot, err := MakeBot(tt.give)
 			assert.Equal(t, tt.wantErr, err)
 			assert.Equal(t, tt.wantBot, bot)
 		})

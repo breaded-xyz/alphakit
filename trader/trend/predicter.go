@@ -5,7 +5,10 @@ import (
 
 	"github.com/colngroup/zero2algo/market"
 	"github.com/colngroup/zero2algo/ta"
+	"github.com/colngroup/zero2algo/trader"
 )
+
+var _ trader.Predicter = (*Predicter)(nil)
 
 type Predicter struct {
 	priceSelector ta.PriceSelector

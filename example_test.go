@@ -17,7 +17,7 @@ func Example() {
 	// Verbose error handling ommitted for brevity
 
 	// Identify the asset to trade
-	asset := market.NewAsset("BTCUSD")
+	//asset := market.NewAsset("BTCUSD")
 
 	// Define the set of possible values for each param
 	params := map[string]any{
@@ -49,10 +49,10 @@ func Example() {
 			dealer := backtest.NewDealer()
 
 			// Create a new bot initialized with our dealer
-			// Hodl Bot implements a basic buy and hold algo
-			bot := hodl.New(asset, dealer)
 			// The bot is configured with the params in the test case
-			bot.Configure(c)
+			// Hodl Bot implements a basic buy and hold algo
+			bot, _ := hodl.MakeBot(c)
+			bot.SetDealer(dealer)
 
 			// Iterate prices sending each price interval to the dealer and then to the bot
 			for _, price := range prices {

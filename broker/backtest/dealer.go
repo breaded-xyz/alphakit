@@ -28,10 +28,6 @@ func NewDealerWithCost(cost Coster) *Dealer {
 	}
 }
 
-func (d *Dealer) Configure(config map[string]any) error {
-	return d.simulator.Configure(config)
-}
-
 func (d *Dealer) SetInitialCapital(amount decimal.Decimal) {
 	d.simulator.SetInitialCapital(amount)
 }
