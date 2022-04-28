@@ -33,9 +33,9 @@ func MakeBreakoutBot(config map[string]any) (trader.Bot, error) {
 
 	riskSDLength := util.ToInt(config["riskersdlength"])
 	if riskSDLength > 0 {
-		bot.Risker = risk.NewSDRisk(util.ToInt(config["riskersdlength"]), config["riskersdfactor"].(float64))
+		bot.Risker = risk.NewSDRisker(util.ToInt(config["riskersdlength"]), config["riskersdfactor"].(float64))
 	} else {
-		bot.Risker = risk.NewFullRisk()
+		bot.Risker = risk.NewFullRisker()
 	}
 
 	initialCapital := dec.New(config["initialcapital"].(float64))

@@ -35,7 +35,7 @@ func TestBotWithBreakoutPredicter(t *testing.T) {
 		asset:      market.NewAsset("BTCUSDT"),
 		dealer:     dealer,
 		Predicter:  predicter,
-		Risker:     risk.NewFullRisk(),
+		Risker:     risk.NewFullRisker(),
 		Sizer:      &money.FixedSizer{FixedCapital: dec.New(1000)},
 	}
 

@@ -9,26 +9,26 @@ import (
 	"github.com/shopspring/decimal"
 )
 
-var _ Risker = (*SDRisk)(nil)
+var _ Risker = (*SDRisker)(nil)
 
-type SDRisk struct {
+type SDRisker struct {
 	sd *ta.SD
 }
 
-func NewSDRisk(length int, factor float64) *SDRisk {
-	return &SDRisk{
+func NewSDRisker(length int, factor float64) *SDRisker {
+	return &SDRisker{
 		sd: ta.NewSDWithFactor(length, factor),
 	}
 }
 
-func (r *SDRisk) ReceivePrice(ctx context.Context, price market.Kline) error {
+func (r *SDRisker) ReceivePrice(ctx context.Context, price market.Kline) error {
 	return r.sd.Update(price.C.InexactFloat64())
 }
 
-func (r *SDRisk) Risk() decimal.Decimal {
+func (r *SDRisker) Risk() decimal.Decimal {
 	return dec.New(r.sd.Value())
 }
 
-func (r *SDRisk) Valid() bool {
+func (r *SDRisker) Valid() bool {
 	return r.sd.Valid()
 }
