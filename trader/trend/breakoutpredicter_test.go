@@ -11,7 +11,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestPredicter_ReceivePrice(t *testing.T) {
+func TestBreakoutPredicter_ReceivePrice(t *testing.T) {
 	var giveOsc, giveSD, giveMMI ta.MockIndicator
 	giveOsc.On("Update", []float64{10}).Return(error(nil))
 	giveOsc.On("Value").Return(10.0)
@@ -20,7 +20,7 @@ func TestPredicter_ReceivePrice(t *testing.T) {
 	givePrice := market.Kline{C: dec.New(10)}
 	givePrev := 3.0
 
-	predicter := NewPredicter(&giveOsc, &giveSD, &giveMMI)
+	predicter := NewBreakoutPredicter(&giveOsc, &giveSD, &giveMMI)
 	predicter.prev = givePrev
 	err := predicter.ReceivePrice(context.Background(), givePrice)
 
@@ -30,7 +30,7 @@ func TestPredicter_ReceivePrice(t *testing.T) {
 	giveMMI.AssertExpectations(t)
 }
 
-func TestPredicter_Predict(t *testing.T) {
+func TestBreakoutPredicter_Predict(t *testing.T) {
 	tests := []struct {
 		name          string
 		giveOscValues []float64
@@ -139,7 +139,7 @@ func TestPredicter_Predict(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			predicter := NewPredicter(
+			predicter := NewBreakoutPredicter(
 				&ta.StubIndicator{Values: tt.giveOscValues},
 				&ta.StubIndicator{Values: tt.giveSDValues},
 				&ta.StubIndicator{Values: tt.giveMMIValues},
@@ -151,8 +151,8 @@ func TestPredicter_Predict(t *testing.T) {
 
 }
 
-func TestPredicter_Valid(t *testing.T) {
-	predicter := NewPredicter(
+func TestBreakoutPredicter_Valid(t *testing.T) {
+	predicter := NewBreakoutPredicter(
 		&ta.StubIndicator{IsValid: true},
 		&ta.StubIndicator{IsValid: true},
 		&ta.StubIndicator{IsValid: true},

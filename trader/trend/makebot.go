@@ -10,7 +10,7 @@ import (
 	"github.com/colngroup/zero2algo/trader"
 )
 
-func MakeBot(config map[string]any) (trader.Bot, error) {
+func MakeBreakoutBot(config map[string]any) (trader.Bot, error) {
 
 	var bot Bot
 
@@ -29,7 +29,7 @@ func MakeBot(config map[string]any) (trader.Bot, error) {
 	maOsc := ta.NewOsc(ta.NewALMA(maFastLength), ta.NewALMA(maSlowLength))
 	maSDFilter := ta.NewSDWithFactor(util.ToInt(config["masdfilterlength"]), config["masdfilterfactor"].(float64))
 	mmi := ta.NewMMIWithSmoother(util.ToInt(config["mmilength"]), ta.NewALMA(util.ToInt(config["mmismootherlength"])))
-	bot.Predicter = NewPredicter(maOsc, maSDFilter, mmi)
+	bot.Predicter = NewBreakoutPredicter(maOsc, maSDFilter, mmi)
 
 	riskSDLength := util.ToInt(config["riskersdlength"])
 	if riskSDLength > 0 {

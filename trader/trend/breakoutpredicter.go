@@ -8,9 +8,9 @@ import (
 	"github.com/colngroup/zero2algo/trader"
 )
 
-var _ trader.Predicter = (*Predicter)(nil)
+var _ trader.Predicter = (*BreakoutPredicter)(nil)
 
-type Predicter struct {
+type BreakoutPredicter struct {
 	priceSelector ta.PriceSelector
 
 	osc ta.Indicator
@@ -20,8 +20,8 @@ type Predicter struct {
 	prev float64
 }
 
-func NewPredicter(osc, sd, mmi ta.Indicator) *Predicter {
-	return &Predicter{
+func NewBreakoutPredicter(osc, sd, mmi ta.Indicator) *BreakoutPredicter {
+	return &BreakoutPredicter{
 		priceSelector: ta.Close,
 		osc:           osc,
 		sd:            sd,
@@ -29,7 +29,7 @@ func NewPredicter(osc, sd, mmi ta.Indicator) *Predicter {
 	}
 }
 
-func (p *Predicter) ReceivePrice(ctx context.Context, price market.Kline) error {
+func (p *BreakoutPredicter) ReceivePrice(ctx context.Context, price market.Kline) error {
 
 	v := p.priceSelector(price)
 	vDiff := v - p.prev
@@ -48,7 +48,7 @@ func (p *Predicter) ReceivePrice(ctx context.Context, price market.Kline) error 
 	return nil
 }
 
-func (p *Predicter) Predict() float64 {
+func (p *BreakoutPredicter) Predict() float64 {
 
 	var score float64
 
@@ -78,6 +78,6 @@ func (p *Predicter) Predict() float64 {
 	return score
 }
 
-func (p *Predicter) Valid() bool {
+func (p *BreakoutPredicter) Valid() bool {
 	return p.osc.Valid() && p.sd.Valid() && p.mmi.Valid()
 }
