@@ -7,6 +7,8 @@ import (
 )
 
 // Study is an optimization experiment, prepared and executed by an Optimizer.
+// First, a training (in-sample) phase is conducted, followed by a validation (out-of-sample) phase.
+// The validation phase should report the out-of-sample (OOS) performance of the optimum param set.
 //
 // The experiment can be summarised as:
 //
