@@ -8,7 +8,6 @@ import (
 
 func Test(t *testing.T) {
 	args := []string{
-		"./testdata/prices",
 		"./testdata/study.toml",
 	}
 	err := run(args)

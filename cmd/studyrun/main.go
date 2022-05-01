@@ -1,11 +1,12 @@
 package main
 
 import (
+	"context"
 	"log"
 	"os"
 
 	"github.com/colngroup/zero2algo/internal/studyrun"
-	"github.com/davecgh/go-spew/spew"
+	"github.com/schollz/progressbar/v3"
 )
 
 const _outputDir = ".out"
@@ -19,48 +20,50 @@ func main() {
 func run(args []string) error {
 
 	print("Reading study config... ")
-	config, err := studyrun.ReadConfig(args[1])
+	config, err := studyrun.ReadConfig(args[0])
 	if err != nil {
 		return err
 	}
 	print("done\n")
 
-	spew.Dump(config)
-
-	/*print("Reading prices... ")
-	//_, err := studyrun.readPrices(args[0])
+	print("Reading price samples... ")
+	samples, err := studyrun.ReadPricesFromConfig(config)
 	if err != nil {
 		return err
 	}
 	print("done\n")
 
-
-
-	print("Preparing optimizer...\n")
-	//optimizer := optimize.NewBruteOptimizer()
-	//err = optimizer.Configure(config)
-	//if err != nil {
-	//	return err
-	//}
-	///cycles, err := optimizer.Prepare(config)
+	print("Reading param set... ")
+	psets, err := studyrun.ReadParamSetFromConfig(config)
 	if err != nil {
 		return err
 	}
 	print("done\n")
 
-	//bar := progressbar.Default(int64(cycles), "Running backtests")
-	//results := make([]perf.PerformanceReport, 0, cycles)
-	//_, err = optimizer.Start(context.Background())
+	print("Reading optimizer... ")
+	optimizer, err := studyrun.ReadBruteOptimizerFromConfig(config)
 	if err != nil {
 		return err
 	}
+	print("done\n")
 
-	//bar.Finish()
+	print("Preparing optimizer... ")
+	stepCount, err := optimizer.Prepare(psets, samples)
+	if err != nil {
+		return err
+	}
+	print("done\n")
 
-	//if err := writeReports(_outputDir, results); err != nil {
-	//	return err
-	//}
+	print("Executing optimizer... ")
+	bar := progressbar.Default(int64(stepCount), "Running backtests")
+	stepCh, err := optimizer.Start(context.Background())
+	if err != nil {
+		return err
+	}
+	for range stepCh {
+		bar.Add(1)
+	}
+	bar.Finish()
 
-	return nil*/
 	return nil
 }

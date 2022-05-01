@@ -2,6 +2,7 @@ package studyrun
 
 import (
 	"encoding/csv"
+	"errors"
 	"io/fs"
 	"os"
 	"path/filepath"
@@ -9,7 +10,27 @@ import (
 	"github.com/colngroup/zero2algo/market"
 )
 
-func ReadPrices(path string) ([]market.Kline, error) {
+func ReadPricesFromConfig(config map[string]any) ([][]market.Kline, error) {
+
+	sub, ok := config["samples"]
+	if !ok {
+		return nil, errors.New("'samples' key not found")
+	}
+	paths := sub.(map[string]any)
+
+	var prices [][]market.Kline
+	for _, v := range paths {
+		path := v.(string)
+		series, err := ReadPriceSeries(path)
+		if err != nil {
+			return nil, err
+		}
+		prices = append(prices, series)
+	}
+	return prices, nil
+}
+
+func ReadPriceSeries(path string) ([]market.Kline, error) {
 	var prices []market.Kline
 
 	err := filepath.WalkDir(path, func(path string, d fs.DirEntry, err error) error {

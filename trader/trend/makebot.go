@@ -10,6 +10,8 @@ import (
 	"github.com/colngroup/zero2algo/trader"
 )
 
+var _ trader.MakeBot = MakeBreakoutBot
+
 func MakeBreakoutBot(config map[string]any) (trader.Bot, error) {
 
 	var bot Bot
