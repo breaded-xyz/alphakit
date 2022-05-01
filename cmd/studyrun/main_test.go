@@ -8,8 +8,8 @@ import (
 
 func Test(t *testing.T) {
 	args := []string{
-		"../../testdata/",
-		"./study.toml",
+		"./testdata/prices",
+		"./testdata/study.toml",
 	}
 	err := run(args)
 	assert.NoError(t, err)
