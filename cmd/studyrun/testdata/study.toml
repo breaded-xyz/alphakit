@@ -4,7 +4,7 @@ resolution = "H1"
 [optimizer]
 bot = "trend.breakout"
 sampleSplictPct = 0.7
-warmupBarCount = 300
+warmupBarCount = 1024
 ranker = "sharpe"
 
 [samples]
@@ -18,7 +18,7 @@ spreadPct = 0.00025
 transactionPct = 0.0005
 fundingHourPct = 0.000025
 
-[paramset]
+[paramspace]
 initialCapital = 1000.0
 sizerF = 0.0
 sizerScaleF = 1.0
@@ -27,7 +27,7 @@ enterShort = -1.0
 exitLong = -1.0
 exitShort = 1.0
 maFastLength = 1
-maSlowLength = [64, 128, 256, 512] # Param range to optimize
+maSlowLength = [64, 128, 256, 512, 1024] # Param range to optimize
 maSDFilterLength = 512
 maSDFilterFactor =  1.5
 mmiLength = 300

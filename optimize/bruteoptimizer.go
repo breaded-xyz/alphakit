@@ -32,7 +32,7 @@ import (
 type BruteOptimizer struct {
 	SampleSplitPct float64
 	WarmupBarCount int
-	MakeBot        trader.MakeBot
+	MakeBot        trader.MakeFromConfig
 	MakeDealer     broker.MakeSimulatedDealer
 	Ranker         ObjectiveRanker
 
@@ -43,8 +43,17 @@ type bruteOptimizerJob struct {
 	ParamSet       ParamSet
 	Sample         []market.Kline
 	WarmupBarCount int
-	MakeBot        trader.MakeBot
+	MakeBot        trader.MakeFromConfig
 	MakeDealer     broker.MakeSimulatedDealer
+}
+
+func NewBruteOptimizer() BruteOptimizer {
+	return BruteOptimizer{
+		SampleSplitPct: 0,
+		WarmupBarCount: 0,
+		Ranker:         SharpeRanker,
+		study:          NewStudy(),
+	}
 }
 
 func (o *BruteOptimizer) Prepare(in ParamMap, samples [][]market.Kline) (int, error) {
@@ -172,7 +181,7 @@ func processBruteJobs(ctx context.Context, doneCh <-chan struct{}, jobCh <-chan 
 				wg.Add(1)
 				go func() {
 					defer wg.Done()
-					dealer, err := job.MakeDealer(job.ParamSet.Params)
+					dealer, err := job.MakeDealer()
 					if err != nil {
 						outCh <- OptimizerStep{PSet: job.ParamSet, Err: err}
 					}
@@ -180,6 +189,7 @@ func processBruteJobs(ctx context.Context, doneCh <-chan struct{}, jobCh <-chan 
 					if err != nil {
 						outCh <- OptimizerStep{PSet: job.ParamSet, Err: err}
 					}
+					bot.SetDealer(dealer)
 					if err := bot.Warmup(ctx, job.Sample[:job.WarmupBarCount]); err != nil {
 						outCh <- OptimizerStep{PSet: job.ParamSet, Err: err}
 					}

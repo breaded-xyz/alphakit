@@ -94,7 +94,7 @@ func TestBruteOptimizer_Start(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			optimizer := BruteOptimizer{
 				MakeBot:    func(config map[string]any) (trader.Bot, error) { return &trader.StubBot{}, nil },
-				MakeDealer: func(config map[string]any) (broker.SimulatedDealer, error) { return &broker.StubDealer{}, nil },
+				MakeDealer: func() (broker.SimulatedDealer, error) { return &broker.StubDealer{}, nil },
 				Ranker:     PRRRanker,
 				study:      tt.giveStudy,
 			}
@@ -131,7 +131,7 @@ func TestProcessBruteJobs(t *testing.T) {
 
 	giveSample := []market.Kline{{C: dec.New(10)}, {C: dec.New(20)}, {C: dec.New(30)}, {C: dec.New(40)}, {C: dec.New(50)}}
 	giveMakeBot := func(map[string]any) (trader.Bot, error) { return &trader.StubBot{}, nil }
-	giveMakeDealer := func(map[string]any) (broker.SimulatedDealer, error) { return &broker.StubDealer{}, nil }
+	giveMakeDealer := func() (broker.SimulatedDealer, error) { return &broker.StubDealer{}, nil }
 	giveJobCh := make(chan bruteOptimizerJob)
 	giveDoneCh := make(chan struct{})
 	defer close(giveDoneCh)

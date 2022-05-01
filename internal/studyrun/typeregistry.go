@@ -6,5 +6,5 @@ import (
 )
 
 var _typeRegistry = map[string]any{
-	"trend.breakout": trader.MakeBot(trend.MakeBreakoutBot),
+	"trend.breakout": trader.MakeFromConfig(trend.MakeBreakoutBotFromConfig),
 }

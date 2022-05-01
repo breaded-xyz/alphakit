@@ -23,4 +23,4 @@ type SimulatedDealer interface {
 	SetInitialCapital(amount decimal.Decimal)
 }
 
-type MakeSimulatedDealer func(config map[string]any) (SimulatedDealer, error)
+type MakeSimulatedDealer func() (SimulatedDealer, error)

@@ -17,4 +17,4 @@ type Bot interface {
 	Close(context.Context) error
 }
 
-type MakeBot func(config map[string]any) (Bot, error)
+type MakeFromConfig func(config map[string]any) (Bot, error)

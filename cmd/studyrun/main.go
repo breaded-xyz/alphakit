@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"os"
 
@@ -18,8 +19,9 @@ func main() {
 }
 
 func run(args []string) error {
+	print("Executing studyrun...\n")
 
-	print("Reading study config... ")
+	fmt.Printf("Reading config '%s' ... ", args[0])
 	config, err := studyrun.ReadConfig(args[0])
 	if err != nil {
 		return err
@@ -33,8 +35,15 @@ func run(args []string) error {
 	}
 	print("done\n")
 
-	print("Reading param set... ")
-	psets, err := studyrun.ReadParamSetFromConfig(config)
+	print("Reading param space... ")
+	psets, err := studyrun.ReadParamSpaceFromConfig(config)
+	if err != nil {
+		return err
+	}
+	print("done\n")
+
+	print("Reading dealer... ")
+	makeDealer, err := studyrun.ReadDealerFromConfig(config)
 	if err != nil {
 		return err
 	}
@@ -45,17 +54,18 @@ func run(args []string) error {
 	if err != nil {
 		return err
 	}
+	optimizer.MakeDealer = makeDealer
 	print("done\n")
 
-	print("Preparing optimizer... ")
+	print("Preparing study... ")
 	stepCount, err := optimizer.Prepare(psets, samples)
 	if err != nil {
 		return err
 	}
 	print("done\n")
 
-	print("Executing optimizer... ")
-	bar := progressbar.Default(int64(stepCount), "Running backtests")
+	print("Running study... ")
+	bar := progressbar.Default(int64(stepCount), "Running backtests... ")
 	stepCh, err := optimizer.Start(context.Background())
 	if err != nil {
 		return err
@@ -64,6 +74,11 @@ func run(args []string) error {
 		bar.Add(1)
 	}
 	bar.Finish()
+	print("Study complete\n")
+
+	//spew.Dump(maps.Values(optimizer.Study().ValidationResults)[0].Backtests)
+
+	print("studyrun execution complete\n")
 
 	return nil
 }

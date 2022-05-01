@@ -31,6 +31,13 @@ type Study struct {
 	ValidationResults map[ParamSetID]Report
 }
 
+func NewStudy() Study {
+	return Study{
+		TrainingResults:   make(map[ParamSetID]Report),
+		ValidationResults: make(map[ParamSetID]Report),
+	}
+}
+
 type ParamSet struct {
 	ID     ParamSetID
 	Params ParamMap

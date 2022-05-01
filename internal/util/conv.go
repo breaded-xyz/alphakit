@@ -1,5 +1,14 @@
 package util
 
+func ToString(v any) string {
+	var s string
+	switch t := v.(type) {
+	case string:
+		s = t
+	}
+	return s
+}
+
 func ToInt(v any) int {
 	var i int
 	switch t := v.(type) {

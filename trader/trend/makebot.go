@@ -10,13 +10,13 @@ import (
 	"github.com/colngroup/zero2algo/trader"
 )
 
-var _ trader.MakeBot = MakeBreakoutBot
+var _ trader.MakeFromConfig = MakeBreakoutBotFromConfig
 
-func MakeBreakoutBot(config map[string]any) (trader.Bot, error) {
+func MakeBreakoutBotFromConfig(config map[string]any) (trader.Bot, error) {
 
 	var bot Bot
 
-	bot.asset = market.NewAsset(config["asset"].(string))
+	bot.asset = market.NewAsset(util.ToString(config["asset"]))
 
 	bot.EnterLong = config["enterlong"].(float64)
 	bot.EnterShort = config["entershort"].(float64)

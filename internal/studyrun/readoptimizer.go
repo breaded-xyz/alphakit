@@ -4,13 +4,12 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/colngroup/zero2algo/broker/backtest"
 	"github.com/colngroup/zero2algo/internal/util"
 	"github.com/colngroup/zero2algo/optimize"
 	"github.com/colngroup/zero2algo/trader"
 )
 
-func ReadBruteOptimizerFromConfig(config map[string]any) (optimize.Optimizer, error) {
+func ReadBruteOptimizerFromConfig(config map[string]any) (*optimize.BruteOptimizer, error) {
 
 	var optimizer optimize.BruteOptimizer
 
@@ -28,9 +27,9 @@ func ReadBruteOptimizerFromConfig(config map[string]any) (optimize.Optimizer, er
 	if _, ok := _typeRegistry[bot]; !ok {
 		return nil, fmt.Errorf("'%s' key not found in type registry", bot)
 	}
-	optimizer.MakeBot = _typeRegistry[bot].(trader.MakeBot)
-	
-	optimizer.MakeDealer = backtest.MakeDealer
+
+	optimizer = optimize.NewBruteOptimizer()
+	optimizer.MakeBot = _typeRegistry[bot].(trader.MakeFromConfig)
 	optimizer.SampleSplitPct = util.ToFloat(root["sampleSplitPct"])
 	optimizer.WarmupBarCount = util.ToInt(root["warmupBarCount"])
 	optimizer.Ranker = optimize.SharpeRanker

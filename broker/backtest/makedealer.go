@@ -5,9 +5,9 @@ import (
 	"github.com/colngroup/zero2algo/internal/dec"
 )
 
-func MakeDealer(config map[string]any) (broker.SimulatedDealer, error) {
+func MakeDealerFromConfig(config map[string]any) (broker.SimulatedDealer, error) {
 
-	var dealer Dealer
+	dealer := NewDealer()
 
 	dealer.simulator.SetInitialCapital(dec.New(config["initialcapital"].(float64)))
 	dealer.simulator.cost = &PerpCost{
@@ -17,5 +17,5 @@ func MakeDealer(config map[string]any) (broker.SimulatedDealer, error) {
 		FundingHourPct: dec.New(config["fundinghourpct"].(float64)),
 	}
 
-	return &dealer, nil
+	return dealer, nil
 }
