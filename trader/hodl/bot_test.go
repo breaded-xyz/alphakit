@@ -7,92 +7,10 @@ import (
 	"github.com/colngroup/zero2algo/broker"
 	"github.com/colngroup/zero2algo/internal/dec"
 	"github.com/colngroup/zero2algo/market"
-	"github.com/colngroup/zero2algo/trader"
 	"github.com/stretchr/testify/assert"
 )
 
-func TestHoldBotConfigure(t *testing.T) {
-	tests := []struct {
-		name    string
-		give    map[string]any
-		wantBot Bot
-		wantErr error
-	}{
-		{
-			name: "buy index < sell index",
-			give: map[string]any{"buybarindex": 1, "sellbarindex": 1000},
-			wantBot: Bot{
-				BuyBarIndex:  1,
-				SellBarIndex: 1000,
-			},
-			wantErr: nil,
-		},
-		{
-			name: "no sell",
-			give: map[string]any{"buybarindex": 10, "sellbarindex": 0},
-			wantBot: Bot{
-				BuyBarIndex:  10,
-				SellBarIndex: 0,
-			},
-			wantErr: nil,
-		},
-		{
-			name: "default",
-			give: map[string]any{"buybarindex": 0, "sellbarindex": 0},
-			wantBot: Bot{
-				BuyBarIndex:  0,
-				SellBarIndex: 0,
-			},
-			wantErr: nil,
-		},
-		{
-			name: "buy index >= sell index",
-			give: map[string]any{"buybarindex": 10, "sellbarindex": 5},
-			wantBot: Bot{
-				BuyBarIndex:  0,
-				SellBarIndex: 0,
-			},
-			wantErr: trader.ErrInvalidConfig,
-		},
-		{
-			name: "not int",
-			give: map[string]any{"buybarindex": 10.5, "sellbarindex": 5},
-			wantBot: Bot{
-				BuyBarIndex:  0,
-				SellBarIndex: 0,
-			},
-			wantErr: trader.ErrInvalidConfig,
-		},
-		{
-			name: "neg int",
-			give: map[string]any{"buybarindex": -1, "sellbarindex": 5},
-			wantBot: Bot{
-				BuyBarIndex:  0,
-				SellBarIndex: 0,
-			},
-			wantErr: trader.ErrInvalidConfig,
-		},
-		{
-			name: "key not found",
-			give: map[string]any{"notakey": 10, "sellbarindex": 5},
-			wantBot: Bot{
-				BuyBarIndex:  0,
-				SellBarIndex: 0,
-			},
-			wantErr: trader.ErrInvalidConfig,
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			bot, err := MakeBot(tt.give)
-			act := *bot.(*Bot)
-			assert.Equal(t, tt.wantErr, err)
-			assert.Equal(t, tt.wantBot, act)
-		})
-	}
-}
-
-func TestHodlBotEvalAlgo(t *testing.T) {
+func TestBot_evalAlgo(t *testing.T) {
 	tests := []struct {
 		name string
 		give []int // barIndex, buyIndex, sellIndex
@@ -129,7 +47,7 @@ func TestHodlBotEvalAlgo(t *testing.T) {
 	}
 }
 
-func TestHodlBotReceivePrice(t *testing.T) {
+func TestBot_ReceivePrice(t *testing.T) {
 	expOrder := broker.Order{Type: broker.Market, Side: broker.Buy, Size: dec.New(1)}
 	mock := &broker.MockDealer{}
 	mock.On("PlaceOrder", context.Background(), expOrder)
@@ -141,7 +59,7 @@ func TestHodlBotReceivePrice(t *testing.T) {
 	mock.AssertExpectations(t)
 }
 
-func TestHodlBotClose(t *testing.T) {
+func TestBot_Close(t *testing.T) {
 	expOrder := broker.Order{Type: broker.Market, Side: broker.Sell, Size: dec.New(1), ReduceOnly: true}
 	mock := &broker.MockDealer{}
 	mock.On("PlaceOrder", context.Background(), expOrder)

@@ -3,18 +3,18 @@ package hodl
 import "github.com/colngroup/zero2algo/trader"
 
 const (
-	BuyBarIndex  = "buybarindex"
-	SellBarIndex = "sellbarindex"
+	BuyBarIndexKey  = "buybarindex"
+	SellBarIndexKey = "sellbarindex"
 )
 
 func MakeBot(config map[string]any) (trader.Bot, error) {
 	var hodl Bot
 
-	buyBarIndex, ok := config[BuyBarIndex].(int)
+	buyBarIndex, ok := config[BuyBarIndexKey].(int)
 	if !ok {
 		return nil, trader.ErrInvalidConfig
 	}
-	sellBarIndex, ok := config[SellBarIndex].(int)
+	sellBarIndex, ok := config[SellBarIndexKey].(int)
 	if !ok {
 		return nil, trader.ErrInvalidConfig
 	}
