@@ -7,7 +7,9 @@ import (
 	"os"
 
 	"github.com/colngroup/zero2algo/internal/studyrun"
+	"github.com/davecgh/go-spew/spew"
 	"github.com/schollz/progressbar/v3"
+	"golang.org/x/exp/maps"
 )
 
 const _outputDir = ".out"
@@ -19,7 +21,9 @@ func main() {
 }
 
 func run(args []string) error {
-	print("Executing studyrun...\n")
+	print("studyrun\n")
+	fmt.Printf("Tag %s, Commit %s\n", buildGitTag, buildGitCommit)
+	fmt.Printf("Time: %s, User: %s\n", buildTime, buildUser)
 
 	fmt.Printf("Reading config '%s' ... ", args[0])
 	config, err := studyrun.ReadConfig(args[0])
@@ -76,9 +80,11 @@ func run(args []string) error {
 	bar.Finish()
 	print("Study complete\n")
 
-	//spew.Dump(maps.Values(optimizer.Study().ValidationResults)[0].Backtests)
-
-	print("studyrun execution complete\n")
+	print("Raw read out:\n\n")
+	optimaResult := maps.Values(optimizer.Study().ValidationResults)[0]
+	spew.Dump(optimaResult.Subject.Params)
+	spew.Config.MaxDepth = 1
+	spew.Dump(optimaResult)
 
 	return nil
 }

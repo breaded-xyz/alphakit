@@ -16,6 +16,7 @@ bin/
 # Local system files and folders
 .DS_store
 .*/
+*.code-workspace
 
 # Dependency directories (remove the comment below to include it)
 # vendor/
