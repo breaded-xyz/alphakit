@@ -184,14 +184,17 @@ func processBruteJobs(ctx context.Context, doneCh <-chan struct{}, jobCh <-chan 
 					dealer, err := job.MakeDealer()
 					if err != nil {
 						outCh <- OptimizerStep{PSet: job.ParamSet, Err: err}
+						return
 					}
 					bot, err := job.MakeBot(job.ParamSet.Params)
 					if err != nil {
 						outCh <- OptimizerStep{PSet: job.ParamSet, Err: err}
+						return
 					}
 					bot.SetDealer(dealer)
 					if err := bot.Warmup(ctx, job.Sample[:job.WarmupBarCount]); err != nil {
 						outCh <- OptimizerStep{PSet: job.ParamSet, Err: err}
+						return
 					}
 					perf, err := runBacktest(ctx, bot, dealer, job.Sample[job.WarmupBarCount:])
 					outCh <- OptimizerStep{PSet: job.ParamSet, Result: perf, Err: err}
