@@ -30,8 +30,8 @@ func ReadBruteOptimizerFromConfig(config map[string]any) (*optimize.BruteOptimiz
 
 	optimizer = optimize.NewBruteOptimizer()
 	optimizer.MakeBot = _typeRegistry[bot].(trader.MakeFromConfig)
-	optimizer.SampleSplitPct = util.ToFloat(root["sampleSplitPct"])
-	optimizer.WarmupBarCount = util.ToInt(root["warmupBarCount"])
+	optimizer.SampleSplitPct = util.ToFloat(root["samplesplitpct"])
+	optimizer.WarmupBarCount = util.ToInt(root["warmupbarcount"])
 	optimizer.Ranker = optimize.SharpeRanker
 
 	return &optimizer, nil

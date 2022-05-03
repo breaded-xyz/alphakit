@@ -3,7 +3,7 @@ resolution = "H1"
 
 [optimizer]
 bot = "trend.breakout"
-sampleSplictPct = 0.7
+sampleSplitPct = 0.7
 warmupBarCount = 1024
 ranker = "sharpe"
 

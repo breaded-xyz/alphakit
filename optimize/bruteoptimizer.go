@@ -10,6 +10,7 @@ import (
 	"github.com/colngroup/zero2algo/market"
 	"github.com/colngroup/zero2algo/perf"
 	"github.com/colngroup/zero2algo/trader"
+	"github.com/davecgh/go-spew/spew"
 	"golang.org/x/exp/maps"
 	"golang.org/x/exp/slices"
 )
@@ -69,6 +70,7 @@ func (o *BruteOptimizer) Prepare(in ParamMap, samples [][]market.Kline) (int, er
 		training, validation := splitSample(samples[i], o.SampleSplitPct)
 		o.study.TrainingSamples = append(o.study.TrainingSamples, training)
 		o.study.ValidationSamples = append(o.study.ValidationSamples, validation)
+		spew.Dump(len(training), len(validation))
 	}
 
 	steps := len(o.study.Training) * len(samples) // Training phase
