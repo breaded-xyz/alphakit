@@ -85,9 +85,12 @@ func run(args []string) error {
 	}
 	print("done\n")
 
-	print("Optima summary performance:\n")
+	print("Optima params:\n")
 	optimaResult := maps.Values(optimizer.Study().ValidationResults)[0]
-	studyrun.PrintSummary(optimaResult)
+	studyrun.PrintParams(optimaResult.Subject.Params)
+
+	print("Optima performance:\n")
+	studyrun.PrintSummaryReport(optimaResult)
 
 	return nil
 }
