@@ -19,6 +19,8 @@ var _summaryReportHeader = []string{
 	"CAGR",
 	"Sharpe",
 	"Calmar",
+	"Kelly",
+	"OptimalF",
 	"Samples",
 	"Trades",
 }
@@ -48,6 +50,8 @@ func PrintSummaryReport(report optimize.Report) {
 		fmt.Sprintf("%.2f", report.CAGR*100),
 		fmt.Sprintf("%.2f", report.Sharpe),
 		fmt.Sprintf("%.2f", report.Calmar),
+		fmt.Sprintf("%.2f", report.Kelly),
+		fmt.Sprintf("%.2f", report.OptimalF),
 		fmt.Sprintf("%d", report.SampleCount),
 		fmt.Sprintf("%d", report.TradeCount),
 	})

@@ -71,6 +71,9 @@ type Report struct {
 	Calmar float64 `csv:"calmar"`
 	WinPct float64 `csv:"win_pct"`
 
+	Kelly    float64 `csv:"kelly"`
+	OptimalF float64 `csv:"optimalf"`
+
 	SampleCount int `csv:"sample_count"`
 	TradeCount  int `csv:"trade_count"`
 
@@ -97,6 +100,9 @@ func Summarize(report Report) Report {
 		report.Sharpe += backtest.Portfolio.Sharpe
 		report.Calmar += backtest.Portfolio.Calmar
 		report.WinPct += backtest.Trade.PercentProfitable
+
+		report.Kelly += backtest.Trade.Kelly
+		report.OptimalF += backtest.Trade.OptimalF
 	}
 
 	count := float64(report.SampleCount)
@@ -106,6 +112,8 @@ func Summarize(report Report) Report {
 	report.Sharpe /= count
 	report.Calmar /= count
 	report.WinPct /= count
+	report.Kelly /= count
+	report.OptimalF /= count
 
 	return report
 }
