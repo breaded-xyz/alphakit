@@ -20,10 +20,14 @@ func main() {
 }
 
 func run(args []string) error {
-	print("studyrun\n")
-	fmt.Printf("Tag %s, Commit %s\n", buildGitTag, buildGitCommit)
+	print(_titleArtMoney)
+
+	print("\n ----- App Info -----\n")
+	print("App: studyrun\n")
+	fmt.Printf("Tag: %s, Commit: %s\n", buildGitTag, buildGitCommit)
 	fmt.Printf("Time: %s, User: %s\n", buildTime, buildUser)
 
+	print("\n----- Study Configuration -----\n")
 	fmt.Printf("Reading config '%s' ... ", args[0])
 	config, err := studyrun.ReadConfig(args[0])
 	if err != nil {
@@ -60,6 +64,8 @@ func run(args []string) error {
 	optimizer.MakeDealer = makeDealer
 	print("done\n")
 
+	print("\n----- Study Execution -----\n")
+
 	print("Preparing study... ")
 	stepCount, err := optimizer.Prepare(psets, samples)
 	if err != nil {
@@ -69,6 +75,7 @@ func run(args []string) error {
 
 	print("Running study... ")
 	bar := progressbar.Default(int64(stepCount), "Running backtests... ")
+	bar.RenderBlank()
 	stepCh, err := optimizer.Start(context.Background())
 	if err != nil {
 		return err
@@ -85,12 +92,12 @@ func run(args []string) error {
 	}
 	print("done\n")
 
-	print("Optima params:\n")
+	print("\n----- Optima Performance -----\n")
 	optimaResult := maps.Values(optimizer.Study().ValidationResults)[0]
-	studyrun.PrintParams(optimaResult.Subject.Params)
-
-	print("Optima performance:\n")
 	studyrun.PrintSummaryReport(optimaResult)
+
+	print("\n----- Optima Params -----\n")
+	studyrun.PrintParams(optimaResult.Subject.Params)
 
 	return nil
 }

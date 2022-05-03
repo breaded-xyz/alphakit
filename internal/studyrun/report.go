@@ -8,6 +8,8 @@ import (
 	"github.com/colngroup/zero2algo/optimize"
 	"github.com/colngroup/zero2algo/perf"
 	"github.com/olekukonko/tablewriter"
+	"golang.org/x/exp/maps"
+	"golang.org/x/exp/slices"
 )
 
 var _summaryReportHeader = []string{
@@ -54,7 +56,9 @@ func PrintSummaryReport(report optimize.Report) {
 }
 
 func PrintParams(params map[string]any) {
-	for k, v := range params {
-		fmt.Printf("%s: %s\n", k, util.ToString(v))
+	keys := maps.Keys(params)
+	slices.Sort(keys)
+	for _, k := range keys {
+		fmt.Printf("%s: %s\n", k, util.ToString(params[k]))
 	}
 }
