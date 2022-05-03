@@ -3,14 +3,7 @@ package util
 import "fmt"
 
 func ToString(v any) string {
-	var s string
-	switch t := v.(type) {
-	case string:
-		s = t
-	case any:
-		s = fmt.Sprint(v)
-	}
-	return s
+	return fmt.Sprint(v)
 }
 
 func ToInt(v any) int {

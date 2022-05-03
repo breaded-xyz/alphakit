@@ -22,7 +22,7 @@ func main() {
 func run(args []string) error {
 	print(_titleArtMoney)
 
-	print("\n ----- App Info -----\n")
+	print("\n ----- Build Info -----\n")
 	print("App: studyrun\n")
 	fmt.Printf("Tag: %s, Commit: %s\n", buildGitTag, buildGitCommit)
 	fmt.Printf("Time: %s, User: %s\n", buildTime, buildUser)
