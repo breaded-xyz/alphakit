@@ -8,7 +8,7 @@ import (
 
 // Study is an optimization experiment, prepared and executed by an Optimizer.
 // First, a training (in-sample) phase is conducted, followed by a validation (out-of-sample) phase.
-// The validation phase should report the out-of-sample (OOS) performance of the optimum param set.
+// The validation phase reports the out-of-sample (OOS) performance of the optimum param set.
 //
 // The experiment can be summarised as:
 //
@@ -24,6 +24,8 @@ import (
 //
 // - Method: as defined by the Optimizer implementation (e.g. brute force, genetic et al) and its ObjectiveRanker func.
 type Study struct {
+	ID string
+
 	Training        []ParamSet
 	TrainingSamples [][]market.Kline
 	TrainingResults map[ParamSetID]Report
@@ -35,6 +37,7 @@ type Study struct {
 
 func NewStudy() Study {
 	return Study{
+		ID:                string(util.NewID()),
 		TrainingResults:   make(map[ParamSetID]Report),
 		ValidationResults: make(map[ParamSetID]Report),
 	}
@@ -57,8 +60,8 @@ func NewParamSet() ParamSet {
 }
 
 type Report struct {
-	ID string `csv:"id"`
-
+	ID      string   `csv:"id"`
+	Phase   Phase    `csv:"phase"`
 	Subject ParamSet `csv:",inline"`
 
 	PRR    float64 `csv:"prr"`
@@ -71,6 +74,12 @@ type Report struct {
 	TradeCount  int `csv:"trade_count"`
 
 	Backtests []perf.PerformanceReport `csv:"-"`
+}
+
+func NewReport() Report {
+	return Report{
+		ID: string(util.NewID()),
+	}
 }
 
 func Summarize(report Report) Report {

@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/colngroup/zero2algo/broker"
+	"github.com/colngroup/zero2algo/internal/util"
 	"github.com/olekukonko/tablewriter"
 )
 
@@ -26,15 +27,17 @@ var _summaryReportHeader = []string{
 
 type PerformanceReport struct {
 	ID         string           `csv:"id"`
-	Properties map[string]any   `csv:",inline"`
 	Trade      *TradeReport     `csv:",inline"`
 	Portfolio  *PortfolioReport `csv:",inline"`
+	Properties map[string]any   `csv:",inline"`
 }
 
 func NewPerformanceReport(trades []broker.Trade, equity broker.EquitySeries) PerformanceReport {
 	return PerformanceReport{
-		Trade:     NewTradeReport(trades),
-		Portfolio: NewPortfolioReport(equity),
+		ID:         string(util.NewID()),
+		Trade:      NewTradeReport(trades),
+		Portfolio:  NewPortfolioReport(equity),
+		Properties: make(map[string]any),
 	}
 }
 

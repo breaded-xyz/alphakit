@@ -7,12 +7,11 @@ import (
 	"os"
 
 	"github.com/colngroup/zero2algo/internal/studyrun"
-	"github.com/davecgh/go-spew/spew"
 	"github.com/schollz/progressbar/v3"
 	"golang.org/x/exp/maps"
 )
 
-const _outputDir = ".out"
+const _outputDir = "/.out"
 
 func main() {
 	if err := run(os.Args[1:]); err != nil {
@@ -80,11 +79,15 @@ func run(args []string) error {
 	bar.Finish()
 	print("Study complete\n")
 
-	print("Raw read out:\n\n")
+	fmt.Printf("Writing study results to output directory '%s'... ", _outputDir)
+	if err := studyrun.WriteStudy(_outputDir, optimizer.Study()); err != nil {
+		return err
+	}
+	print("done\n")
+
+	print("Optima summary performance:\n")
 	optimaResult := maps.Values(optimizer.Study().ValidationResults)[0]
-	spew.Dump(optimaResult.Subject.Params)
-	spew.Config.MaxDepth = 1
-	spew.Dump(optimaResult)
+	studyrun.PrintSummary(optimaResult)
 
 	return nil
 }

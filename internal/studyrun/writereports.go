@@ -7,15 +7,29 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/colngroup/zero2algo/perf"
+	"github.com/colngroup/zero2algo/optimize"
 	"github.com/jszwec/csvutil"
 )
 
 const _filenameFriendlyTimeFormat = "20060102T150405"
 
-func WriteReports(path string, reports []perf.PerformanceReport) error {
+func WriteStudy(path string, study optimize.Study) error {
+	return nil
+}
+
+func WriteSummaryReports(path string, reports []SummaryReport) error {
 	prefix := time.Now().UTC().Format(_filenameFriendlyTimeFormat)
-	out := filepath.Join(path, fmt.Sprintf("%s-performancereport.csv", prefix))
+	out := filepath.Join(path, fmt.Sprintf("%s-summaryreports.csv", prefix))
+	if err := saveStructToCSV(out, reports); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func WriteBacktestReports(path string, reports []BacktestReport) error {
+	prefix := time.Now().UTC().Format(_filenameFriendlyTimeFormat)
+	out := filepath.Join(path, fmt.Sprintf("%s-backtestreports.csv", prefix))
 	if err := saveStructToCSV(out, reports); err != nil {
 		return err
 	}
@@ -33,7 +47,7 @@ func saveStructToCSV(filename string, data interface{}) error {
 	// Wrap file in CSV struct encoder
 	w := csv.NewWriter(f)
 	enc := csvutil.NewEncoder(w)
-	enc.Tag = "json"
+	enc.Tag = "csv"
 
 	// Only write header if new file
 	info, err := f.Stat()

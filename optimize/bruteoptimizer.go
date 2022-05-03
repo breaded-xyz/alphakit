@@ -82,12 +82,16 @@ func (o *BruteOptimizer) Start(ctx context.Context) (<-chan OptimizerStep, error
 	outCh := make(chan OptimizerStep)
 
 	// Helper to append results to each phase
-	appendResult := func(phase map[ParamSetID]Report, pset ParamSet, result perf.PerformanceReport) {
-		report := phase[pset.ID]
-		report.ID, result.ID = string(pset.ID), string(pset.ID)
-		report.Subject = pset
-		report.Backtests = append(report.Backtests, result)
-		phase[pset.ID] = report
+	appendResult := func(phase Phase, results map[ParamSetID]Report, pset ParamSet, backtest perf.PerformanceReport) {
+		report, ok := results[pset.ID]
+		if !ok {
+			report = NewReport()
+			report.Subject = pset
+			report.Phase = phase
+		}
+		backtest.Properties = pset.Params
+		report.Backtests = append(report.Backtests, backtest)
+		results[pset.ID] = report
 	}
 
 	go func() {
@@ -109,7 +113,7 @@ func (o *BruteOptimizer) Start(ctx context.Context) (<-chan OptimizerStep, error
 					return
 				}
 			}
-			appendResult(o.study.TrainingResults, step.PSet, step.Result)
+			appendResult(Training, o.study.TrainingResults, step.PSet, step.Result)
 		}
 
 		// Summarize backtest results for each param set
@@ -132,7 +136,7 @@ func (o *BruteOptimizer) Start(ctx context.Context) (<-chan OptimizerStep, error
 			if step.Err != nil {
 				return
 			}
-			appendResult(o.study.ValidationResults, step.PSet, step.Result)
+			appendResult(Validation, o.study.ValidationResults, step.PSet, step.Result)
 		}
 		o.study.ValidationResults[optima.ID] = Summarize(o.study.ValidationResults[optima.ID])
 	}()
