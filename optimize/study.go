@@ -60,9 +60,13 @@ type Report struct {
 	Subject ParamSet
 
 	PRR    float64
+	MDD    float64
 	CAGR   float64
 	Sharpe float64
 	Calmar float64
+
+	SampleCount int
+	TradeCount  int
 
 	Backtests []perf.PerformanceReport
 }
@@ -71,14 +75,20 @@ func Summarize(report Report) Report {
 
 	for i := range report.Backtests {
 		backtest := report.Backtests[i]
+
+		report.SampleCount++
+		report.TradeCount += int(backtest.Trade.TradeCount)
+
 		report.PRR += backtest.Trade.PRR
+		report.MDD += backtest.Portfolio.MaxDrawdown
 		report.CAGR += backtest.Portfolio.CAGR
 		report.Sharpe += backtest.Portfolio.Sharpe
 		report.Calmar += backtest.Portfolio.Calmar
 	}
 
-	count := float64(len(report.Backtests))
+	count := float64(report.SampleCount)
 	report.PRR /= count
+	report.MDD /= count
 	report.CAGR /= count
 	report.Sharpe /= count
 	report.Calmar /= count
