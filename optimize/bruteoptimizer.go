@@ -102,14 +102,19 @@ func (o *BruteOptimizer) Start(ctx context.Context) (<-chan OptimizerStep, error
 			}
 			report := o.study.TrainingResults[step.PSet.ID]
 			report.Subject = step.PSet
-			report.AddResult(step.Result)
+			report.Backtests = append(report.Backtests, step.Result)
 			o.study.TrainingResults[step.PSet.ID] = report
 		}
 
-		// Evaluate training results and select top ranked pset for validation phase
-		ranked := maps.Values(o.study.TrainingResults)
-		slices.SortFunc(ranked, o.Ranker)
-		optima := ranked[len(ranked)-1].Subject
+		// Summarize backtest results for each param set
+		for k := range o.study.TrainingResults {
+			o.study.TrainingResults[k] = Summarize(o.study.TrainingResults[k])
+		}
+
+		// Select top ranked result for validation phase
+		results := maps.Values(o.study.TrainingResults)
+		slices.SortFunc(results, o.Ranker)
+		optima := results[len(results)-1].Subject
 		o.study.Validation = append(o.study.Validation, optima)
 
 		// Validation phase
@@ -123,9 +128,10 @@ func (o *BruteOptimizer) Start(ctx context.Context) (<-chan OptimizerStep, error
 			}
 			report := o.study.ValidationResults[step.PSet.ID]
 			report.Subject = step.PSet
-			report.AddResult(step.Result)
+			report.Backtests = append(report.Backtests, step.Result)
 			o.study.ValidationResults[step.PSet.ID] = report
 		}
+		o.study.ValidationResults[optima.ID] = Summarize(o.study.ValidationResults[optima.ID])
 	}()
 
 	return outCh, nil

@@ -67,19 +67,21 @@ type Report struct {
 	Backtests []perf.PerformanceReport
 }
 
-func (r *Report) AddResult(backtest ...perf.PerformanceReport) {
-	r.Backtests = append(r.Backtests, backtest...)
+func Summarize(report Report) Report {
 
-	for i := range r.Backtests {
-		r.PRR += r.Backtests[i].Trade.PRR
-		r.CAGR += r.Backtests[i].Portfolio.CAGR
-		r.Sharpe += r.Backtests[i].Portfolio.Sharpe
-		r.Calmar += r.Backtests[i].Portfolio.Calmar
+	for i := range report.Backtests {
+		backtest := report.Backtests[i]
+		report.PRR += backtest.Trade.PRR
+		report.CAGR += backtest.Portfolio.CAGR
+		report.Sharpe += backtest.Portfolio.Sharpe
+		report.Calmar += backtest.Portfolio.Calmar
 	}
 
-	count := float64(len(r.Backtests))
-	r.PRR /= count
-	r.CAGR /= count
-	r.Sharpe /= count
-	r.Calmar /= count
+	count := float64(len(report.Backtests))
+	report.PRR /= count
+	report.CAGR /= count
+	report.Sharpe /= count
+	report.Calmar /= count
+
+	return report
 }

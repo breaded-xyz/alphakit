@@ -41,7 +41,7 @@ func NewPortfolioReport(curve broker.EquitySeries) *PortfolioReport {
 	report.Period = report.PeriodEnd.Sub(report.PeriodStart)
 
 	report.EquityReturn = (report.EndEquity - report.StartEquity) / NNZ(report.StartEquity, 1)
-	report.CAGR = CAGR(report.StartEquity, report.EndEquity, int(report.Period.Hours())/24)
+	report.CAGR = NN(CAGR(report.StartEquity, report.EndEquity, int(report.Period.Hours())/24), 0)
 
 	daily := ReduceEOD(curve)
 	if len(daily) == 0 {
