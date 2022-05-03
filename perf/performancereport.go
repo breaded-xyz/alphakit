@@ -25,10 +25,10 @@ var _summaryReportHeader = []string{
 }
 
 type PerformanceReport struct {
-	Description string           `json:"description"`
-	Properties  map[string]any   `json:",inline"`
-	Trade       *TradeReport     `json:",inline"`
-	Portfolio   *PortfolioReport `json:",inline"`
+	ID         string           `csv:"id"`
+	Properties map[string]any   `csv:",inline"`
+	Trade      *TradeReport     `csv:",inline"`
+	Portfolio  *PortfolioReport `csv:",inline"`
 }
 
 func NewPerformanceReport(trades []broker.Trade, equity broker.EquitySeries) PerformanceReport {

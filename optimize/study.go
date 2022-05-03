@@ -57,18 +57,20 @@ func NewParamSet() ParamSet {
 }
 
 type Report struct {
-	Subject ParamSet
+	ID string `csv:"id"`
 
-	PRR    float64
-	MDD    float64
-	CAGR   float64
-	Sharpe float64
-	Calmar float64
+	Subject ParamSet `csv:",inline"`
 
-	SampleCount int
-	TradeCount  int
+	PRR    float64 `csv:"prr"`
+	MDD    float64 `csv:"mdd"`
+	CAGR   float64 `csv:"cagr"`
+	Sharpe float64 `csv:"sharpe"`
+	Calmar float64 `csv:"calmar"`
 
-	Backtests []perf.PerformanceReport
+	SampleCount int `csv:"sample_count"`
+	TradeCount  int `csv:"trade_count"`
+
+	Backtests []perf.PerformanceReport `csv:"-"`
 }
 
 func Summarize(report Report) Report {
