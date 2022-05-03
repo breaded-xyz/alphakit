@@ -56,14 +56,41 @@ func (p *ApexPredicter) Predict() float64 {
 		score += 0.1
 	}
 
-	sd := func(f float64) float64 { return p.sd.Value() * f }
+	//if p.osc.Value() > p.sd.Value() || p.osc.Value() < -p.sd.Value() {
+	//	score += 0.05
+	//}
 
 	switch {
-	case ta.Valley(p.osc.History()) && p.osc.Value() < sd(-2):
-		return score + 0.9
-	case ta.Peak(p.osc.History()) && p.osc.Value() > sd(2):
-		return -(score + 0.9)
+	case ta.Valley(p.osc.History()):
+		score = (score + 0.9)
+	case ta.Peak(p.osc.History()):
+		score = -(score + 0.9)
 	}
+
+	/*sd05, sd15, sd2 := sd*0.5, sd*1.5, sd*2
+
+	switch {
+	case ta.Valley(p.osc.History()) && p.osc.Value() < 0-sd2:
+		return score + 0.9
+	case ta.Valley(p.osc.History()) && p.osc.Value() < 0-sd15:
+		return score + 0.7
+	case ta.Valley(p.osc.History()) && p.osc.Value() < 0-sd:
+		return score + 0.5
+	case ta.Valley(p.osc.History()) && p.osc.Value() < 0-sd05:
+		return score + 0.3
+	case ta.Valley(p.osc.History()) && p.osc.Value() < 0:
+		return score + 0.1
+	case ta.Peak(p.osc.History()) && p.osc.Value() > 0+sd2:
+		return -(score + 0.9)
+	case ta.Peak(p.osc.History()) && p.osc.Value() > 0+sd15:
+		return -(score + 0.7)
+	case ta.Peak(p.osc.History()) && p.osc.Value() > 0+sd:
+		return -(score + 0.5)
+	case ta.Peak(p.osc.History()) && p.osc.Value() > 0+sd05:
+		return -(score + 0.3)
+	case ta.Peak(p.osc.History()) && p.osc.Value() > 0:
+		return -(score + 0.1)
+	}*/
 
 	return score
 }

@@ -7,4 +7,5 @@ import (
 
 var _typeRegistry = map[string]any{
 	"trend.breakout": trader.MakeFromConfig(trend.MakeBreakoutBotFromConfig),
+	"trend.apex":     trader.MakeFromConfig(trend.MakeApexBotFromConfig),
 }
