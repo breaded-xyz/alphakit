@@ -72,16 +72,19 @@ func run(args []string) error {
 		return err
 	}
 	print("done\n")
+	fmt.Printf("Estimated backtests # required: %d\n", stepCount)
 
 	print("Running study... ")
 	bar := progressbar.Default(int64(stepCount), "Running backtests... ")
-	bar.RenderBlank()
 	stepCh, err := optimizer.Start(context.Background())
 	if err != nil {
 		return err
 	}
-	for range stepCh {
+	for step := range stepCh {
 		bar.Add(1)
+		if step.Err != nil {
+			return err
+		}
 	}
 	bar.Finish()
 	print("Study complete\n")

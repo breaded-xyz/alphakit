@@ -136,7 +136,7 @@ func TestProcessBruteJobs(t *testing.T) {
 	giveDoneCh := make(chan struct{})
 	defer close(giveDoneCh)
 
-	outChan := processBruteJobs(context.Background(), giveDoneCh, giveJobCh)
+	outChan := processBruteJobs(context.Background(), giveDoneCh, giveJobCh, 8)
 
 	giveJobCh <- bruteOptimizerJob{
 		ParamSet: ParamSet{ID: "0", Params: map[string]any{"A": 0, "B": 1}},

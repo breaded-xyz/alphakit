@@ -2,9 +2,9 @@ title = "Test Study"
 resolution = "H1"
 
 [optimizer]
-bot = "trend.breakout"
+bot = "trend.cross"
 sampleSplitPct = 0.7
-warmupBarCount = 1024
+warmupBarCount = 64
 ranker = "sharpe"
 
 [samples]
@@ -20,17 +20,14 @@ fundingHourPct = 0.000025
 
 [paramspace]
 initialCapital = 1000.0
-sizerF = 0.0
+sizerF = 0.5
 sizerScaleF = 1.0
+riskerSDLength = 64
+riskerSDFactor = 1.0
 enterLong = 1.0
 enterShort = -1.0
 exitLong = -1.0
 exitShort = 1.0
 maFastLength = 1
-maSlowLength = [64, 128, 256, 512, 1024] # Param range to optimize
-maSDFilterLength = 512
-maSDFilterFactor =  1.5
+maSlowLength = [32, 64] # Param range to optimize
 mmiLength = 300
-mmiSmootherLength = 300
-riskerSDLength = 0
-riskerSDFactor = 1.0

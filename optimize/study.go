@@ -91,6 +91,10 @@ func Summarize(report Report) Report {
 	for i := range report.Backtests {
 		backtest := report.Backtests[i]
 
+		if backtest.Trade == nil || backtest.Portfolio == nil {
+			continue
+		}
+
 		report.SampleCount++
 		report.TradeCount += int(backtest.Trade.TradeCount)
 

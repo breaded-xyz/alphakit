@@ -4,12 +4,13 @@ import (
 	"context"
 	"errors"
 	"math"
-	"sync"
+	"runtime"
 
 	"github.com/colngroup/zero2algo/broker"
 	"github.com/colngroup/zero2algo/market"
 	"github.com/colngroup/zero2algo/perf"
 	"github.com/colngroup/zero2algo/trader"
+	"github.com/gammazero/workerpool"
 	"golang.org/x/exp/maps"
 	"golang.org/x/exp/slices"
 )
@@ -36,6 +37,8 @@ type BruteOptimizer struct {
 	MakeDealer     broker.MakeSimulatedDealer
 	Ranker         ObjectiveRanker
 
+	MaxWorkers int
+
 	study Study
 }
 
@@ -52,6 +55,7 @@ func NewBruteOptimizer() BruteOptimizer {
 		SampleSplitPct: 0,
 		WarmupBarCount: 0,
 		Ranker:         SharpeRanker,
+		MaxWorkers:     runtime.NumCPU(),
 		study:          NewStudy(),
 	}
 }
@@ -102,7 +106,7 @@ func (o *BruteOptimizer) Start(ctx context.Context) (<-chan OptimizerStep, error
 
 		// Training phase
 		trainigJobCh := o.enqueueJobs(o.study.Training, o.study.TrainingSamples)
-		trainingOutCh := processBruteJobs(ctx, doneCh, trainigJobCh)
+		trainingOutCh := processBruteJobs(ctx, doneCh, trainigJobCh, o.MaxWorkers)
 		for step := range trainingOutCh {
 			step.Phase = Training
 			outCh <- step
@@ -129,7 +133,7 @@ func (o *BruteOptimizer) Start(ctx context.Context) (<-chan OptimizerStep, error
 
 		// Validation phase
 		validationJobCh := o.enqueueJobs(o.study.Validation, o.study.ValidationSamples)
-		validationOutCh := processBruteJobs(ctx, doneCh, validationJobCh)
+		validationOutCh := processBruteJobs(ctx, doneCh, validationJobCh, o.MaxWorkers)
 		for step := range validationOutCh {
 			step.Phase = Validation
 			outCh <- step
@@ -170,13 +174,15 @@ func (o *BruteOptimizer) enqueueJobs(pSets []ParamSet, samples [][]market.Kline)
 	return jobCh
 }
 
-func processBruteJobs(ctx context.Context, doneCh <-chan struct{}, jobCh <-chan bruteOptimizerJob) <-chan OptimizerStep {
+func processBruteJobs(ctx context.Context, doneCh <-chan struct{}, jobCh <-chan bruteOptimizerJob, maxWorkers int) <-chan OptimizerStep {
 
 	outCh := make(chan OptimizerStep)
 
 	go func() {
 		defer close(outCh)
-		var wg sync.WaitGroup
+
+		wp := workerpool.New(maxWorkers)
+		//var wg sync.WaitGroup
 		next := true
 
 		for next {
@@ -191,30 +197,32 @@ func processBruteJobs(ctx context.Context, doneCh <-chan struct{}, jobCh <-chan 
 					next = false
 					break
 				}
-				wg.Add(1)
-				go func() {
-					defer wg.Done()
-					dealer, err := job.MakeDealer()
-					if err != nil {
-						outCh <- OptimizerStep{PSet: job.ParamSet, Err: err}
-						return
-					}
-					bot, err := job.MakeBot(job.ParamSet.Params)
-					if err != nil {
-						outCh <- OptimizerStep{PSet: job.ParamSet, Err: err}
-						return
-					}
-					bot.SetDealer(dealer)
-					if err := bot.Warmup(ctx, job.Sample[:job.WarmupBarCount]); err != nil {
-						outCh <- OptimizerStep{PSet: job.ParamSet, Err: err}
-						return
-					}
-					perf, err := runBacktest(ctx, bot, dealer, job.Sample[job.WarmupBarCount:])
-					outCh <- OptimizerStep{PSet: job.ParamSet, Result: perf, Err: err}
-				}()
+				//wg.Add(1)
+				wp.Submit(
+					func() {
+						//defer wg.Done()
+						dealer, err := job.MakeDealer()
+						if err != nil {
+							outCh <- OptimizerStep{PSet: job.ParamSet, Err: err}
+							return
+						}
+						bot, err := job.MakeBot(job.ParamSet.Params)
+						if err != nil {
+							outCh <- OptimizerStep{PSet: job.ParamSet, Err: err}
+							return
+						}
+						bot.SetDealer(dealer)
+						if err := bot.Warmup(ctx, job.Sample[:job.WarmupBarCount]); err != nil {
+							outCh <- OptimizerStep{PSet: job.ParamSet, Err: err}
+							return
+						}
+						perf, err := runBacktest(ctx, bot, dealer, job.Sample[job.WarmupBarCount:])
+						outCh <- OptimizerStep{PSet: job.ParamSet, Result: perf, Err: err}
+					})
 			}
 		}
-		wg.Wait()
+		//wg.
+		wp.StopWait()
 	}()
 
 	return outCh

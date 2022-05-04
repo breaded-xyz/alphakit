@@ -18,13 +18,12 @@ import (
 
 const testdataPath string = "../../internal/testdata/"
 
-func TestBotWithBreakoutPredicter(t *testing.T) {
+func TestBotWithCrossPredicter(t *testing.T) {
 	dealer := backtest.NewDealer()
 	dealer.SetInitialCapital(dec.New(1000))
 
-	predicter := NewBreakoutPredicter(
+	predicter := NewCrossPredicter(
 		ta.NewOsc(ta.NewALMA(1), ta.NewALMA(256)),
-		ta.NewSDWithFactor(512, 1.5),
 		ta.NewMMIWithSmoother(200, ta.NewALMA(200)))
 
 	bot := Bot{

@@ -20,7 +20,7 @@ func TestCrossPredicter_ReceivePrice(t *testing.T) {
 	givePrice := market.Kline{C: dec.New(10)}
 	givePrev := 3.0
 
-	predicter := NewBreakoutPredicter(&giveOsc, &giveSD, &giveMMI)
+	predicter := NewCrossPredicter(&giveOsc, &giveMMI)
 	predicter.prev = givePrev
 	err := predicter.ReceivePrice(context.Background(), givePrice)
 
@@ -139,9 +139,8 @@ func TestCrossPredicter_Predict(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			predicter := NewBreakoutPredicter(
+			predicter := NewCrossPredicter(
 				&ta.StubIndicator{Values: tt.giveOscValues},
-				&ta.StubIndicator{Values: tt.giveSDValues},
 				&ta.StubIndicator{Values: tt.giveMMIValues},
 			)
 			act := predicter.Predict()
@@ -152,8 +151,7 @@ func TestCrossPredicter_Predict(t *testing.T) {
 }
 
 func TestCrossPredicter_Valid(t *testing.T) {
-	predicter := NewBreakoutPredicter(
-		&ta.StubIndicator{IsValid: true},
+	predicter := NewCrossPredicter(
 		&ta.StubIndicator{IsValid: true},
 		&ta.StubIndicator{IsValid: true},
 	)

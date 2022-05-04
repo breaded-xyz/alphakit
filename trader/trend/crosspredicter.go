@@ -8,37 +8,32 @@ import (
 	"github.com/colngroup/zero2algo/trader"
 )
 
-var _ trader.Predicter = (*BreakoutPredicter)(nil)
+var _ trader.Predicter = (*CrossPredicter)(nil)
 
-type BreakoutPredicter struct {
+type CrossPredicter struct {
 	priceSelector ta.PriceSelector
 
 	osc ta.Indicator
-	sd  ta.Indicator
 	mmi ta.Indicator
 
 	prev float64
 }
 
-func NewBreakoutPredicter(osc, sd, mmi ta.Indicator) *BreakoutPredicter {
-	return &BreakoutPredicter{
-		priceSelector: ta.Close,
+func NewCrossPredicter(osc, mmi ta.Indicator) *CrossPredicter {
+	return &CrossPredicter{
+		priceSelector: ta.HL2,
 		osc:           osc,
-		sd:            sd,
 		mmi:           mmi,
 	}
 }
 
-func (p *BreakoutPredicter) ReceivePrice(ctx context.Context, price market.Kline) error {
+func (p *CrossPredicter) ReceivePrice(ctx context.Context, price market.Kline) error {
 
 	v := p.priceSelector(price)
 	vDiff := v - p.prev
 	p.prev = v
 
 	if err := p.osc.Update(v); err != nil {
-		return err
-	}
-	if err := p.sd.Update(p.osc.Value()); err != nil {
 		return err
 	}
 	if err := p.mmi.Update(vDiff); err != nil {
@@ -48,7 +43,7 @@ func (p *BreakoutPredicter) ReceivePrice(ctx context.Context, price market.Kline
 	return nil
 }
 
-func (p *BreakoutPredicter) Predict() float64 {
+func (p *CrossPredicter) Predict() float64 {
 
 	var score float64
 
@@ -56,28 +51,16 @@ func (p *BreakoutPredicter) Predict() float64 {
 		score += 0.1
 	}
 
-	threshold := p.sd.Value()
-	upper := threshold
-	lower := -threshold
-
 	switch {
-	case ta.CrossUp(p.osc.History(), upper):
-		return score + 0.9
 	case ta.CrossUp(p.osc.History(), 0):
-		return score + 0.7
-	case ta.CrossUp(p.osc.History(), lower):
-		return score + 0.3
-	case ta.CrossDown(p.osc.History(), upper):
-		return -(score + 0.3)
+		score += 0.9
 	case ta.CrossDown(p.osc.History(), 0):
-		return -(score + 0.7)
-	case ta.CrossDown(p.osc.History(), lower):
-		return -(score + 0.9)
+		score = -(score + 0.9)
 	}
 
 	return score
 }
 
-func (p *BreakoutPredicter) Valid() bool {
-	return p.osc.Valid() && p.sd.Valid() && p.mmi.Valid()
+func (p *CrossPredicter) Valid() bool {
+	return p.osc.Valid() && p.mmi.Valid()
 }

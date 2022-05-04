@@ -29,13 +29,12 @@ func MakeCrossBotFromConfig(config map[string]any) (trader.Bot, error) {
 		return nil, trader.ErrInvalidConfig
 	}
 	maOsc := ta.NewOsc(ta.NewALMA(maFastLength), ta.NewALMA(maSlowLength))
-	maSDFilter := ta.NewSDWithFactor(util.ToInt(config["masdfilterlength"]), config["masdfilterfactor"].(float64))
-	mmi := ta.NewMMIWithSmoother(util.ToInt(config["mmilength"]), ta.NewALMA(util.ToInt(config["mmismootherlength"])))
-	bot.Predicter = NewBreakoutPredicter(maOsc, maSDFilter, mmi)
+	mmi := ta.NewMMI(util.ToInt(config["mmilength"]))
+	bot.Predicter = NewCrossPredicter(maOsc, mmi)
 
 	riskSDLength := util.ToInt(config["riskersdlength"])
 	if riskSDLength > 0 {
-		bot.Risker = risk.NewSDRisker(util.ToInt(config["riskersdlength"]), config["riskersdfactor"].(float64))
+		bot.Risker = risk.NewSDRisker(riskSDLength, util.ToFloat(config["riskersdfactor"]))
 	} else {
 		bot.Risker = risk.NewFullRisker()
 	}
