@@ -21,7 +21,7 @@ type CrossPredicter struct {
 
 func NewCrossPredicter(osc, mmi ta.Indicator) *CrossPredicter {
 	return &CrossPredicter{
-		priceSelector: ta.HL2,
+		priceSelector: ta.Close,
 		osc:           osc,
 		mmi:           mmi,
 	}
