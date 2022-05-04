@@ -24,6 +24,8 @@ func ToFloat(v any) float64 {
 	switch t := v.(type) {
 	case int:
 		f = float64(t)
+	case int64:
+		f = float64(t)
 	case float64:
 		f = t
 	}
