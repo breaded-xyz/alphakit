@@ -7,6 +7,7 @@ import (
 	"os"
 
 	"github.com/colngroup/zero2algo/internal/studyrun"
+	"github.com/davecgh/go-spew/spew"
 	"github.com/schollz/progressbar/v3"
 	"golang.org/x/exp/maps"
 )
@@ -80,14 +81,18 @@ func run(args []string) error {
 	if err != nil {
 		return err
 	}
+	var errs []string
 	for step := range stepCh {
 		bar.Add(1)
 		if step.Err != nil {
-			return err
+			errs = append(errs, step.Err.Error())
 		}
 	}
 	bar.Finish()
 	print("Study complete\n")
+
+	print("Errors encountered:\n")
+	spew.Dump(errs)
 
 	fmt.Printf("Writing study results to output directory '%s'... ", _outputDir)
 	if err := studyrun.WriteStudy(_outputDir, optimizer.Study()); err != nil {
