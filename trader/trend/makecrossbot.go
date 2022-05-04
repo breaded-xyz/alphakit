@@ -10,9 +10,9 @@ import (
 	"github.com/colngroup/zero2algo/trader"
 )
 
-var _ trader.MakeFromConfig = MakeBreakoutBotFromConfig
+var _ trader.MakeFromConfig = MakeCrossBotFromConfig
 
-func MakeBreakoutBotFromConfig(config map[string]any) (trader.Bot, error) {
+func MakeCrossBotFromConfig(config map[string]any) (trader.Bot, error) {
 
 	var bot Bot
 

@@ -11,7 +11,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestBreakoutPredicter_ReceivePrice(t *testing.T) {
+func TestCrossPredicter_ReceivePrice(t *testing.T) {
 	var giveOsc, giveSD, giveMMI ta.MockIndicator
 	giveOsc.On("Update", []float64{10}).Return(error(nil))
 	giveOsc.On("Value").Return(10.0)
@@ -30,7 +30,7 @@ func TestBreakoutPredicter_ReceivePrice(t *testing.T) {
 	giveMMI.AssertExpectations(t)
 }
 
-func TestBreakoutPredicter_Predict(t *testing.T) {
+func TestCrossPredicter_Predict(t *testing.T) {
 	tests := []struct {
 		name          string
 		giveOscValues []float64
@@ -67,32 +67,32 @@ func TestBreakoutPredicter_Predict(t *testing.T) {
 			want:          0.9,
 		},
 		{
-			name:          "long @ 0.7, cross up zero w/ MMI",
+			name:          "long @ 0.8, cross up zero w/ MMI",
 			giveOscValues: []float64{-10, 10},
 			giveSDValues:  []float64{15, 15},
 			giveMMIValues: []float64{75, 70},
+			want:          0.8,
+		},
+		{
+			name:          "long @ 0.7, cross up zero w/no MMI",
+			giveOscValues: []float64{-10, 10},
+			giveSDValues:  []float64{15, 15},
+			giveMMIValues: []float64{70, 75},
 			want:          0.7,
 		},
 		{
-			name:          "long @ 0.6, cross up zero w/no MMI",
-			giveOscValues: []float64{-10, 10},
-			giveSDValues:  []float64{15, 15},
-			giveMMIValues: []float64{70, 75},
-			want:          0.6,
-		},
-		{
-			name:          "long @ 0.3, cross up lower limit w/ MMI",
+			name:          "long @ 0.4, cross up lower limit w/ MMI",
 			giveOscValues: []float64{-20, -10},
 			giveSDValues:  []float64{15, 15},
 			giveMMIValues: []float64{75, 70},
-			want:          0.3,
+			want:          0.4,
 		},
 		{
-			name:          "long @ 0.2, cross up lower limit w/no MMI",
+			name:          "long @ 0.3, cross up lower limit w/no MMI",
 			giveOscValues: []float64{-20, -10},
 			giveSDValues:  []float64{15, 15},
 			giveMMIValues: []float64{70, 75},
-			want:          0.2,
+			want:          0.3,
 		},
 		{
 			name:          "short @ -1.0",
@@ -109,32 +109,32 @@ func TestBreakoutPredicter_Predict(t *testing.T) {
 			want:          -0.9,
 		},
 		{
-			name:          "short @ -0.7",
+			name:          "short @ -0.8",
 			giveOscValues: []float64{10, -10},
 			giveSDValues:  []float64{15, 15},
 			giveMMIValues: []float64{75, 70},
-			want:          -0.7,
+			want:          -0.8,
 		},
 		{
-			name:          "short @ -0.6",
+			name:          "short @ -0.7",
 			giveOscValues: []float64{10, -10},
 			giveSDValues:  []float64{15, 15},
 			giveMMIValues: []float64{70, 70},
-			want:          -0.6,
+			want:          -0.7,
+		},
+		{
+			name:          "short @ -0.4",
+			giveOscValues: []float64{20, 10},
+			giveSDValues:  []float64{15, 15},
+			giveMMIValues: []float64{75, 70},
+			want:          -0.4,
 		},
 		{
 			name:          "short @ -0.3",
 			giveOscValues: []float64{20, 10},
 			giveSDValues:  []float64{15, 15},
-			giveMMIValues: []float64{75, 70},
-			want:          -0.3,
-		},
-		{
-			name:          "short @ -0.2",
-			giveOscValues: []float64{20, 10},
-			giveSDValues:  []float64{15, 15},
 			giveMMIValues: []float64{70, 75},
-			want:          -0.2,
+			want:          -0.3,
 		},
 	}
 	for _, tt := range tests {
@@ -151,7 +151,7 @@ func TestBreakoutPredicter_Predict(t *testing.T) {
 
 }
 
-func TestBreakoutPredicter_Valid(t *testing.T) {
+func TestCrossPredicter_Valid(t *testing.T) {
 	predicter := NewBreakoutPredicter(
 		&ta.StubIndicator{IsValid: true},
 		&ta.StubIndicator{IsValid: true},
