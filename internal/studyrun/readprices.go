@@ -12,11 +12,11 @@ import (
 
 func ReadPricesFromConfig(config map[string]any) ([][]market.Kline, error) {
 
-	sub, ok := config["samples"]
+	root, ok := config["samples"]
 	if !ok {
 		return nil, errors.New("'samples' key not found")
 	}
-	paths := sub.(map[string]any)
+	paths := root.(map[string]any)
 
 	var prices [][]market.Kline
 	for _, v := range paths {

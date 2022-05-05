@@ -20,10 +20,10 @@ func ReadBruteOptimizerFromConfig(config map[string]any) (*optimize.BruteOptimiz
 	root := config["optimizer"].(map[string]any)
 
 	// Load bot from type registry
-	bot, ok := root["bot"].(string)
-	if !ok {
+	if _, ok := config["bot"]; !ok {
 		return nil, errors.New("'bot' key not found")
 	}
+	bot := util.ToString(config["bot"])
 	if _, ok := _typeRegistry[bot]; !ok {
 		return nil, fmt.Errorf("'%s' key not found in type registry", bot)
 	}

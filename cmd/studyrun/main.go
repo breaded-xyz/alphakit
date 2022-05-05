@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strings"
 
 	"github.com/colngroup/zero2algo/internal/studyrun"
-	"github.com/davecgh/go-spew/spew"
 	"github.com/schollz/progressbar/v3"
 	"golang.org/x/exp/maps"
 )
@@ -91,7 +91,10 @@ func run(args []string) error {
 	bar.Finish()
 	print("Study complete\n")
 
-	spew.Dump(errs)
+	if len(errs) > 0 {
+		print("Errors encountered during optimization:\n")
+		print(strings.Join(errs, "\n"))
+	}
 
 	fmt.Printf("Writing study results to output directory '%s'... ", _outputDir)
 	if err := studyrun.WriteStudy(_outputDir, optimizer.Study()); err != nil {
