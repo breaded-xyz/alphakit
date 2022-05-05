@@ -4,13 +4,17 @@ import (
 	"math"
 
 	"github.com/colngroup/zero2algo/internal/dec"
+	"github.com/colngroup/zero2algo/internal/util"
 	"github.com/shopspring/decimal"
 )
+
+var _ Sizer = (*SafeFSizer)(nil)
 
 type SafeFSizer struct {
 	InitialCapital decimal.Decimal
 	F              float64
 	ScaleF         float64
+	StepSize       float64
 }
 
 func NewSafeFSizer(initialCapital decimal.Decimal, f, scaleF float64) *SafeFSizer {
@@ -18,6 +22,7 @@ func NewSafeFSizer(initialCapital decimal.Decimal, f, scaleF float64) *SafeFSize
 		InitialCapital: initialCapital,
 		F:              f,
 		ScaleF:         scaleF,
+		StepSize:       _defaultStepSize,
 	}
 }
 
@@ -33,6 +38,8 @@ func (s *SafeFSizer) Size(price, capital, risk decimal.Decimal) decimal.Decimal 
 	margin := capital.InexactFloat64() * safeF
 
 	size := margin / risk.InexactFloat64()
+
+	size = util.RoundTo(size, s.StepSize)
 
 	return dec.New(size)
 }

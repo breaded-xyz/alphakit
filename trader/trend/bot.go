@@ -185,6 +185,9 @@ func (b *Bot) enter(ctx context.Context, enterSide broker.OrderSide, price decim
 	capital := balance.Trade
 	unitaryRisk := b.Risker.Risk()
 	size := b.Sizer.Size(price, capital, unitaryRisk)
+	if !size.IsPositive() {
+		return nil
+	}
 	_, err = b.executeEnterOrder(ctx, enterSide, price, size, unitaryRisk)
 	if err != nil {
 		return err

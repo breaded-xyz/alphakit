@@ -7,6 +7,7 @@ import (
 	"os"
 
 	"github.com/colngroup/zero2algo/internal/studyrun"
+	"github.com/davecgh/go-spew/spew"
 	"github.com/schollz/progressbar/v3"
 	"golang.org/x/exp/maps"
 )
@@ -89,6 +90,8 @@ func run(args []string) error {
 	}
 	bar.Finish()
 	print("Study complete\n")
+
+	spew.Dump(errs)
 
 	fmt.Printf("Writing study results to output directory '%s'... ", _outputDir)
 	if err := studyrun.WriteStudy(_outputDir, optimizer.Study()); err != nil {
