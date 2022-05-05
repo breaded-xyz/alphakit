@@ -1,23 +1,27 @@
 package hodl
 
-import "github.com/colngroup/zero2algo/trader"
+import (
+	"github.com/colngroup/zero2algo/internal/util"
+	"github.com/colngroup/zero2algo/trader"
+)
 
 const (
 	BuyBarIndexKey  = "buybarindex"
 	SellBarIndexKey = "sellbarindex"
 )
 
-func MakeBot(config map[string]any) (trader.Bot, error) {
+func MakeBotFromConfig(config map[string]any) (trader.Bot, error) {
 	var hodl Bot
 
-	buyBarIndex, ok := config[BuyBarIndexKey].(int)
-	if !ok {
+	if _, ok := config[BuyBarIndexKey]; !ok {
 		return nil, trader.ErrInvalidConfig
 	}
-	sellBarIndex, ok := config[SellBarIndexKey].(int)
-	if !ok {
+	buyBarIndex := util.ToInt(config[BuyBarIndexKey])
+
+	if _, ok := config[SellBarIndexKey]; !ok {
 		return nil, trader.ErrInvalidConfig
 	}
+	sellBarIndex := util.ToInt(config[SellBarIndexKey])
 
 	switch {
 	case buyBarIndex == 0 && sellBarIndex == 0:

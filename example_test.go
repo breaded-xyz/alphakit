@@ -51,7 +51,7 @@ func Example() {
 			// Create a new bot initialized with our dealer
 			// The bot is configured with the params in the test case
 			// Hodl Bot implements a basic buy and hold algo
-			bot, _ := hodl.MakeBot(c)
+			bot, _ := hodl.MakeBotFromConfig(c)
 			bot.SetDealer(dealer)
 
 			// Iterate prices sending each price interval to the dealer and then to the bot

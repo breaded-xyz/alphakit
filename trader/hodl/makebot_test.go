@@ -7,7 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestMakeBot(t *testing.T) {
+func TestMakeBotFromConfig(t *testing.T) {
 	tests := []struct {
 		name    string
 		give    map[string]any
@@ -68,7 +68,7 @@ func TestMakeBot(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			act, err := MakeBot(tt.give)
+			act, err := MakeBotFromConfig(tt.give)
 			assert.Equal(t, tt.wantErr, err)
 			assert.Equal(t, tt.wantBot, act)
 		})
