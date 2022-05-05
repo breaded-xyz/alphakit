@@ -45,6 +45,7 @@ require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/gonum/stat v0.0.0-20181125101827-41a0da705a5b
 	github.com/google/uuid v1.3.0 // indirect
+	github.com/iamjinlei/go-tart v0.0.0-20210623083942-ceb57e98706b
 	github.com/jszwec/csvutil v1.6.0
 	github.com/oklog/ulid/v2 v2.0.2 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect

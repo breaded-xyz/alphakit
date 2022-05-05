@@ -18,32 +18,27 @@ func MakeApexBotFromConfig(config map[string]any) (trader.Bot, error) {
 
 	bot.asset = market.NewAsset(util.ToString(config["asset"]))
 
-	bot.EnterLong = config["enterlong"].(float64)
-	bot.EnterShort = config["entershort"].(float64)
-	bot.ExitLong = config["exitlong"].(float64)
-	bot.ExitShort = config["exitshort"].(float64)
+	bot.EnterLong = util.ToFloat(config["enterlong"])
+	bot.EnterShort = util.ToFloat(config["entershort"])
+	bot.ExitLong = util.ToFloat(config["exitlong"])
+	bot.ExitShort = util.ToFloat(config["exitshort"])
 
-	maFastLength := util.ToInt(config["mafastlength"])
-	maSlowLength := util.ToInt(config["maslowlength"])
-	if maFastLength >= maSlowLength {
-		return nil, trader.ErrInvalidConfig
-	}
-	maOsc := ta.NewOsc(ta.NewALMA(maFastLength), ta.NewALMA(maSlowLength))
-	maSDFilter := ta.NewSD(util.ToInt(config["masdfilterlength"]))
-	mmi := ta.NewMMIWithSmoother(util.ToInt(config["mmilength"]), ta.NewALMA(util.ToInt(config["mmismootherlength"])))
-	bot.Predicter = NewApexPredicter(maOsc, maSDFilter, mmi)
+	maLength := util.ToInt(config["malength"])
+	ma := ta.NewALMA(maLength)
+	mmi := ta.NewMMI(util.ToInt(config["mmilength"]))
+	bot.Predicter = NewApexPredicter(ma, mmi)
 
 	riskSDLength := util.ToInt(config["riskersdlength"])
 	if riskSDLength > 0 {
-		bot.Risker = risk.NewSDRisker(util.ToInt(config["riskersdlength"]), config["riskersdfactor"].(float64))
+		bot.Risker = risk.NewSDRisker(riskSDLength, util.ToFloat(config["riskersdfactor"]))
 	} else {
 		bot.Risker = risk.NewFullRisker()
 	}
 
-	initialCapital := dec.New(config["initialcapital"].(float64))
-	sizerF := config["sizerf"].(float64)
+	initialCapital := dec.New(util.ToFloat(config["initialcapital"]))
+	sizerF := util.ToFloat(config["sizerf"])
 	if sizerF > 0 {
-		bot.Sizer = money.NewSafeFSizer(initialCapital, sizerF, config["sizerscalef"].(float64))
+		bot.Sizer = money.NewSafeFSizer(initialCapital, sizerF, util.ToFloat(config["sizerscalef"]))
 	} else {
 		bot.Sizer = money.NewFixedSizer(initialCapital)
 	}
