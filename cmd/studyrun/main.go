@@ -12,8 +12,6 @@ import (
 	"golang.org/x/exp/maps"
 )
 
-const _outputDir = "/.out"
-
 func main() {
 	if err := run(os.Args[1:]); err != nil {
 		log.Fatal(err)
@@ -28,9 +26,14 @@ func run(args []string) error {
 	fmt.Printf("Tag: %s, Commit: %s\n", buildGitTag, buildGitCommit)
 	fmt.Printf("Time: %s, User: %s\n", buildTime, buildUser)
 
+	if len(args) < 2 {
+		print("Expect args: [config filename] [output path]\n")
+	}
+	configFilename, outputPath := args[0], args[1]
+
 	print("\n----- Study Configuration -----\n")
-	fmt.Printf("Reading config '%s' ... ", args[0])
-	config, err := studyrun.ReadConfig(args[0])
+	fmt.Printf("Reading config '%s' ... ", configFilename)
+	config, err := studyrun.ReadConfig(configFilename)
 	if err != nil {
 		return err
 	}
@@ -96,8 +99,8 @@ func run(args []string) error {
 		print(strings.Join(errs, "\n"))
 	}
 
-	fmt.Printf("Writing study results to output directory '%s'... ", _outputDir)
-	if err := studyrun.WriteStudy(_outputDir, optimizer.Study()); err != nil {
+	fmt.Printf("Writing study results to output directory '%s'... ", outputPath)
+	if err := studyrun.WriteStudy(outputPath, optimizer.Study()); err != nil {
 		return err
 	}
 	print("done\n")

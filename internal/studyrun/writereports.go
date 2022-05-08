@@ -14,6 +14,17 @@ import (
 const _filenameFriendlyTimeFormat = "20060102T150405"
 
 func WriteStudy(path string, study optimize.Study) error {
+
+	summaries, backtests := PrepareStudyForCSV(study)
+
+	if err := WriteSummaryReports(path, summaries); err != nil {
+		return err
+	}
+
+	if err := WriteBacktestReports(path, backtests); err != nil {
+		return err
+	}
+
 	return nil
 }
 
