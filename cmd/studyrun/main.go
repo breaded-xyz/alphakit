@@ -86,12 +86,12 @@ func run(args []string) error {
 	}
 	var errs []string
 	for step := range stepCh {
-		bar.Add(1)
+		_ = bar.Add(1)
 		if step.Err != nil {
 			errs = append(errs, step.Err.Error())
 		}
 	}
-	bar.Finish()
+	_ = bar.Finish()
 	print("Study complete\n")
 
 	if len(errs) > 0 {

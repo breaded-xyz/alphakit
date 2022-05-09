@@ -17,6 +17,6 @@ func Test(t *testing.T) {
 
 func Benchmark(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		run(nil)
+		assert.NoError(b, run(nil))
 	}
 }
