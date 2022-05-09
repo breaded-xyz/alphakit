@@ -5,24 +5,19 @@ import (
 	"github.com/colngroup/zero2algo/trader"
 )
 
-const (
-	BuyBarIndexKey  = "buybarindex"
-	SellBarIndexKey = "sellbarindex"
-)
-
 // MakeBotFromConfig builds a valid Bot from a given set of config params.
 func MakeBotFromConfig(config map[string]any) (trader.Bot, error) {
 	var hodl Bot
 
-	if _, ok := config[BuyBarIndexKey]; !ok {
+	if _, ok := config["buybarindex"]; !ok {
 		return nil, trader.ErrInvalidConfig
 	}
-	buyBarIndex := util.ToInt(config[BuyBarIndexKey])
+	buyBarIndex := util.ToInt(config["buybarindex"])
 
-	if _, ok := config[SellBarIndexKey]; !ok {
+	if _, ok := config["sellbarindex"]; !ok {
 		return nil, trader.ErrInvalidConfig
 	}
-	sellBarIndex := util.ToInt(config[SellBarIndexKey])
+	sellBarIndex := util.ToInt(config["sellbarindex"])
 
 	switch {
 	case buyBarIndex == 0 && sellBarIndex == 0:

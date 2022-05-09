@@ -83,6 +83,7 @@ func (p *ApexPredicter) Predict() float64 {
 	return score
 }
 
+// Valid returns true if MA and MMI indicators are valid.
 func (p *ApexPredicter) Valid() bool {
 	return p.MA.Valid() && p.MMI.Valid()
 }

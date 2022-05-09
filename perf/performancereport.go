@@ -42,6 +42,11 @@ func NewPerformanceReport(trades []broker.Trade, equity broker.EquitySeries) Per
 }
 
 func PrintSummary(r PerformanceReport) {
+	if r.Trade == nil || r.Portfolio == nil {
+		println("No trades and/or equity data")
+		return
+	}
+
 	table := tablewriter.NewWriter(os.Stdout)
 	table.SetHeader(_summaryReportHeader)
 	table.Append([]string{

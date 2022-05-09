@@ -18,7 +18,7 @@ var _ trader.Bot = (*Bot)(nil)
 // Default is to buy on the first price received,
 // call Close() to then sell the position and create a trade.
 type Bot struct {
-	// BuyBarIndex is the index in the price sequence to open the position.
+	// BuyBarIndex is the index in the price sequence to open the position
 	BuyBarIndex int
 
 	// SellBarIndex is the index in the price sequence to close the position.

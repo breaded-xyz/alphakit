@@ -4,6 +4,7 @@ import (
 	"math"
 
 	"github.com/colngroup/zero2algo/broker"
+	"github.com/colngroup/zero2algo/internal/util"
 	"github.com/gonum/floats"
 )
 
@@ -72,11 +73,11 @@ func NewTradeReport(trades []broker.Trade) *TradeReport {
 
 	report.TotalNetProfit = report.GrossProfit - report.GrossLoss
 	report.AvgNetProfit = report.TotalNetProfit / report.TradeCount
-	report.ProfitFactor = report.GrossProfit / NNZ(report.GrossLoss, 1)
+	report.ProfitFactor = report.GrossProfit / util.NNZ(report.GrossLoss, 1)
 	report.PRR = PRR(report.GrossProfit, report.GrossLoss, report.winningCount, report.losingCount)
 
-	report.AvgProfit = report.GrossProfit / NNZ(report.winningCount, 1)
-	report.AvgLoss = report.GrossLoss / NNZ(report.losingCount, 1)
+	report.AvgProfit = report.GrossProfit / util.NNZ(report.winningCount, 1)
+	report.AvgLoss = report.GrossLoss / util.NNZ(report.losingCount, 1)
 
 	report.winningPct = report.winningCount / report.TradeCount
 	report.losingPct = 1 - report.winningPct

@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/colngroup/zero2algo/broker"
+	"github.com/colngroup/zero2algo/internal/util"
 )
 
 type PortfolioReport struct {
@@ -40,8 +41,8 @@ func NewPortfolioReport(curve broker.EquitySeries) *PortfolioReport {
 	report.PeriodEnd, report.EndEquity = tEnd.Time(), curve[tEnd].InexactFloat64()
 	report.Period = report.PeriodEnd.Sub(report.PeriodStart)
 
-	report.EquityReturn = (report.EndEquity - report.StartEquity) / NNZ(report.StartEquity, 1)
-	report.CAGR = NN(CAGR(report.StartEquity, report.EndEquity, int(report.Period.Hours())/24), 0)
+	report.EquityReturn = (report.EndEquity - report.StartEquity) / util.NNZ(report.StartEquity, 1)
+	report.CAGR = util.NN(CAGR(report.StartEquity, report.EndEquity, int(report.Period.Hours())/24), 0)
 
 	daily := ReduceEOD(curve)
 	if len(daily) == 0 {

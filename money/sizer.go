@@ -27,5 +27,5 @@ func NewFixedSizer(capital decimal.Decimal) *FixedSizer {
 func (s *FixedSizer) Size(price, capital, risk decimal.Decimal) decimal.Decimal {
 	size := s.FixedCapital.Div(price).InexactFloat64()
 	size = util.RoundTo(size, s.StepSize)
-	return dec.New(size)
+	return dec.New(util.NN(size, 0))
 }

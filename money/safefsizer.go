@@ -41,5 +41,5 @@ func (s *SafeFSizer) Size(price, capital, risk decimal.Decimal) decimal.Decimal 
 
 	size = util.RoundTo(size, s.StepSize)
 
-	return dec.New(size)
+	return dec.New(util.NN(size, 0))
 }

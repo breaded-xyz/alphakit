@@ -14,6 +14,7 @@ import (
 	"github.com/colngroup/zero2algo/perf"
 	"github.com/colngroup/zero2algo/risk"
 	"github.com/colngroup/zero2algo/ta"
+	"github.com/stretchr/testify/assert"
 )
 
 const testdataPath string = "../../internal/testdata/"
@@ -23,7 +24,7 @@ func TestBotWithCrossPredicter(t *testing.T) {
 	dealer.SetInitialCapital(dec.New(1000))
 
 	predicter := NewCrossPredicter(
-		ta.NewOsc(ta.NewALMA(1), ta.NewALMA(256)),
+		ta.NewOsc(ta.NewALMA(32), ta.NewALMA(64)),
 		ta.NewMMIWithSmoother(200, ta.NewALMA(200)))
 
 	bot := Bot{
@@ -35,11 +36,13 @@ func TestBotWithCrossPredicter(t *testing.T) {
 		dealer:     dealer,
 		Predicter:  predicter,
 		Risker:     risk.NewFullRisker(),
-		Sizer:      &money.FixedSizer{FixedCapital: dec.New(1000)},
+		Sizer:      money.NewFixedSizer(dec.New(1000)),
 	}
 
 	file, _ := os.Open(path.Join(testdataPath, "btcusdt-1h-2021-Q1.csv"))
-	defer file.Close()
+	defer func() {
+		assert.NoError(t, file.Close())
+	}()
 
 	prices, _ := market.NewCSVKlineReader(csv.NewReader(file)).ReadAll()
 	for _, price := range prices {
@@ -51,7 +54,7 @@ func TestBotWithCrossPredicter(t *testing.T) {
 		}
 	}
 
-	bot.Close(context.Background())
+	assert.NoError(t, bot.Close(context.Background()))
 
 	trades, _, _ := dealer.ListTrades(context.Background(), nil)
 	equity := dealer.EquityHistory()
