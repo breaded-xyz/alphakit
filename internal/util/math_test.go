@@ -9,7 +9,7 @@ import (
 
 func TestRoundTo(t *testing.T) {
 	giveX, giveY := 0.036, 0.01
-	want := 0.3
+	want := 0.04
 	act := RoundTo(giveX, giveY)
 	assert.Equal(t, want, act)
 }
