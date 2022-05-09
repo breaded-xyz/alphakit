@@ -59,6 +59,12 @@ func saveStructToCSV(filename string, data interface{}) error {
 	w := csv.NewWriter(f)
 	enc := csvutil.NewEncoder(w)
 	enc.Tag = "csv"
+	enc.Register(func(m map[string]any) ([]byte, error) {
+		return []byte(fmt.Sprint(m)), nil
+	})
+	enc.Register(func(m optimize.ParamMap) ([]byte, error) {
+		return []byte(fmt.Sprint(m)), nil
+	})
 
 	// Only write header if new file
 	info, err := f.Stat()

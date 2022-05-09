@@ -29,7 +29,7 @@ type PerformanceReport struct {
 	ID         string           `csv:"id"`
 	Trade      *TradeReport     `csv:",inline"`
 	Portfolio  *PortfolioReport `csv:",inline"`
-	Properties map[string]any   `csv:",inline"`
+	Properties map[string]any   `csv:"properties"`
 }
 
 func NewPerformanceReport(trades []broker.Trade, equity broker.EquitySeries) PerformanceReport {
