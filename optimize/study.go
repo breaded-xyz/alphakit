@@ -52,6 +52,10 @@ type ParamSetID string
 
 type ParamMap map[string]any
 
+//func (pm ParamMap) MarshalCSV() ([]byte, error) {
+//	return []byte(fmt.Sprint(pm)), nil
+//}
+
 func NewParamSet() ParamSet {
 	return ParamSet{
 		ID:     ParamSetID(util.NewID()),

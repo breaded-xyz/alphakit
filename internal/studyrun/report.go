@@ -37,7 +37,31 @@ type BacktestReport struct {
 }
 
 func PrepareStudyForCSV(study optimize.Study) ([]SummaryReport, []BacktestReport) {
-	return nil, nil
+
+	var summaries []SummaryReport
+	var backtests []BacktestReport
+
+	flattenResults := func(results map[optimize.ParamSetID]optimize.Report) {
+		for k := range results {
+			report := results[k]
+			summaries = append(summaries, SummaryReport{
+				StudyID: study.ID,
+				Summary: report,
+			})
+			for i := range report.Backtests {
+				backtests = append(backtests, BacktestReport{
+					StudyID:   study.ID,
+					SummaryID: report.ID,
+					Backtest:  report.Backtests[i],
+				})
+			}
+		}
+	}
+
+	flattenResults(study.TrainingResults)
+	flattenResults(study.ValidationResults)
+
+	return summaries, backtests
 }
 
 func PrintSummaryReport(report optimize.Report) {
