@@ -3,42 +3,52 @@ package ta
 var _ Indicator = (*ALMA)(nil)
 
 // Osc is a composite of a fast and slow moving average indicator.
-// Osc value = fast value - slow value.
+// Osc value = fast value minus slow value.
 // Osc is not normalized and has an unbounded range.
 type Osc struct {
+	// Fast is the fast moving average indicator.
+	Fast Indicator
+
+	// Slow is the slow moving average indicator.
+	Slow Indicator
+
 	series []float64
-	fast   Indicator
-	slow   Indicator
 }
 
+// NewOsc returns a new oscillator with the given fast and slow moving averages.
 func NewOsc(fast, slow Indicator) *Osc {
 	return &Osc{
-		fast: fast,
-		slow: slow,
+		Fast: fast,
+		Slow: slow,
 	}
 }
 
+// Update updates the indicator with the next value(s).
 func (ind *Osc) Update(v ...float64) error {
 	for i := range v {
-		if err := ind.fast.Update(v[i]); err != nil {
+		if err := ind.Fast.Update(v[i]); err != nil {
 			return err
 		}
-		if err := ind.slow.Update(v[i]); err != nil {
+		if err := ind.Slow.Update(v[i]); err != nil {
 			return err
 		}
-		ind.series = append(ind.series, ind.fast.Value()-ind.slow.Value())
+		ind.series = append(ind.series, ind.Fast.Value()-ind.Slow.Value())
 	}
 
 	return nil
 }
+
+// Valid returns true if the indicator has enough data to be calculated.
 func (ind *Osc) Valid() bool {
-	return ind.fast.Valid() && ind.slow.Valid()
+	return ind.Fast.Valid() && ind.Slow.Valid()
 }
 
+// Value returns the current value of the indicator.
 func (ind *Osc) Value() float64 {
 	return Lookback(ind.series, 0)
 }
 
+// History returns the history of the indicator.
 func (ind *Osc) History() []float64 {
 	return ind.series
 }

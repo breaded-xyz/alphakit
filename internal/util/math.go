@@ -1,6 +1,11 @@
 package util
 
-import "math"
+import (
+	"math"
+	"sort"
+
+	"github.com/gonum/stat"
+)
 
 func Round2DP(x float64) float64 {
 	return math.Round(x*100) / 100
@@ -8,6 +13,13 @@ func Round2DP(x float64) float64 {
 
 func RoundTo(x, y float64) float64 {
 	return y * math.Round(x/y)
+}
+
+func Median(v []float64) float64 {
+	x := make([]float64, len(v))
+	copy(x, v)
+	sort.Float64s(x)
+	return stat.Quantile(0.5, stat.Empirical, x, nil)
 }
 
 // NN (Not Number) returns y if x is NaN or Inf.

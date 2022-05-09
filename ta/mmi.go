@@ -1,41 +1,44 @@
 package ta
 
-import (
-	"sort"
-
-	"github.com/gonum/stat"
-)
+import "github.com/colngroup/zero2algo/internal/util"
 
 // MMI (Market Meaness Index) is a statistical measure between 0 - 100
 // that indicates if the series exhibits serial correlation (trendiness).
-// Reference: https://financial-hacker.com/the-market-meanness-index/
+// Reference: https://financial-hacker.com/the-market-meanness-index/.
 type MMI struct {
-	sample []float64
-	length int
+	// Length is the number of values to use for the calculation.
+	Length int
 
-	smoother Indicator
+	// Smoother is the indicator used to smooth the MMI.
+	Smoother Indicator
+
+	sample []float64
 }
 
+// NewMMI returns a new MMI indicator with a default ALMA smoother.
+// The smoothing length is the same as the given MMI length.
 func NewMMI(length int) *MMI {
 	return &MMI{
-		length:   length,
-		smoother: NewALMA(length),
+		Length:   length,
+		Smoother: NewALMA(length),
 	}
 }
 
+// NewMMIWithSmoother returns a new MMI indicator with the given smoother.
 func NewMMIWithSmoother(length int, smoother Indicator) *MMI {
 	return &MMI{
-		length:   length,
-		smoother: smoother,
+		Length:   length,
+		Smoother: smoother,
 	}
 }
 
+// Update updates the indicator with the next value(s).
 func (ind *MMI) Update(v ...float64) error {
 
 	for i := range v {
-		ind.sample = WindowAppend(ind.sample, ind.length-1, v[i])
+		ind.sample = WindowAppend(ind.sample, ind.Length-1, v[i])
 
-		m := Median(ind.sample)
+		m := util.Median(ind.sample)
 		var nh, nl float64
 		for i := 1; i < len(ind.sample); i++ {
 			p1, p0 := Lookback(ind.sample, i), Lookback(ind.sample, i-1)
@@ -46,28 +49,25 @@ func (ind *MMI) Update(v ...float64) error {
 			}
 		}
 		mmi := (nl + nh) / float64(len(ind.sample)-1)
-		if err := ind.smoother.Update(mmi); err != nil {
+		if err := ind.Smoother.Update(mmi); err != nil {
 			return err
 		}
 	}
 
 	return nil
 }
+
+// Valid returns true if the indicator has enough data to be calculated.
 func (ind *MMI) Valid() bool {
-	return len(ind.sample) >= ind.length
+	return len(ind.sample) >= ind.Length
 }
 
+// Value returns the current value of the indicator.
 func (ind *MMI) Value() float64 {
-	return ind.smoother.Value()
+	return ind.Smoother.Value()
 }
 
+// History returns the historical data of the indicator.
 func (ind *MMI) History() []float64 {
-	return ind.smoother.History()
-}
-
-func Median(v []float64) float64 {
-	x := make([]float64, len(v))
-	copy(x, v)
-	sort.Float64s(x)
-	return stat.Quantile(0.5, stat.Empirical, x, nil)
+	return ind.Smoother.History()
 }
