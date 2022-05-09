@@ -19,7 +19,7 @@ func TestCrossPredicter_ReceivePrice(t *testing.T) {
 	givePrev := 3.0
 
 	predicter := NewCrossPredicter(&giveOsc, &giveMMI)
-	predicter.priceSelector = ta.Close
+	predicter.PriceSelector = ta.Close
 	predicter.prev = givePrev
 	err := predicter.ReceivePrice(context.Background(), givePrice)
 

@@ -12,6 +12,7 @@ import (
 
 var _ trader.MakeFromConfig = MakeCrossBotFromConfig
 
+// MakeCrossBotFromConfig returns a bot configured with a CrossPredicter.
 func MakeCrossBotFromConfig(config map[string]any) (trader.Bot, error) {
 
 	var bot Bot

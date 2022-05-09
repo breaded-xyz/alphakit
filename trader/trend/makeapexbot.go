@@ -12,6 +12,7 @@ import (
 
 var _ trader.MakeFromConfig = MakeApexBotFromConfig
 
+// MakeApexBotFromConfig returns a bot configured with an ApexPredicter.
 func MakeApexBotFromConfig(config map[string]any) (trader.Bot, error) {
 
 	var bot Bot
