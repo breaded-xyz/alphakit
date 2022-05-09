@@ -10,6 +10,7 @@ const (
 	SellBarIndexKey = "sellbarindex"
 )
 
+// MakeBotFromConfig builds a valid Bot from a given set of config params.
 func MakeBotFromConfig(config map[string]any) (trader.Bot, error) {
 	var hodl Bot
 

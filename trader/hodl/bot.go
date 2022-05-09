@@ -1,3 +1,4 @@
+// Hodl package offers a buy and hold trading algo.
 package hodl
 
 import (
@@ -11,8 +12,14 @@ import (
 
 var _ trader.Bot = (*Bot)(nil)
 
+// Bot implements a buy and hold algo.
+// Should only be used for backtesting purposes.
+// At the set bar index a long position of size of 1 is opened.
 type Bot struct {
-	BuyBarIndex  int
+	// BuyBarIndex is the index in the price sequence to open the position.
+	BuyBarIndex int
+
+	// SellBarIndex is the index in the price sequence to close the position.
 	SellBarIndex int
 
 	asset    market.Asset
@@ -20,6 +27,7 @@ type Bot struct {
 	barIndex int
 }
 
+// New returns a new Bot.
 func New(asset market.Asset, dealer broker.Dealer) *Bot {
 	return &Bot{
 		asset:  asset,
@@ -27,14 +35,18 @@ func New(asset market.Asset, dealer broker.Dealer) *Bot {
 	}
 }
 
+// SetDealer is the dealer to use for order execution.
+// Should only be given a simulated dealer for backtesting.
 func (b *Bot) SetDealer(dealer broker.Dealer) {
 	b.dealer = dealer
 }
 
+// Warmup is not used.
 func (b *Bot) Warmup(ctx context.Context, prices []market.Kline) error {
 	return nil
 }
 
+// ReceivePrice updates the algo with the next market price.
 func (b *Bot) ReceivePrice(ctx context.Context, price market.Kline) error {
 	defer func() { b.barIndex++ }()
 
@@ -66,6 +78,7 @@ func (b *Bot) evalAlgo(index, buybar, sellbar int) broker.OrderSide {
 	return signal
 }
 
+// Close closes any open position.
 func (b *Bot) Close(ctx context.Context) error {
 	order := broker.NewOrder(b.asset, broker.Sell, dec.New(1))
 	order.ReduceOnly = true

@@ -7,6 +7,7 @@ import (
 	"github.com/colngroup/zero2algo/market"
 )
 
+// StubBot is a testing double.
 type StubBot struct {
 }
 
