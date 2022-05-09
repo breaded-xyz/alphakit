@@ -1,4 +1,4 @@
-// Trader package provides an API for building trading bots.
+// Package trader provides an API for building trading bots.
 // A bot receives prices and execute orders with a broker.
 // Child packages offer specific bot implementations.
 package trader

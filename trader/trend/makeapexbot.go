@@ -16,7 +16,7 @@ func MakeApexBotFromConfig(config map[string]any) (trader.Bot, error) {
 
 	var bot Bot
 
-	bot.asset = market.NewAsset(util.ToString(config["asset"]))
+	bot.Asset = market.NewAsset(util.ToString(config["asset"]))
 
 	bot.EnterLong = util.ToFloat(config["enterlong"])
 	bot.EnterShort = util.ToFloat(config["entershort"])

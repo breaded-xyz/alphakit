@@ -26,7 +26,7 @@ import (
 // Train:
 // - Execute each algo param set over the in-sample price data
 // - Average the performance for each param set over the in-sample data
-// - Rank the param sets based on the performance objective (Profit Factor, T-Score etc)
+// - Rank the param sets based on the performance objective (Profit Factor, Sharpe etc)
 // Validate:
 // - Execute the highest ranked ("trained") algo param set over the out-of-sample price data
 // - Accept or reject the hypothesis based on statistical significance of the study report

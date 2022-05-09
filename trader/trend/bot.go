@@ -1,9 +1,11 @@
+// Package trend offers classic trend following algos.
 package trend
 
 import (
 	"context"
 
 	"github.com/colngroup/zero2algo/broker"
+	"github.com/colngroup/zero2algo/internal/dec"
 	"github.com/colngroup/zero2algo/market"
 	"github.com/colngroup/zero2algo/money"
 	"github.com/colngroup/zero2algo/risk"
@@ -13,7 +15,12 @@ import (
 
 var _ trader.Bot = (*Bot)(nil)
 
+// Bot will open and/or close a single market position based on the score from the
+// the given trader.Predicter and the associated EnterLong et al params.
+// Stop loss and position size is determined by the given risk.Risker and money.Sizer.
 type Bot struct {
+	Asset market.Asset
+
 	EnterLong float64
 	ExitLong  float64
 
@@ -24,18 +31,28 @@ type Bot struct {
 	Risker    risk.Risker
 	Sizer     money.Sizer
 
-	asset  market.Asset
 	dealer broker.Dealer
 }
 
+// NewBot sets default enter and exit scores and basic Risker and Sizer implementations.
+// Post creation of the bot the Predicter and Asset field must be set and a call made to SetDealer().
 func NewBot() *Bot {
-	return &Bot{}
+	return &Bot{
+		EnterLong:  +1,
+		ExitLong:   -1,
+		EnterShort: -1,
+		ExitShort:  +1,
+		Risker:     risk.NewFullRisker(),
+		Sizer:      money.NewFixedSizer(dec.New(1000)),
+	}
 }
 
+// SetDealer sets the broker used for placing orders.
 func (b *Bot) SetDealer(dealer broker.Dealer) {
 	b.dealer = dealer
 }
 
+// Warmup seeds the Predicter and Risker with historical price data.
 func (b *Bot) Warmup(ctx context.Context, prices []market.Kline) error {
 	for i := range prices {
 		if err := b.updateIndicators(ctx, prices[i]); err != nil {
@@ -45,6 +62,7 @@ func (b *Bot) Warmup(ctx context.Context, prices []market.Kline) error {
 	return nil
 }
 
+// ReceivePrice updates the algo with latest market price potentially triggering buy and/or sell orders.
 func (b *Bot) ReceivePrice(ctx context.Context, price market.Kline) error {
 
 	if err := b.updateIndicators(ctx, price); err != nil {
@@ -67,6 +85,7 @@ func (b *Bot) ReceivePrice(ctx context.Context, price market.Kline) error {
 	return nil
 }
 
+// Close exits all open positions at current market price.
 func (b *Bot) Close(ctx context.Context) error {
 
 	if err := b.exit(ctx, broker.Buy); err != nil {
@@ -114,7 +133,7 @@ func (b *Bot) getOpenPosition(ctx context.Context, side broker.OrderSide) (broke
 	if err != nil {
 		return empty, err
 	}
-	opens := filterPositions(positions, b.asset, side, broker.PositionOpen)
+	opens := filterPositions(positions, b.Asset, side, broker.PositionOpen)
 	if len(opens) == 0 {
 		return empty, err
 	}
@@ -148,7 +167,7 @@ func (b *Bot) executeExitOrder(ctx context.Context, side broker.OrderSide, size 
 	}
 
 	order := broker.Order{
-		Asset:      b.asset,
+		Asset:      b.Asset,
 		Type:       broker.Market,
 		Side:       side.Opposite(),
 		Size:       size,
@@ -203,7 +222,7 @@ func (b *Bot) executeEnterOrder(ctx context.Context, side broker.OrderSide, pric
 	}
 
 	order := broker.Order{
-		Asset: b.asset,
+		Asset: b.Asset,
 		Type:  broker.Market,
 		Side:  side,
 		Size:  size,
@@ -215,7 +234,7 @@ func (b *Bot) executeEnterOrder(ctx context.Context, side broker.OrderSide, pric
 	bracket = broker.BracketOrder{Enter: *enterPlaced}
 
 	stop := broker.Order{
-		Asset:      b.asset,
+		Asset:      b.Asset,
 		Type:       broker.Limit,
 		Side:       side.Opposite(),
 		Size:       size,

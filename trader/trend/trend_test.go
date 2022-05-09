@@ -31,7 +31,7 @@ func TestBotWithCrossPredicter(t *testing.T) {
 		ExitLong:   -0.9,
 		EnterShort: -1,
 		ExitShort:  0.9,
-		asset:      market.NewAsset("BTCUSDT"),
+		Asset:      market.NewAsset("BTCUSDT"),
 		dealer:     dealer,
 		Predicter:  predicter,
 		Risker:     risk.NewFullRisker(),
