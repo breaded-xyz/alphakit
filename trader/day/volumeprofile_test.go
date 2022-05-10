@@ -32,7 +32,7 @@ func TestNewMarketProfile(t *testing.T) {
 
 func TestMarketProfileWithPriceFile(t *testing.T) {
 
-	file, _ := os.Open(path.Join(testdataPath, "btcusdt-1m-2022-05-05.csv"))
+	file, _ := os.Open(path.Join(testdataPath, "btcusdt-1m-2022-05-06.csv"))
 	defer func() {
 		assert.NoError(t, file.Close())
 	}()

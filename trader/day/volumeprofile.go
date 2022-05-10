@@ -3,6 +3,7 @@ package day
 import (
 	"sort"
 
+	"github.com/davecgh/go-spew/spew"
 	"github.com/gonum/floats"
 	"github.com/gonum/stat"
 	"golang.org/x/exp/slices"
@@ -103,6 +104,10 @@ func NewVolumeProfile(nBins int, prices, volumes []float64) *VolumeProfile {
 
 	vp.VAH = vp.Bins[vahIdx]
 	vp.VAL = vp.Bins[valIdx]
+
+	volTot := floats.Sum(vp.Hist[valIdx : vahIdx+1])
+	spew.Dump(valIdx, pocIdx, vahIdx)
+	spew.Dump(vaTotalVol, vaCumVol, volTot)
 
 	return &vp
 }
