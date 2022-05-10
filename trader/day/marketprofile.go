@@ -68,38 +68,45 @@ func NewMarketProfile(nBins int, prices, volumes []float64) *MarketProfile {
 	mp.Hist = stat.Histogram(nil, mp.Bins, prices, sortedVolumes)
 
 	pocIdx := floats.MaxIdx(mp.Hist)
-	mp.POC = stat.Mean([]float64{mp.Bins[pocIdx], mp.Bins[pocIdx+1]}, nil)
+	mp.POC = stat.Mean([]float64{mp.Bins[pocIdx]}, nil)
 
-	vaTotalVol := floats.Sum(volumes) * DefaultValueAreaPercentage
+	vaTotalVol := floats.Sum(mp.Hist) * DefaultValueAreaPercentage
 
 	vaCumVol := mp.Hist[pocIdx]
-	var vahIdx, valIdx = pocIdx, pocIdx
+	var vaPOCOffset int
 
 	for i := 1; vaCumVol <= vaTotalVol; i++ {
-		var hVol, lVol float64
+		vahVol := mp.Hist[pocIdx+i] + mp.Hist[pocIdx+(i+1)]
+		valVol := mp.Hist[pocIdx-i] + mp.Hist[pocIdx-(i+1)]
 
-		if pocIdx+(i+1) < len(mp.Hist) {
-			hVol = mp.Hist[pocIdx+i] + mp.Hist[pocIdx+(i+1)]
-		}
-		if pocIdx-(i+1) >= 0 {
-			lVol = mp.Hist[pocIdx-i] + mp.Hist[pocIdx-(i-1)]
-		}
+		/*	//hVolIdx, lVolIdx := 1, 1
+			//
+					if pocIdx+hVolIdx < len(mp.Hist) {
+			/			vahVol = mp.Hist[pocIdx+hVolIdx]
+					}
+					if pocIdx-lVolIdx >= 0 {
+						valVol = mp.Hist[pocIdx-lVolIdx]
+					}*/
 
 		switch {
-		case hVol > lVol:
-			vahIdx++
-			vaCumVol += hVol
-		case hVol < lVol:
-			valIdx--
-			vaCumVol += lVol
-		case hVol == lVol:
-			valIdx++
-			vaCumVol += lVol
+		case vahVol > valVol:
+			//vahIdx++
+			//valIdx++
+			vaCumVol += vahVol
+		case vahVol <= valVol:
+			//valIdx--
+			//vahIdx++
+			vaCumVol += valVol
+			//case vahVol == valVol:
+			//	valIdx++
+			//	vaCumVol += valVol
 		}
+
+		vaPOCOffset = i
 	}
 
-	mp.VAH = stat.Mean([]float64{mp.Bins[vahIdx], mp.Bins[vahIdx+1]}, nil)
-	mp.VAL = stat.Mean([]float64{mp.Bins[valIdx], mp.Bins[valIdx+1]}, nil)
+	mp.VAH = stat.Mean([]float64{mp.Bins[pocIdx+vaPOCOffset]}, nil)
+	mp.VAL = stat.Mean([]float64{mp.Bins[pocIdx-vaPOCOffset]}, nil)
 
 	return &mp
 }

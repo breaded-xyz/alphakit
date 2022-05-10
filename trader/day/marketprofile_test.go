@@ -35,7 +35,7 @@ func TestNewMarketProfile(t *testing.T) {
 
 func TestMarketProfileWithPriceFile(t *testing.T) {
 
-	file, _ := os.Open(path.Join(testdataPath, "btcusdt-1m-2022-05-04.csv"))
+	file, _ := os.Open(path.Join(testdataPath, "btcusdt-1m-2022-05-05.csv"))
 	defer func() {
 		assert.NoError(t, file.Close())
 	}()
@@ -56,16 +56,17 @@ func TestMarketProfileWithPriceFile(t *testing.T) {
 	priceLevels := make([]float64, len(prices))
 	vols := make([]float64, len(prices))
 	for i := range prices {
-		priceLevels[i] = util.RoundTo(ta.OHLC4(prices[i]), 1.0)
+		priceLevels[i] = util.RoundTo(ta.OHLC4(prices[i]), 0.1)
 		vols[i] = util.RoundTo(prices[i].Volume, 1.0)
 	}
 
+	//spew.Dump(priceLevels[floats.MaxIdx(vols)])
 	//spew.Dump(hlc3s, vols)
 
 	spew.Dump(prices[0].Start, prices[len(prices)-1].Start)
 	mp := NewMarketProfile(100, priceLevels, vols)
 
-	spew.Dump(mp.POC, mp.VAH, mp.VAL, mp.High, mp.Low)
+	spew.Dump(mp.POC, mp.VAH, mp.VAL)
 
 	// Make a plot and set its title.
 	p := plot.New()
