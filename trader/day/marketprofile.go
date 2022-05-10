@@ -8,10 +8,11 @@ import (
 	"golang.org/x/exp/slices"
 )
 
+// DefaultValueAreaPercentage is the percentage of the total volume used to calculate the value area.
 const DefaultValueAreaPercentage = 0.7
 
-// MarketProfile is a histogram of market price and volume for a session.
-// Intent is to show the price points with most volume during the session.
+// VolumeProfile is a histogram of market price and volume.
+// Intent is to show the price points with most volume during a period.
 // The profile gives key features such as:
 //
 // Point of control (POC)
@@ -23,7 +24,7 @@ const DefaultValueAreaPercentage = 0.7
 // Session High
 //
 // Session Low
-type MarketProfile struct {
+type VolumeProfile struct {
 	Bins []float64
 	Hist []float64
 
@@ -34,79 +35,74 @@ type MarketProfile struct {
 	Low  float64
 }
 
-type pricevol struct {
+type level struct {
 	Price  float64
 	Volume float64
 }
 
-// NewMarketProfile creates a new MarketProfile for the given price series.
-func NewMarketProfile(nBins int, prices, volumes []float64) *MarketProfile {
+// NewVolumeProfile creates a new profile for the given price and volume series.
+// nBins is the number of bins to use, higher numbers for greater accurracy.
+// Prices and volumes must be of the same length.
+func NewVolumeProfile(nBins int, prices, volumes []float64) *VolumeProfile {
 
-	var mp MarketProfile
-	mp.Bins = make([]float64, nBins+1)
+	var vp VolumeProfile
 
-	pvs := make([]pricevol, len(prices))
+	levels := make([]level, len(prices))
 	for i := range prices {
-		pvs[i] = pricevol{prices[i], volumes[i]}
+		levels[i] = level{prices[i], volumes[i]}
 	}
-	slices.SortFunc(pvs, func(i, j pricevol) bool {
+	slices.SortFunc(levels, func(i, j level) bool {
 		return i.Price < j.Price
 	})
 
-	sort.Float64s(prices)
-	mp.High = floats.Max(prices)
-	mp.Low = floats.Min(prices)
-	mp.Bins = floats.Span(mp.Bins, mp.Low, mp.High+1)
+	sortedPrices := prices
+	sort.Float64s(sortedPrices)
+	vp.High = floats.Max(sortedPrices)
+	vp.Low = floats.Min(sortedPrices)
+	vp.Bins = make([]float64, nBins+1)
+	vp.Bins = floats.Span(vp.Bins, vp.Low, vp.High+1)
 
 	sortedVolumes := make([]float64, len(volumes))
-	for i := range pvs {
-		sortedVolumes[i] = pvs[i].Volume
+	for i := range levels {
+		sortedVolumes[i] = levels[i].Volume
 	}
 
-	//spew.Dump(prices[floats.MaxIdx(sortedVolumes)])
+	vp.Hist = stat.Histogram(nil, vp.Bins, sortedPrices, sortedVolumes)
 
-	mp.Hist = stat.Histogram(nil, mp.Bins, prices, sortedVolumes)
+	pocIdx := floats.MaxIdx(vp.Hist)
+	vp.POC = vp.Bins[pocIdx]
 
-	pocIdx := floats.MaxIdx(mp.Hist)
-	mp.POC = stat.Mean([]float64{mp.Bins[pocIdx]}, nil)
+	vaTotalVol := floats.Sum(sortedVolumes) * DefaultValueAreaPercentage
 
-	vaTotalVol := floats.Sum(mp.Hist) * DefaultValueAreaPercentage
-
-	vaCumVol := mp.Hist[pocIdx]
-	var vaPOCOffset int
+	vaCumVol := vp.Hist[pocIdx]
+	var vaPOCOffsetIdx int
 
 	for i := 1; vaCumVol <= vaTotalVol; i++ {
-		vahVol := mp.Hist[pocIdx+i] + mp.Hist[pocIdx+(i+1)]
-		valVol := mp.Hist[pocIdx-i] + mp.Hist[pocIdx-(i+1)]
 
-		/*	//hVolIdx, lVolIdx := 1, 1
-			//
-					if pocIdx+hVolIdx < len(mp.Hist) {
-			/			vahVol = mp.Hist[pocIdx+hVolIdx]
-					}
-					if pocIdx-lVolIdx >= 0 {
-						valVol = mp.Hist[pocIdx-lVolIdx]
-					}*/
-
-		switch {
-		case vahVol > valVol:
-			//vahIdx++
-			//valIdx++
-			vaCumVol += vahVol
-		case vahVol <= valVol:
-			//valIdx--
-			//vahIdx++
-			vaCumVol += valVol
-			//case vahVol == valVol:
-			//	valIdx++
-			//	vaCumVol += valVol
+		var vahVol, valVol float64
+		if (pocIdx + i) <= len(vp.Hist)-1 {
+			vahVol = vp.Hist[pocIdx+i]
+		}
+		if (pocIdx - i) >= 0 {
+			valVol = vp.Hist[pocIdx-i]
 		}
 
-		vaPOCOffset = i
+		vaCumVol += (vahVol + valVol)
+		vaPOCOffsetIdx = i
 	}
 
-	mp.VAH = stat.Mean([]float64{mp.Bins[pocIdx+vaPOCOffset]}, nil)
-	mp.VAL = stat.Mean([]float64{mp.Bins[pocIdx-vaPOCOffset]}, nil)
+	vahIdx := pocIdx + vaPOCOffsetIdx
+	if vahIdx > len(vp.Bins)-1 {
+		vahIdx = len(vp.Bins) - 1
+	}
 
-	return &mp
+	valIdx := pocIdx - vaPOCOffsetIdx
+	if valIdx < 0 {
+		valIdx = 0
+	}
+
+	vp.VAH = vp.Bins[vahIdx]
+	vp.VAL = vp.Bins[valIdx]
+
+	return &vp
 }
