@@ -63,6 +63,8 @@ func NewMarketProfile(nBins int, prices, volumes []float64) *MarketProfile {
 		sortedVolumes[i] = pvs[i].Volume
 	}
 
+	//spew.Dump(prices[floats.MaxIdx(sortedVolumes)])
+
 	mp.Hist = stat.Histogram(nil, mp.Bins, prices, sortedVolumes)
 
 	pocIdx := floats.MaxIdx(mp.Hist)
@@ -74,8 +76,14 @@ func NewMarketProfile(nBins int, prices, volumes []float64) *MarketProfile {
 	var vahIdx, valIdx = pocIdx, pocIdx
 
 	for i := 1; vaCumVol <= vaTotalVol; i++ {
-		hVol := mp.Hist[pocIdx+i] + mp.Hist[pocIdx+(i+1)]
-		lVol := mp.Hist[pocIdx-i] + mp.Hist[pocIdx-(i-1)]
+		var hVol, lVol float64
+
+		if pocIdx+(i+1) < len(mp.Hist) {
+			hVol = mp.Hist[pocIdx+i] + mp.Hist[pocIdx+(i+1)]
+		}
+		if pocIdx-(i+1) >= 0 {
+			lVol = mp.Hist[pocIdx-i] + mp.Hist[pocIdx-(i-1)]
+		}
 
 		switch {
 		case hVol > lVol:
