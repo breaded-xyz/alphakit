@@ -2,48 +2,48 @@ package day
 
 import (
 	"context"
+	"time"
 
 	"github.com/colngroup/zero2algo/broker"
 	"github.com/colngroup/zero2algo/internal/util"
 	"github.com/colngroup/zero2algo/market"
 	"github.com/colngroup/zero2algo/ta"
 	"github.com/colngroup/zero2algo/trader"
-	"github.com/go-gota/gota/dataframe"
-	"github.com/go-gota/gota/series"
 	"golang.org/x/exp/slices"
 )
 
 var _ trader.Bot = (*Bot)(nil)
 
-func NewTable() dataframe.DataFrame {
-	return dataframe.New(
-		series.New(nil, series.Int, "session"),
-		series.New(nil, series.Float, "yLow"),
-		series.New(nil, series.Float, "yVAL"),
-		series.New(nil, series.Float, "yPOC"),
-		series.New(nil, series.Float, "yVAH"),
-		series.New(nil, series.Float, "yHigh"),
-		series.New(nil, series.Float, "hourClose"),
-		series.New(nil, series.Bool, "crossLow"),
-		series.New(nil, series.Bool, "crossVAL"),
-		series.New(nil, series.Bool, "crossPOC"),
-		series.New(nil, series.Bool, "crossVAH"),
-		series.New(nil, series.Bool, "crossHigh"),
-	)
+type sessionRow struct {
+	Day          time.Time
+	YLow         float64
+	YVAL         float64
+	YPOC         float64
+	YVAH         float64
+	YHigh        float64
+	HourClose    float64
+	YLowDistPct  float64
+	YVALDistPct  float64
+	YPOCDistPct  float64
+	YVAHDistPct  float64
+	YHighDistPct float64
+	CrossLow     bool
+	CrossVAL     bool
+	CrossPOC     bool
+	CrossVAH     bool
+	CrossHigh    bool
 }
 
 // Bot is a trader.Bot implementation for day trading.
 type Bot struct {
 	Levels   []VolumeLevel
 	Profiles []*VolumeProfile
-	Results  dataframe.DataFrame
+	Results  []sessionRow
 }
 
 // NewBot creates a new Bot instance.
 func NewBot() *Bot {
-	return &Bot{
-		Results: NewTable(),
-	}
+	return &Bot{}
 }
 
 // SetDealer sets the broker used for placing orders.
@@ -61,36 +61,80 @@ func (b *Bot) Warmup(ctx context.Context, prices []market.Kline) error {
 func (b *Bot) ReceivePrice(ctx context.Context, price market.Kline) error {
 
 	// Add new Level for kline using HL2
-	b.Levels = append(b.Levels, VolumeLevel{
+	levelsNow := VolumeLevel{
 		Price:  util.RoundTo(ta.HL2(price), 1.0),
 		Volume: util.RoundTo(price.Volume, 1.0),
-	})
+	}
+	b.Levels = append(b.Levels, levelsNow)
 
-	// If hour, minute, second is 0
+	// Initialize new day
 	if h, m, s := price.Start.UTC().Clock(); h == 0 && m == 0 && s == 0 {
-		if len(b.Levels) >= 1440 {
-			ySession := b.Levels[len(b.Levels)-1440:]
-			slices.SortStableFunc(ySession, func(i, j VolumeLevel) bool {
-				return i.Price < j.Price
-			})
-			b.Profiles = append(b.Profiles, NewVolumeProfile(100, ySession))
+		if len(b.Levels) < 1440 {
+			return nil
 		}
+		ySession := b.Levels[len(b.Levels)-1440:]
+		slices.SortStableFunc(ySession, func(i, j VolumeLevel) bool {
+			return i.Price < j.Price
+		})
+		vp := NewVolumeProfile(100, ySession)
+		b.Profiles = append(b.Profiles, vp)
+		b.Results = append(b.Results, sessionRow{
+			Day:   price.Start.UTC(),
+			YLow:  vp.Low,
+			YVAL:  vp.VAL,
+			YPOC:  vp.POC,
+			YVAH:  vp.VAH,
+			YHigh: vp.High,
+		})
+		return nil
 	}
 
-	// Create new table row for today with yPOC, yVAH, yVAL, yHigh, yLow
-	//b.Table.Set(nil)
-	//b.Table.
+	// Initialize distance to key levels after first hour
+	if h, m, s := price.Start.UTC().Clock(); h == 1 && m == 0 && s == 0 {
+		if len(b.Results) == 0 {
+			return nil
+		}
+		session := b.Results[len(b.Results)-1]
+		session.HourClose = price.C.InexactFloat64()
+		session.YLowDistPct = util.RoundTo((session.YLow-session.HourClose)/session.HourClose, 0.01)
+		session.YVALDistPct = util.RoundTo((session.YVAL-session.HourClose)/session.HourClose, 0.01)
+		session.YPOCDistPct = util.RoundTo((session.YPOC-session.HourClose)/session.HourClose, 0.01)
+		session.YVAHDistPct = util.RoundTo((session.YVAH-session.HourClose)/session.HourClose, 0.01)
+		session.YHighDistPct = util.RoundTo((session.YHigh-session.HourClose)/session.HourClose, 0.01)
+		b.Results[len(b.Results)-1] = session
+		return nil
+	}
 
-	// If hour is 1 and minute, second is 0
-	// Record close price in table for opening hour
+	if h, m, s := price.Start.UTC().Clock(); h > 0 && (h < 23 && m < 59 && s < 59) {
 
-	// Record percentage change from hour close price to yPOC, yVAH, yVAL, yHigh, yLow
+		if len(b.Results) == 0 || len(b.Levels) == 0 {
+			return nil
+		}
 
-	// If clock > 1:00:00 and clock < 23:59:59
-	// Check if any key volume profile levels crossed and record in table time
-	// crossed(levels, yPOC)
+		session := b.Results[len(b.Results)-1]
+		if crossed(b.Levels[len(b.Levels)-2].Price, levelsNow.Price, session.YLow) {
+			session.CrossLow = true
+		}
+		if crossed(b.Levels[len(b.Levels)-2].Price, levelsNow.Price, session.YVAL) {
+			session.CrossVAL = true
+		}
+		if crossed(b.Levels[len(b.Levels)-2].Price, levelsNow.Price, session.YPOC) {
+			session.CrossPOC = true
+		}
+		if crossed(b.Levels[len(b.Levels)-2].Price, levelsNow.Price, session.YVAH) {
+			session.CrossVAH = true
+		}
+		if crossed(b.Levels[len(b.Levels)-2].Price, levelsNow.Price, session.YHigh) {
+			session.CrossHigh = true
+		}
+		b.Results[len(b.Results)-1] = session
+	}
 
 	return nil
+}
+
+func crossed(a, b, c float64) bool {
+	return ta.CrossUp([]float64{a, b}, c) || ta.CrossDown([]float64{a, b}, c)
 }
 
 // Close exits all open positions at current market price.

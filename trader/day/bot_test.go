@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/colngroup/zero2algo/internal/studyrun"
+	"github.com/davecgh/go-spew/spew"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -20,4 +21,6 @@ func TestBot(t *testing.T) {
 		assert.NoError(t, err)
 
 	}
+
+	spew.Dump(bot.Results)
 }
