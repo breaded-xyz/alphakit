@@ -1,12 +1,10 @@
 package day
 
 import (
-	"sort"
-
+	"github.com/colngroup/zero2algo/internal/util"
 	"github.com/davecgh/go-spew/spew"
 	"github.com/gonum/floats"
 	"github.com/gonum/stat"
-	"golang.org/x/exp/slices"
 )
 
 // DefaultValueAreaPercentage is the percentage of the total volume used to calculate the value area.
@@ -36,7 +34,7 @@ type VolumeProfile struct {
 	Low  float64
 }
 
-type level struct {
+type Level struct {
 	Price  float64
 	Volume float64
 }
@@ -44,70 +42,44 @@ type level struct {
 // NewVolumeProfile creates a new profile for the given price and volume series.
 // nBins is the number of bins to use, higher numbers for greater accurracy.
 // Prices and volumes must be of the same length.
-func NewVolumeProfile(nBins int, prices, volumes []float64) *VolumeProfile {
+func NewVolumeProfile(nBins int, levels []Level) *VolumeProfile {
 
 	var vp VolumeProfile
 
-	levels := make([]level, len(prices))
-	for i := range prices {
-		levels[i] = level{prices[i], volumes[i]}
+	var sortedPrices, volumes []float64
+	for _, level := range levels {
+		sortedPrices = append(sortedPrices, level.Price)
+		volumes = append(volumes, level.Volume)
 	}
-	slices.SortFunc(levels, func(i, j level) bool {
-		return i.Price < j.Price
-	})
 
-	sortedPrices := prices
-	sort.Float64s(sortedPrices)
 	vp.High = floats.Max(sortedPrices)
 	vp.Low = floats.Min(sortedPrices)
-	vp.Bins = make([]float64, nBins+1)
+	vp.Bins = make([]float64, nBins)
 	vp.Bins = floats.Span(vp.Bins, vp.Low, vp.High+1)
 
-	sortedVolumes := make([]float64, len(volumes))
-	for i := range levels {
-		sortedVolumes[i] = levels[i].Volume
-	}
-
-	vp.Hist = stat.Histogram(nil, vp.Bins, sortedPrices, sortedVolumes)
+	vp.Hist = stat.Histogram(nil, vp.Bins, sortedPrices, volumes)
 
 	pocIdx := floats.MaxIdx(vp.Hist)
-	vp.POC = vp.Bins[pocIdx]
+	vp.POC = stat.Mean([]float64{vp.Bins[pocIdx], vp.Bins[pocIdx+1]}, nil)
 
-	vaTotalVol := floats.Sum(sortedVolumes) * DefaultValueAreaPercentage
-
+	vaTotalVol := util.RoundTo(floats.Sum(volumes)*DefaultValueAreaPercentage, 1)
 	vaCumVol := vp.Hist[pocIdx]
-	var vaPOCOffsetIdx int
+
+	spew.Dump(vaTotalVol, vaCumVol)
+
+	var vaIdx int
 
 	for i := 1; vaCumVol <= vaTotalVol; i++ {
 
-		var vahVol, valVol float64
-		if (pocIdx + i) <= len(vp.Hist)-1 {
-			vahVol = vp.Hist[pocIdx+i]
-		}
-		if (pocIdx - i) >= 0 {
-			valVol = vp.Hist[pocIdx-i]
+		if pocIdx+i == 0 {
 		}
 
-		vaCumVol += (vahVol + valVol)
-		vaPOCOffsetIdx = i
+		vaCumVol += vp.Hist[pocIdx+i] + vp.Hist[pocIdx-i]
+		vaIdx = i
+		spew.Dump(vaCumVol)
 	}
 
-	vahIdx := pocIdx + vaPOCOffsetIdx
-	if vahIdx > len(vp.Bins)-1 {
-		vahIdx = len(vp.Bins) - 1
-	}
-
-	valIdx := pocIdx - vaPOCOffsetIdx
-	if valIdx < 0 {
-		valIdx = 0
-	}
-
-	vp.VAH = vp.Bins[vahIdx]
-	vp.VAL = vp.Bins[valIdx]
-
-	volTot := floats.Sum(vp.Hist[valIdx : vahIdx+1])
-	spew.Dump(valIdx, pocIdx, vahIdx)
-	spew.Dump(vaTotalVol, vaCumVol, volTot)
+	spew.Dump(vaIdx)
 
 	return &vp
 }
