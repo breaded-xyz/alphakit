@@ -13,6 +13,7 @@ var _ trader.Bot = (*Bot)(nil)
 
 // Bot is a trader.Bot implementation for day trading.
 type Bot struct {
+	//Sessions map[int][]market.Kline
 	Profiles []*VolumeProfile
 	Table    dataframe.DataFrame
 }
