@@ -6,12 +6,15 @@ import (
 	"github.com/colngroup/zero2algo/broker"
 	"github.com/colngroup/zero2algo/market"
 	"github.com/colngroup/zero2algo/trader"
+	"github.com/go-gota/gota/dataframe"
 )
 
 var _ trader.Bot = (*Bot)(nil)
 
 // Bot is a trader.Bot implementation for day trading.
 type Bot struct {
+	Profiles []*VolumeProfile
+	Table    dataframe.DataFrame
 }
 
 // NewBot creates a new Bot instance.
