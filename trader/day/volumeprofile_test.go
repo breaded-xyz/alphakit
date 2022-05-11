@@ -28,7 +28,7 @@ func TestMarketProfileWithPriceFile(t *testing.T) {
 	var levels []VolumeLevel
 	for i := range prices {
 		levels = append(levels, VolumeLevel{
-			Price:  util.RoundTo(ta.HL2(prices[i]), 0.1),
+			Price:  util.RoundTo(ta.HL2(prices[i]), 1.0),
 			Volume: util.RoundTo(prices[i].Volume, 1.0),
 		})
 	}
