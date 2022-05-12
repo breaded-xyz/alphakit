@@ -18,7 +18,7 @@ const testdataPath string = "../../internal/testdata/"
 
 func TestMarketProfileWithPriceFile(t *testing.T) {
 
-	file, _ := os.Open(path.Join(testdataPath, "btcusdt-1m-2022-05-05.csv"))
+	file, _ := os.Open(path.Join(testdataPath, "btcusdt-1m-2022-05-06.csv"))
 	defer func() {
 		assert.NoError(t, file.Close())
 	}()
@@ -28,7 +28,7 @@ func TestMarketProfileWithPriceFile(t *testing.T) {
 	var levels []VolumeLevel
 	for i := range prices {
 		levels = append(levels, VolumeLevel{
-			Price:  util.RoundTo(ta.HL2(prices[i]), 1.0),
+			Price:  util.RoundTo(ta.HLC3(prices[i]), 1.0),
 			Volume: util.RoundTo(prices[i].Volume, 1.0),
 		})
 	}
@@ -39,9 +39,9 @@ func TestMarketProfileWithPriceFile(t *testing.T) {
 	spew.Dump(prices[0].Start, prices[len(prices)-1].Start)
 	vp := NewVolumeProfile(100, levels)
 
-	assert.Equal(t, 35583.700000000004, vp.Low)
-	assert.Equal(t, 35626.39292929293, vp.VAL)
-	assert.Equal(t, 36522.944444444445, vp.POC)
-	assert.Equal(t, 38273.354545454546, vp.VAH)
-	assert.Equal(t, 39809.3, vp.High)
+	assert.Equal(t, 35359.0, vp.Low)
+	assert.Equal(t, 35753.232323232325, vp.VAL)
+	assert.Equal(t, 36033.0101010101, vp.POC)
+	assert.Equal(t, 36325.50505050505, vp.VAH)
+	assert.Equal(t, 36617.0, vp.High)
 }

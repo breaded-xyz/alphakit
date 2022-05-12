@@ -16,27 +16,27 @@ import (
 var _ trader.Bot = (*Bot)(nil)
 
 type sessionRow struct {
-	Start        time.Time
-	YLow         float64
-	YVAL         float64
-	YPOC         float64
-	YVAH         float64
-	YHigh        float64
-	SessionOpen  float64
-	HourClose    float64
-	LinRegAlpha  float64
-	LinRegBeta   float64
-	LinRegR2     float64
-	YLowDistPct  float64
-	YVALDistPct  float64
-	YPOCDistPct  float64
-	YVAHDistPct  float64
-	YHighDistPct float64
-	CrossLow     bool
-	CrossVAL     bool
-	CrossPOC     bool
-	CrossVAH     bool
-	CrossHigh    bool
+	Start             time.Time
+	YLow              float64
+	YVAL              float64
+	YPOC              float64
+	YVAH              float64
+	YHigh             float64
+	SessionOpen       float64
+	HourClose         float64
+	LinRegAlpha       float64
+	LinRegBeta        float64
+	LinRegR2          float64
+	YNakedLowDistPct  float64
+	YNakedVALDistPct  float64
+	YNakedPOCDistPct  float64
+	YNakedVAHDistPct  float64
+	YNakedHighDistPct float64
+	CrossYLow         bool
+	CrossYVAL         bool
+	CrossYPOC         bool
+	CrossYVAH         bool
+	CrossYHigh        bool
 }
 
 // Bot is a trader.Bot implementation for day trading.
@@ -100,6 +100,31 @@ func (b *Bot) ReceivePrice(ctx context.Context, price market.Kline) error {
 		return nil
 	}
 
+	if h, m, s := price.Start.UTC().Clock(); h > 0 && (h < 23 && m < 59 && s < 59) {
+
+		if len(b.Results) == 0 || len(b.Levels) == 0 {
+			return nil
+		}
+
+		session := b.Results[len(b.Results)-1]
+		if crossed(b.Levels[len(b.Levels)-2].Price, levelsNow.Price, session.YLow) {
+			session.CrossYLow = true
+		}
+		if crossed(b.Levels[len(b.Levels)-2].Price, levelsNow.Price, session.YVAL) {
+			session.CrossYVAL = true
+		}
+		if crossed(b.Levels[len(b.Levels)-2].Price, levelsNow.Price, session.YPOC) {
+			session.CrossYPOC = true
+		}
+		if crossed(b.Levels[len(b.Levels)-2].Price, levelsNow.Price, session.YVAH) {
+			session.CrossYVAH = true
+		}
+		if crossed(b.Levels[len(b.Levels)-2].Price, levelsNow.Price, session.YHigh) {
+			session.CrossYHigh = true
+		}
+		b.Results[len(b.Results)-1] = session
+	}
+
 	// Initialize distance to key levels after first hour
 	if h, m, s := price.Start.UTC().Clock(); h == 1 && m == 0 && s == 0 {
 		if len(b.Results) == 0 {
@@ -107,11 +132,22 @@ func (b *Bot) ReceivePrice(ctx context.Context, price market.Kline) error {
 		}
 		session := b.Results[len(b.Results)-1]
 		session.HourClose = price.C.InexactFloat64()
-		session.YLowDistPct = (session.YLow - session.HourClose) / session.HourClose
-		session.YVALDistPct = (session.YVAL - session.HourClose) / session.HourClose
-		session.YPOCDistPct = (session.YPOC - session.HourClose) / session.HourClose
-		session.YVAHDistPct = (session.YVAH - session.HourClose) / session.HourClose
-		session.YHighDistPct = (session.YHigh - session.HourClose) / session.HourClose
+
+		if !session.CrossYLow {
+			session.YNakedLowDistPct = (session.YLow - session.HourClose) / session.HourClose
+		}
+		if !session.CrossYVAL {
+			session.YNakedVALDistPct = (session.YVAL - session.HourClose) / session.HourClose
+		}
+		if !session.CrossYPOC {
+			session.YNakedPOCDistPct = (session.YPOC - session.HourClose) / session.HourClose
+		}
+		if !session.CrossYVAH {
+			session.YNakedVAHDistPct = (session.YVAH - session.HourClose) / session.HourClose
+		}
+		if !session.CrossYHigh {
+			session.YNakedHighDistPct = (session.YHigh - session.HourClose) / session.HourClose
+		}
 
 		xs := make([]float64, 60)
 		ys := make([]float64, 60)
@@ -138,19 +174,19 @@ func (b *Bot) ReceivePrice(ctx context.Context, price market.Kline) error {
 
 		session := b.Results[len(b.Results)-1]
 		if crossed(b.Levels[len(b.Levels)-2].Price, levelsNow.Price, session.YLow) {
-			session.CrossLow = true
+			session.CrossYLow = true
 		}
 		if crossed(b.Levels[len(b.Levels)-2].Price, levelsNow.Price, session.YVAL) {
-			session.CrossVAL = true
+			session.CrossYVAL = true
 		}
 		if crossed(b.Levels[len(b.Levels)-2].Price, levelsNow.Price, session.YPOC) {
-			session.CrossPOC = true
+			session.CrossYPOC = true
 		}
 		if crossed(b.Levels[len(b.Levels)-2].Price, levelsNow.Price, session.YVAH) {
-			session.CrossVAH = true
+			session.CrossYVAH = true
 		}
 		if crossed(b.Levels[len(b.Levels)-2].Price, levelsNow.Price, session.YHigh) {
-			session.CrossHigh = true
+			session.CrossYHigh = true
 		}
 		b.Results[len(b.Results)-1] = session
 	}
