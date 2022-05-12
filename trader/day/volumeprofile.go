@@ -131,7 +131,7 @@ func NewVolumeProfile(nBins int, levels []VolumeLevel) *VolumeProfile {
 	}
 
 	vp.VAH = vp.Bins[vahIdx]
-	vp.VAL = vp.Bins[valIdx]
+	vp.VAL = vp.Bins[valIdx+1]
 
 	return &vp
 }

@@ -31,7 +31,7 @@ func WriteStudy(path string, study optimize.Study) error {
 func WriteSummaryReports(path string, reports []SummaryReport) error {
 	prefix := time.Now().UTC().Format(_filenameFriendlyTimeFormat)
 	out := filepath.Join(path, fmt.Sprintf("%s-summaryreports.csv", prefix))
-	if err := saveStructToCSV(out, reports); err != nil {
+	if err := SaveStructToCSV(out, reports); err != nil {
 		return err
 	}
 
@@ -41,14 +41,14 @@ func WriteSummaryReports(path string, reports []SummaryReport) error {
 func WriteBacktestReports(path string, reports []BacktestReport) error {
 	prefix := time.Now().UTC().Format(_filenameFriendlyTimeFormat)
 	out := filepath.Join(path, fmt.Sprintf("%s-backtestreports.csv", prefix))
-	if err := saveStructToCSV(out, reports); err != nil {
+	if err := SaveStructToCSV(out, reports); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func saveStructToCSV(filename string, data interface{}) error {
+func SaveStructToCSV(filename string, data interface{}) error {
 	f, err := os.OpenFile(filename, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0o644)
 	if err != nil {
 		return err
