@@ -11,7 +11,7 @@ import (
 func TestBot(t *testing.T) {
 	bot := NewBot()
 
-	testdataPath := "/Users/richklee/Dropbox/dev-share/github.com/colngroup/zero2algo/prices/perp/btcusdt-m1"
+	testdataPath := "/Users/richklee/Dropbox/dev-share/github.com/colngroup/zero2algo/prices/spot/btcusdt-m1/all"
 
 	prices, err := studyrun.ReadPriceSeries(testdataPath)
 	assert.NoError(t, err)
@@ -21,5 +21,5 @@ func TestBot(t *testing.T) {
 		assert.NoError(t, err)
 	}
 
-	studyrun.SaveStructToCSV("./testdata/results-3.csv", bot.Results)
+	studyrun.SaveStructToCSV("./testdata/results-6.csv", bot.Results)
 }

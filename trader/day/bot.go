@@ -45,6 +45,8 @@ type Bot struct {
 	Levels   []VolumeLevel
 	Profiles []*VolumeProfile
 	Results  []sessionRow
+
+	vwap VWAP
 }
 
 // NewBot creates a new Bot instance.
@@ -70,13 +72,17 @@ func (b *Bot) ReceivePrice(ctx context.Context, price market.Kline) error {
 
 	// Add new Level for kline using HL2
 	levelsNow := VolumeLevel{
-		Price:  util.RoundTo(ta.HL2(price), 1.0),
+		Price:  util.RoundTo(ta.HLC3(price), 0.1),
 		Volume: util.RoundTo(price.Volume, 1.0),
 	}
 	b.Levels = append(b.Levels, levelsNow)
 
+	_ = b.vwap.Update(price)
+
 	// Initialize new day
 	if h, m, s := price.Start.UTC().Clock(); h == 0 && m == 0 && s == 0 {
+		b.vwap = VWAP{}
+
 		if len(b.Levels) < 1440 {
 			return nil
 		}
@@ -151,10 +157,10 @@ func (b *Bot) ReceivePrice(ctx context.Context, price market.Kline) error {
 
 		xs := make([]float64, 60)
 		ys := make([]float64, 60)
-		sessionPrices := b.Prices[len(b.Prices)-60:]
-		for i := range sessionPrices {
+		vwapSeries := ta.Window(b.vwap.History(), 60)
+		for i := range vwapSeries {
 			xs[i] = float64(i)
-			ys[i] = sessionPrices[i].C.InexactFloat64()
+			ys[i] = vwapSeries[i]
 		}
 		alpha, beta := stat.LinearRegression(xs, ys, nil, false)
 		r2 := stat.RSquared(xs, ys, nil, alpha, beta)
