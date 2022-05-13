@@ -21,9 +21,5 @@ func TestBot(t *testing.T) {
 		assert.NoError(t, err)
 	}
 
-<<<<<<< Updated upstream
-	studyrun.SaveStructToCSV("./testdata/results-8.csv", bot.Results)
-=======
 	studyrun.SaveStructToCSV("./testdata/results-9.csv", bot.Results)
->>>>>>> Stashed changes
 }

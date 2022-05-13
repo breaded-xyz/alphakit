@@ -2,14 +2,12 @@ package day
 
 import (
 	"context"
-	"math"
 	"time"
 
 	"github.com/colngroup/zero2algo/broker"
 	"github.com/colngroup/zero2algo/market"
 	"github.com/colngroup/zero2algo/ta"
 	"github.com/colngroup/zero2algo/trader"
-	"github.com/davecgh/go-spew/spew"
 	"github.com/gonum/stat"
 	"golang.org/x/exp/slices"
 )
@@ -75,13 +73,8 @@ func (b *Bot) ReceivePrice(ctx context.Context, price market.Kline) error {
 
 	// Add new Level for kline using HL2
 	levelsNow := VolumeLevel{
-<<<<<<< Updated upstream
-		Price:  util.RoundTo(ta.HLC3(price), 0.1),
-		Volume: util.RoundTo(price.Volume, 0.1),
-=======
 		Price:  ta.HLC3(price),
 		Volume: price.Volume,
->>>>>>> Stashed changes
 	}
 	b.Levels = append(b.Levels, levelsNow)
 
@@ -145,12 +138,8 @@ func (b *Bot) ReceivePrice(ctx context.Context, price market.Kline) error {
 			return nil
 		}
 		session := b.Results[len(b.Results)-1]
-<<<<<<< Updated upstream
-		session.HourClose = price.O.InexactFloat64()
-=======
-		session.FirstHourPrice = price.C.InexactFloat64()
+		session.FirstHourPrice = price.O.InexactFloat64()
 		session.FirstHourVWAP = b.vwap.Value()
->>>>>>> Stashed changes
 
 		if !session.CrossYLow {
 			session.YNakedLowDistPct = (session.YLow - session.FirstHourPrice) / session.FirstHourPrice
@@ -176,11 +165,6 @@ func (b *Bot) ReceivePrice(ctx context.Context, price market.Kline) error {
 			ys[i] = vwapSeries[i]
 		}
 		alpha, beta := stat.LinearRegression(xs, ys, nil, false)
-		if math.IsNaN(alpha) || math.IsNaN(beta) {
-			spew.Dump(vwapSeries)
-			panic("NaN")
-		}
-
 		r2 := stat.RSquared(xs, ys, nil, alpha, beta)
 		session.LinRegAlpha = alpha
 		session.LinRegBeta = beta

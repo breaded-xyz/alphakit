@@ -3,7 +3,6 @@ package day
 import (
 	"math"
 
-	"github.com/colngroup/zero2algo/internal/util"
 	"github.com/gonum/floats"
 	"github.com/gonum/stat"
 )
@@ -80,7 +79,7 @@ func NewVolumeProfile(nBins int, levels []VolumeLevel) *VolumeProfile {
 	vp.POC = midBin(vp.Bins, pocIdx)
 
 	// Calculate Value Area with POC as the centre point
-	vaTotalVol := util.RoundTo(floats.Sum(volumes)*DefaultValueAreaPercentage, 1)
+	vaTotalVol := floats.Sum(volumes) * DefaultValueAreaPercentage
 	vaCumVol := vp.Hist[pocIdx]
 	var vahVol, valVol float64
 	vahIdx, valIdx := pocIdx+1, pocIdx-1
