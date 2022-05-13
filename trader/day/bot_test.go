@@ -21,5 +21,5 @@ func TestBot(t *testing.T) {
 		assert.NoError(t, err)
 	}
 
-	studyrun.SaveStructToCSV("./testdata/results-6.csv", bot.Results)
+	studyrun.SaveStructToCSV("./testdata/results-8.csv", bot.Results)
 }

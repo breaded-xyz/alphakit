@@ -73,7 +73,7 @@ func (b *Bot) ReceivePrice(ctx context.Context, price market.Kline) error {
 	// Add new Level for kline using HL2
 	levelsNow := VolumeLevel{
 		Price:  util.RoundTo(ta.HLC3(price), 0.1),
-		Volume: util.RoundTo(price.Volume, 1.0),
+		Volume: util.RoundTo(price.Volume, 0.1),
 	}
 	b.Levels = append(b.Levels, levelsNow)
 
@@ -108,24 +108,26 @@ func (b *Bot) ReceivePrice(ctx context.Context, price market.Kline) error {
 
 	if h, m, s := price.Start.UTC().Clock(); h > 0 && (h < 23 && m < 59 && s < 59) {
 
-		if len(b.Results) == 0 || len(b.Levels) == 0 {
+		if len(b.Results) == 0 {
 			return nil
 		}
 
+		low, high := price.L.InexactFloat64(), price.H.InexactFloat64()
+
 		session := b.Results[len(b.Results)-1]
-		if crossed(b.Levels[len(b.Levels)-2].Price, levelsNow.Price, session.YLow) {
+		if crossed(session.YLow, low, high) {
 			session.CrossYLow = true
 		}
-		if crossed(b.Levels[len(b.Levels)-2].Price, levelsNow.Price, session.YVAL) {
+		if crossed(session.YVAL, low, high) {
 			session.CrossYVAL = true
 		}
-		if crossed(b.Levels[len(b.Levels)-2].Price, levelsNow.Price, session.YPOC) {
+		if crossed(session.YPOC, low, high) {
 			session.CrossYPOC = true
 		}
-		if crossed(b.Levels[len(b.Levels)-2].Price, levelsNow.Price, session.YVAH) {
+		if crossed(session.YVAH, low, high) {
 			session.CrossYVAH = true
 		}
-		if crossed(b.Levels[len(b.Levels)-2].Price, levelsNow.Price, session.YHigh) {
+		if crossed(session.YHigh, low, high) {
 			session.CrossYHigh = true
 		}
 		b.Results[len(b.Results)-1] = session
@@ -137,7 +139,7 @@ func (b *Bot) ReceivePrice(ctx context.Context, price market.Kline) error {
 			return nil
 		}
 		session := b.Results[len(b.Results)-1]
-		session.HourClose = price.C.InexactFloat64()
+		session.HourClose = price.O.InexactFloat64()
 
 		if !session.CrossYLow {
 			session.YNakedLowDistPct = (session.YLow - session.HourClose) / session.HourClose
@@ -169,39 +171,13 @@ func (b *Bot) ReceivePrice(ctx context.Context, price market.Kline) error {
 		session.LinRegR2 = r2
 
 		b.Results[len(b.Results)-1] = session
-		return nil
-	}
-
-	if h, m, s := price.Start.UTC().Clock(); h > 0 && (h < 23 && m < 59 && s < 59) {
-
-		if len(b.Results) == 0 || len(b.Levels) == 0 {
-			return nil
-		}
-
-		session := b.Results[len(b.Results)-1]
-		if crossed(b.Levels[len(b.Levels)-2].Price, levelsNow.Price, session.YLow) {
-			session.CrossYLow = true
-		}
-		if crossed(b.Levels[len(b.Levels)-2].Price, levelsNow.Price, session.YVAL) {
-			session.CrossYVAL = true
-		}
-		if crossed(b.Levels[len(b.Levels)-2].Price, levelsNow.Price, session.YPOC) {
-			session.CrossYPOC = true
-		}
-		if crossed(b.Levels[len(b.Levels)-2].Price, levelsNow.Price, session.YVAH) {
-			session.CrossYVAH = true
-		}
-		if crossed(b.Levels[len(b.Levels)-2].Price, levelsNow.Price, session.YHigh) {
-			session.CrossYHigh = true
-		}
-		b.Results[len(b.Results)-1] = session
 	}
 
 	return nil
 }
 
-func crossed(a, b, c float64) bool {
-	return ta.CrossUp([]float64{a, b}, c) || ta.CrossDown([]float64{a, b}, c)
+func crossed(v, lower, upper float64) bool {
+	return v >= lower && v <= upper
 }
 
 // Close exits all open positions at current market price.
