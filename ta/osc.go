@@ -1,22 +1,22 @@
 package ta
 
-var _ Indicator = (*ALMA)(nil)
+var _ Indicator[float64] = (*Osc)(nil)
 
 // Osc is a composite of a fast and slow moving average indicator.
 // Osc value = fast value minus slow value.
 // Osc is not normalized and has an unbounded range.
 type Osc struct {
 	// Fast is the fast moving average indicator.
-	Fast Indicator
+	Fast Indicator[float64]
 
 	// Slow is the slow moving average indicator.
-	Slow Indicator
+	Slow Indicator[float64]
 
 	series []float64
 }
 
 // NewOsc returns a new oscillator with the given fast and slow moving averages.
-func NewOsc(fast, slow Indicator) *Osc {
+func NewOsc(fast, slow Indicator[float64]) *Osc {
 	return &Osc{
 		Fast: fast,
 		Slow: slow,

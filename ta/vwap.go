@@ -4,7 +4,7 @@ import (
 	"github.com/colngroup/zero2algo/market"
 )
 
-//var _ ta.Indicator = (*VWAP)(nil)
+var _ Indicator[market.Kline] = (*VWAP)(nil)
 
 // VWAP is a volume weighted average price.
 type VWAP struct {
@@ -41,7 +41,7 @@ func (ind *VWAP) Update(prices ...market.Kline) error {
 // Valid returns true if the indicator is valid.
 // An indicator is invalid if it hasn't received enough values yet.
 func (ind *VWAP) Valid() bool {
-	return true
+	return len(ind.series) > 0
 }
 
 // Value returns the current value of the indicator.

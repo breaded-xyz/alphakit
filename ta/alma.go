@@ -12,7 +12,7 @@ const (
 	DefaultALMASigma = 6
 )
 
-var _ Indicator = (*ALMA)(nil)
+var _ Indicator[float64] = (*ALMA)(nil)
 
 // ALMA is a modern low lag moving average.
 // Ported from https://www.tradingview.com/pine-script-reference/#fun_alma

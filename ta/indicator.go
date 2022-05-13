@@ -2,10 +2,10 @@
 package ta
 
 // Indicator is the interface for all technical analysis functions.
-type Indicator interface {
+type Indicator[T any] interface {
 
 	// Update the indicator with new inputs (typically a price series).
-	Update(v ...float64) error
+	Update(v ...T) error
 
 	// Value returns the latest value of the indicator.
 	Value() float64

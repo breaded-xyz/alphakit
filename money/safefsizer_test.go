@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/colngroup/zero2algo/internal/dec"
+	"github.com/davecgh/go-spew/spew"
 	"github.com/shopspring/decimal"
 	"github.com/stretchr/testify/assert"
 )
@@ -23,11 +24,12 @@ func TestSafeFSizer_Size(t *testing.T) {
 				InitialCapital: dec.New(500),
 				F:              0.1,
 				ScaleF:         0.5,
+				StepSize:       _defaultStepSize,
 			},
 			givePrice:   dec.New(100),
 			giveCapital: dec.New(1000),
 			giveRisk:    dec.New(10),
-			want:        dec.New(6.123724356957945),
+			want:        dec.New(6.12),
 		},
 		{
 			name: "zero or neg profit = fixed capital growth factor at 1.0",
@@ -35,6 +37,7 @@ func TestSafeFSizer_Size(t *testing.T) {
 				InitialCapital: dec.New(5000),
 				F:              0.1,
 				ScaleF:         0.5,
+				StepSize:       _defaultStepSize,
 			},
 			givePrice:   dec.New(100),
 			giveCapital: dec.New(1000),
@@ -47,6 +50,7 @@ func TestSafeFSizer_Size(t *testing.T) {
 				InitialCapital: dec.New(5000),
 				F:              0.1,
 				ScaleF:         0.5,
+				StepSize:       _defaultStepSize,
 			},
 			givePrice:   dec.New(100),
 			giveCapital: dec.New(-1000),
@@ -57,6 +61,7 @@ func TestSafeFSizer_Size(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			act := tt.giveSizer.Size(tt.givePrice, tt.giveCapital, tt.giveRisk)
+			spew.Dump(act)
 			assert.Equal(t, tt.want, act)
 		})
 	}

@@ -19,16 +19,16 @@ type ApexPredicter struct {
 	PriceSelector ta.PriceSelector
 
 	// MA is the smoothed price series to evaluate for a peak or valley.
-	MA ta.Indicator
+	MA ta.Indicator[float64]
 
 	// MMI is the trend filter.
-	MMI ta.Indicator
+	MMI ta.Indicator[float64]
 
 	prev float64
 }
 
 // NewApexPredicter creates a new predicter with Close quote price selector.
-func NewApexPredicter(ma, mmi ta.Indicator) *ApexPredicter {
+func NewApexPredicter(ma, mmi ta.Indicator[float64]) *ApexPredicter {
 	return &ApexPredicter{
 		PriceSelector: ta.Close,
 		MA:            ma,

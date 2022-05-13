@@ -6,7 +6,7 @@ import (
 	"github.com/shopspring/decimal"
 )
 
-var _defaultStepSize = 0.001
+var _defaultStepSize = 0.01
 
 type Sizer interface {
 	Size(price, capital, risk decimal.Decimal) decimal.Decimal

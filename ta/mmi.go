@@ -2,6 +2,8 @@ package ta
 
 import "github.com/colngroup/zero2algo/internal/util"
 
+var _ Indicator[float64] = (*MMI)(nil)
+
 // MMI (Market Meaness Index) is a statistical measure between 0 - 100
 // that indicates if the series exhibits serial correlation (trendiness).
 // Reference: https://financial-hacker.com/the-market-meanness-index/.
@@ -10,7 +12,7 @@ type MMI struct {
 	Length int
 
 	// Smoother is the indicator used to smooth the MMI.
-	Smoother Indicator
+	Smoother Indicator[float64]
 
 	sample []float64
 }
@@ -25,7 +27,7 @@ func NewMMI(length int) *MMI {
 }
 
 // NewMMIWithSmoother returns a new MMI indicator with the given smoother.
-func NewMMIWithSmoother(length int, smoother Indicator) *MMI {
+func NewMMIWithSmoother(length int, smoother Indicator[float64]) *MMI {
 	return &MMI{
 		Length:   length,
 		Smoother: smoother,

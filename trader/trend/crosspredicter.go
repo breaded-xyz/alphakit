@@ -17,16 +17,16 @@ type CrossPredicter struct {
 	PriceSelector ta.PriceSelector
 
 	// Osc is the moving average oscillator to use for entery and exit signals.
-	Osc ta.Indicator
+	Osc ta.Indicator[float64]
 
 	// MMI is the signal filter.
-	MMI ta.Indicator
+	MMI ta.Indicator[float64]
 
 	prev float64
 }
 
 // NewCrossPredicter creates a new predicter with Close quote price selector.
-func NewCrossPredicter(osc, mmi ta.Indicator) *CrossPredicter {
+func NewCrossPredicter(osc, mmi ta.Indicator[float64]) *CrossPredicter {
 	return &CrossPredicter{
 		PriceSelector: ta.Close,
 		Osc:           osc,
