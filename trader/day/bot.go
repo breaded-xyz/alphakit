@@ -8,7 +8,6 @@ import (
 	"github.com/colngroup/zero2algo/market"
 	"github.com/colngroup/zero2algo/ta"
 	"github.com/colngroup/zero2algo/trader"
-	"github.com/gonum/stat"
 	"golang.org/x/exp/slices"
 )
 
@@ -157,7 +156,7 @@ func (b *Bot) ReceivePrice(ctx context.Context, price market.Kline) error {
 			session.YNakedHighDistPct = (session.YHigh - session.FirstHourPrice) / session.FirstHourPrice
 		}
 
-		xs := make([]float64, 60)
+		/*xs := make([]float64, 60)
 		ys := make([]float64, 60)
 		vwapSeries := ta.Window(b.vwap.History(), 60)
 		for i := range vwapSeries {
@@ -168,7 +167,7 @@ func (b *Bot) ReceivePrice(ctx context.Context, price market.Kline) error {
 		r2 := stat.RSquared(xs, ys, nil, alpha, beta)
 		session.LinRegAlpha = alpha
 		session.LinRegBeta = beta
-		session.LinRegR2 = r2
+		session.LinRegR2 = r2*/
 
 		b.Results[len(b.Results)-1] = session
 	}
