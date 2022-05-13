@@ -2,13 +2,14 @@ package day
 
 import (
 	"context"
+	"math"
 	"time"
 
 	"github.com/colngroup/zero2algo/broker"
-	"github.com/colngroup/zero2algo/internal/util"
 	"github.com/colngroup/zero2algo/market"
 	"github.com/colngroup/zero2algo/ta"
 	"github.com/colngroup/zero2algo/trader"
+	"github.com/davecgh/go-spew/spew"
 	"github.com/gonum/stat"
 	"golang.org/x/exp/slices"
 )
@@ -22,8 +23,9 @@ type sessionRow struct {
 	YPOC              float64
 	YVAH              float64
 	YHigh             float64
-	SessionOpen       float64
-	HourClose         float64
+	SessionOpenPrice  float64
+	FirstHourPrice    float64
+	FirstHourVWAP     float64
 	LinRegAlpha       float64
 	LinRegBeta        float64
 	LinRegR2          float64
@@ -69,15 +71,19 @@ func (b *Bot) Warmup(ctx context.Context, prices []market.Kline) error {
 func (b *Bot) ReceivePrice(ctx context.Context, price market.Kline) error {
 
 	b.Prices = append(b.Prices, price)
+	_ = b.vwap.Update(price)
 
 	// Add new Level for kline using HL2
 	levelsNow := VolumeLevel{
+<<<<<<< Updated upstream
 		Price:  util.RoundTo(ta.HLC3(price), 0.1),
 		Volume: util.RoundTo(price.Volume, 0.1),
+=======
+		Price:  ta.HLC3(price),
+		Volume: price.Volume,
+>>>>>>> Stashed changes
 	}
 	b.Levels = append(b.Levels, levelsNow)
-
-	_ = b.vwap.Update(price)
 
 	// Initialize new day
 	if h, m, s := price.Start.UTC().Clock(); h == 0 && m == 0 && s == 0 {
@@ -92,16 +98,16 @@ func (b *Bot) ReceivePrice(ctx context.Context, price market.Kline) error {
 			return i.Price < j.Price
 		})
 
-		vp := NewVolumeProfile(100, ySession)
+		vp := NewVolumeProfile(10, ySession)
 		b.Profiles = append(b.Profiles, vp)
 		b.Results = append(b.Results, sessionRow{
-			Start:       price.Start.UTC(),
-			SessionOpen: price.O.InexactFloat64(),
-			YLow:        vp.Low,
-			YVAL:        vp.VAL,
-			YPOC:        vp.POC,
-			YVAH:        vp.VAH,
-			YHigh:       vp.High,
+			Start:            price.Start.UTC(),
+			SessionOpenPrice: price.O.InexactFloat64(),
+			YLow:             vp.Low,
+			YVAL:             vp.VAL,
+			YPOC:             vp.POC,
+			YVAH:             vp.VAH,
+			YHigh:            vp.High,
 		})
 		return nil
 	}
@@ -139,22 +145,27 @@ func (b *Bot) ReceivePrice(ctx context.Context, price market.Kline) error {
 			return nil
 		}
 		session := b.Results[len(b.Results)-1]
+<<<<<<< Updated upstream
 		session.HourClose = price.O.InexactFloat64()
+=======
+		session.FirstHourPrice = price.C.InexactFloat64()
+		session.FirstHourVWAP = b.vwap.Value()
+>>>>>>> Stashed changes
 
 		if !session.CrossYLow {
-			session.YNakedLowDistPct = (session.YLow - session.HourClose) / session.HourClose
+			session.YNakedLowDistPct = (session.YLow - session.FirstHourPrice) / session.FirstHourPrice
 		}
 		if !session.CrossYVAL {
-			session.YNakedVALDistPct = (session.YVAL - session.HourClose) / session.HourClose
+			session.YNakedVALDistPct = (session.YVAL - session.FirstHourPrice) / session.FirstHourPrice
 		}
 		if !session.CrossYPOC {
-			session.YNakedPOCDistPct = (session.YPOC - session.HourClose) / session.HourClose
+			session.YNakedPOCDistPct = (session.YPOC - session.FirstHourPrice) / session.FirstHourPrice
 		}
 		if !session.CrossYVAH {
-			session.YNakedVAHDistPct = (session.YVAH - session.HourClose) / session.HourClose
+			session.YNakedVAHDistPct = (session.YVAH - session.FirstHourPrice) / session.FirstHourPrice
 		}
 		if !session.CrossYHigh {
-			session.YNakedHighDistPct = (session.YHigh - session.HourClose) / session.HourClose
+			session.YNakedHighDistPct = (session.YHigh - session.FirstHourPrice) / session.FirstHourPrice
 		}
 
 		xs := make([]float64, 60)
@@ -165,6 +176,11 @@ func (b *Bot) ReceivePrice(ctx context.Context, price market.Kline) error {
 			ys[i] = vwapSeries[i]
 		}
 		alpha, beta := stat.LinearRegression(xs, ys, nil, false)
+		if math.IsNaN(alpha) || math.IsNaN(beta) {
+			spew.Dump(vwapSeries)
+			panic("NaN")
+		}
+
 		r2 := stat.RSquared(xs, ys, nil, alpha, beta)
 		session.LinRegAlpha = alpha
 		session.LinRegBeta = beta

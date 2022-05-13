@@ -1,8 +1,12 @@
 package day
 
 import (
+<<<<<<< Updated upstream
 	"math"
 
+=======
+	"github.com/colngroup/zero2algo/internal/util"
+>>>>>>> Stashed changes
 	"github.com/colngroup/zero2algo/market"
 	"github.com/colngroup/zero2algo/ta"
 	"github.com/davecgh/go-spew/spew"
@@ -26,6 +30,7 @@ func NewVWAP() *VWAP {
 func (ind *VWAP) Update(prices ...market.Kline) error {
 
 	for i := range prices {
+<<<<<<< Updated upstream
 		avgPrice := ta.HLC3(prices[i])
 		vol := prices[i].Volume
 
@@ -38,6 +43,16 @@ func (ind *VWAP) Update(prices ...market.Kline) error {
 
 		vwap := ind.cumPV / ind.cumVol
 
+=======
+
+		hlc3 := ta.HLC3(prices[i])
+		vol := util.NNZ(prices[i].Volume, 0.1)
+
+		ind.cumPV += hlc3 * vol
+		ind.cumVol += vol
+		vwap := ind.cumPV / ind.cumVol
+
+>>>>>>> Stashed changes
 		ind.series = append(ind.series, vwap)
 
 		if math.IsNaN(vwap) || math.IsInf(vwap, 0) {

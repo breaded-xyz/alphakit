@@ -1,6 +1,8 @@
 package day
 
 import (
+	"math"
+
 	"github.com/colngroup/zero2algo/internal/util"
 	"github.com/gonum/floats"
 	"github.com/gonum/stat"
@@ -75,7 +77,7 @@ func NewVolumeProfile(nBins int, levels []VolumeLevel) *VolumeProfile {
 	vp.Hist = stat.Histogram(nil, vp.Bins, sortedPrices, volumes)
 
 	pocIdx := floats.MaxIdx(vp.Hist)
-	vp.POC = vp.Bins[pocIdx]
+	vp.POC = midBin(vp.Bins, pocIdx)
 
 	// Calculate Value Area with POC as the centre point
 	vaTotalVol := util.RoundTo(floats.Sum(volumes)*DefaultValueAreaPercentage, 1)
@@ -130,8 +132,26 @@ func NewVolumeProfile(nBins int, levels []VolumeLevel) *VolumeProfile {
 
 	}
 
-	vp.VAH = vp.Bins[vahIdx]
-	vp.VAL = vp.Bins[valIdx+1]
+	vp.VAH = midBin(vp.Bins, vahIdx)
+	vp.VAL = midBin(vp.Bins, valIdx)
 
 	return &vp
+}
+
+func midBin(bins []float64, idx int) float64 {
+
+	if len(bins) == 0 {
+		return math.NaN()
+	}
+
+	if idx >= len(bins)-1 {
+		return bins[len(bins)-1]
+	}
+
+	if idx < 0 {
+		return bins[0]
+	}
+
+	return stat.Mean([]float64{bins[idx], bins[idx+1]}, nil)
+
 }
