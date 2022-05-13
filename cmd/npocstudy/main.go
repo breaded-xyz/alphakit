@@ -9,6 +9,7 @@ import (
 	"github.com/colngroup/zero2algo/internal/studyrun"
 	"github.com/colngroup/zero2algo/market"
 	"github.com/colngroup/zero2algo/ta"
+	"github.com/gonum/stat"
 	"golang.org/x/exp/slices"
 )
 
@@ -38,9 +39,8 @@ type sessionRow struct {
 }
 
 var (
-	prices []market.Kline
-	levels []ta.VolumeLevel
-	//profiles []*ta.VolumeProfile
+	prices  []market.Kline
+	levels  []ta.VolumeLevel
 	results []sessionRow
 	vwap    ta.VWAP
 )
@@ -59,8 +59,6 @@ func main() {
 
 	for i := range prices {
 		fmt.Printf("%s\n", prices[i].Start)
-		//spew.Dump(prices[i])
-		//spew.Dump(i)
 		_ = receivePrice(prices[i])
 	}
 
@@ -68,14 +66,8 @@ func main() {
 }
 
 func receivePrice(price market.Kline) error {
-
-	if price.Start.UTC().Equal(time.Date(2018, 06, 19, 00, 00, 00, 0, time.UTC)) {
-		println("break")
-	}
-
 	_ = vwap.Update(price)
 
-	// Add new Level for kline using HL2
 	levelsNow := ta.VolumeLevel{
 		Price:  ta.HLC3(price),
 		Volume: price.Volume,
@@ -96,7 +88,6 @@ func receivePrice(price market.Kline) error {
 		})
 
 		vp := ta.NewVolumeProfile(10, ySession)
-		//profiles = append(profiles, vp)
 		results = append(results, sessionRow{
 			Start:            price.Start.UTC(),
 			SessionOpenPrice: price.O.InexactFloat64(),
@@ -161,9 +152,9 @@ func receivePrice(price market.Kline) error {
 			session.YNakedHighDistPct = (session.YHigh - session.FirstHourPrice) / session.FirstHourPrice
 		}
 
-		/*xs := make([]float64, 60)
+		xs := make([]float64, 60)
 		ys := make([]float64, 60)
-		vwapSeries := ta.Window(b.vwap.History(), 60)
+		vwapSeries := ta.Window(vwap.History(), 60)
 		for i := range vwapSeries {
 			xs[i] = float64(i)
 			ys[i] = vwapSeries[i]
@@ -172,7 +163,7 @@ func receivePrice(price market.Kline) error {
 		r2 := stat.RSquared(xs, ys, nil, alpha, beta)
 		session.LinRegAlpha = alpha
 		session.LinRegBeta = beta
-		session.LinRegR2 = r2*/
+		session.LinRegR2 = r2
 
 		results[len(results)-1] = session
 	}
