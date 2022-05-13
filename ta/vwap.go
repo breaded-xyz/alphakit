@@ -1,8 +1,7 @@
-package day
+package ta
 
 import (
 	"github.com/colngroup/zero2algo/market"
-	"github.com/colngroup/zero2algo/ta"
 )
 
 //var _ ta.Indicator = (*VWAP)(nil)
@@ -23,7 +22,7 @@ func NewVWAP() *VWAP {
 func (ind *VWAP) Update(prices ...market.Kline) error {
 
 	for i := range prices {
-		avgPrice := ta.HLC3(prices[i])
+		avgPrice := HLC3(prices[i])
 		vol := prices[i].Volume
 
 		if avgPrice == 0 || vol == 0 {
@@ -47,7 +46,7 @@ func (ind *VWAP) Valid() bool {
 
 // Value returns the current value of the indicator.
 func (ind *VWAP) Value() float64 {
-	return ta.Lookback(ind.series, 0)
+	return Lookback(ind.series, 0)
 }
 
 // History returns the historical values of the indicator.

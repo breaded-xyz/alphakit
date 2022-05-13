@@ -1,4 +1,4 @@
-package day
+package ta
 
 import (
 	"math"
@@ -85,7 +85,8 @@ func NewVolumeProfile(nBins int, levels []VolumeLevel) *VolumeProfile {
 	vahIdx, valIdx := pocIdx+1, pocIdx-1
 	stepVAH, stepVAL := true, true
 
-	for vaCumVol <= vaTotalVol {
+	for (vaCumVol <= vaTotalVol) &&
+		(vahIdx <= len(vp.Hist)-1 && valIdx >= 0) {
 
 		if stepVAH {
 			vahVol = 0
@@ -124,11 +125,6 @@ func NewVolumeProfile(nBins int, levels []VolumeLevel) *VolumeProfile {
 		if valIdx <= 0 {
 			stepVAL = false
 		}
-
-		if !stepVAH && !stepVAL {
-			break
-		}
-
 	}
 
 	vp.VAH = midBin(vp.Bins, vahIdx)

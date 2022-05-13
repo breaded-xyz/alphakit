@@ -1,4 +1,4 @@
-package day
+package ta
 
 import (
 	"encoding/csv"
@@ -7,7 +7,6 @@ import (
 	"testing"
 
 	"github.com/colngroup/zero2algo/market"
-	"github.com/colngroup/zero2algo/ta"
 	"github.com/davecgh/go-spew/spew"
 	"github.com/stretchr/testify/assert"
 	"golang.org/x/exp/slices"
@@ -17,7 +16,7 @@ const testdataPath string = "./testdata/"
 
 func TestMarketProfileWithPriceFile(t *testing.T) {
 
-	file, _ := os.Open(path.Join(testdataPath, "BTCUSDT-1m-2022-04-08.csv"))
+	file, _ := os.Open(path.Join(testdataPath, "BTCUSDT-1m-2022-05-06.csv"))
 	defer func() {
 		assert.NoError(t, file.Close())
 	}()
@@ -27,7 +26,7 @@ func TestMarketProfileWithPriceFile(t *testing.T) {
 	var levels []VolumeLevel
 	for i := range prices {
 
-		hlc3 := ta.HLC3(prices[i])
+		hlc3 := HLC3(prices[i])
 		vol := prices[i].Volume
 
 		if hlc3 == 0 || vol == 0 {
@@ -46,11 +45,9 @@ func TestMarketProfileWithPriceFile(t *testing.T) {
 	spew.Dump(prices[0].Start, prices[len(prices)-1].Start)
 	vp := NewVolumeProfile(10, levels)
 
-	spew.Dump(vp)
-
-	//assert.Equal(t, 35359.0, vp.Low)
-	//assert.Equal(t, 35753.232323232325, vp.VAL)
-	//assert.Equal(t, 36033.0101010101, vp.POC)
-	//assert.Equal(t, 36325.50505050505, vp.VAH)
-	//assert.Equal(t, 36617.0, vp.High)
+	assert.Equal(t, 35359.26666666667, vp.Low)
+	assert.Equal(t, 35569.12777777779, vp.VAL)
+	assert.Equal(t, 35988.850000000006, vp.POC)
+	assert.Equal(t, 36408.572222222225, vp.VAH)
+	assert.Equal(t, 36617.433333333334, vp.High)
 }
