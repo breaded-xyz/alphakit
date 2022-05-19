@@ -4,10 +4,10 @@ import (
 	"context"
 	"time"
 
-	"github.com/colngroup/zero2algo/internal/util"
-	"github.com/colngroup/zero2algo/market"
-	"github.com/colngroup/zero2algo/ta"
-	"github.com/colngroup/zero2algo/trader"
+	"github.com/thecolngroup/zerotoalgo/internal/util"
+	"github.com/thecolngroup/zerotoalgo/market"
+	"github.com/thecolngroup/zerotoalgo/ta"
+	"github.com/thecolngroup/zerotoalgo/trader"
 	"golang.org/x/exp/slices"
 )
 
