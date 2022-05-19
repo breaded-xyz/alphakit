@@ -5,6 +5,7 @@ import (
 	"sort"
 
 	"github.com/gonum/stat"
+	"golang.org/x/exp/constraints"
 )
 
 func Round2DP(x float64) float64 {
@@ -36,4 +37,9 @@ func NNZ(x, y float64) float64 {
 		return y
 	}
 	return x
+}
+
+// Between returns true if x >= lower and x <= upper.
+func Between[T constraints.Ordered](v, lower, upper T) bool {
+	return v >= lower && v <= upper
 }
