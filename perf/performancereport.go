@@ -6,9 +6,9 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/colngroup/zero2algo/broker"
-	"github.com/colngroup/zero2algo/internal/util"
 	"github.com/olekukonko/tablewriter"
+	"github.com/thecolngroup/zerotoalgo/broker"
+	"github.com/thecolngroup/zerotoalgo/internal/util"
 )
 
 const _friendlyReportTimeFormat = time.RFC822

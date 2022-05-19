@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/colngroup/zero2algo/internal/util"
-	"github.com/colngroup/zero2algo/optimize"
-	"github.com/colngroup/zero2algo/perf"
 	"github.com/olekukonko/tablewriter"
+	"github.com/thecolngroup/zerotoalgo/internal/util"
+	"github.com/thecolngroup/zerotoalgo/optimize"
+	"github.com/thecolngroup/zerotoalgo/perf"
 	"golang.org/x/exp/maps"
 	"golang.org/x/exp/slices"
 )

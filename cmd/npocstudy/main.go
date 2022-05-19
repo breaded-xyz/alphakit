@@ -6,10 +6,10 @@ import (
 	"os"
 	"time"
 
-	"github.com/colngroup/zero2algo/internal/studyrun"
-	"github.com/colngroup/zero2algo/market"
-	"github.com/colngroup/zero2algo/ta"
 	"github.com/gonum/stat"
+	"github.com/thecolngroup/zerotoalgo/internal/studyrun"
+	"github.com/thecolngroup/zerotoalgo/market"
+	"github.com/thecolngroup/zerotoalgo/ta"
 	"golang.org/x/exp/slices"
 )
 
@@ -49,7 +49,7 @@ func main() {
 
 	var err error
 
-	pricePath := "/Users/richklee/Dropbox/dev-share/github.com/colngroup/zero2algo/prices/spot/btcusdt-m1/all"
+	pricePath := "/Users/richklee/Dropbox/dev-share/github.com/thecolngroup/zerotoalgo/prices/spot/btcusdt-m1/all"
 
 	prices, err = studyrun.ReadPriceSeries(pricePath)
 	if err != nil {

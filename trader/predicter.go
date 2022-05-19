@@ -1,6 +1,6 @@
 package trader
 
-import "github.com/colngroup/zero2algo/market"
+import "github.com/thecolngroup/zerotoalgo/market"
 
 // Predicter is used by a bot to indicate price direction.
 // Child packages provide specific prediction implementations.

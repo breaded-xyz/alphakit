@@ -5,12 +5,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/colngroup/zero2algo/broker"
-	"github.com/colngroup/zero2algo/internal/dec"
-	"github.com/colngroup/zero2algo/market"
-	"github.com/colngroup/zero2algo/netapi"
 	"github.com/shopspring/decimal"
 	"github.com/stretchr/testify/assert"
+	"github.com/thecolngroup/zerotoalgo/broker"
+	"github.com/thecolngroup/zerotoalgo/internal/dec"
+	"github.com/thecolngroup/zerotoalgo/market"
+	"github.com/thecolngroup/zerotoalgo/netapi"
 )
 
 func TestBot_executeExitOrder(t *testing.T) {

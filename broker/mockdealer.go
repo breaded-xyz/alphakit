@@ -3,8 +3,8 @@ package broker
 import (
 	"context"
 
-	"github.com/colngroup/zero2algo/netapi"
 	"github.com/stretchr/testify/mock"
+	"github.com/thecolngroup/zerotoalgo/netapi"
 )
 
 var _ Dealer = (*MockDealer)(nil)

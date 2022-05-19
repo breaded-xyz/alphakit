@@ -3,9 +3,9 @@ package money
 import (
 	"math"
 
-	"github.com/colngroup/zero2algo/internal/dec"
-	"github.com/colngroup/zero2algo/internal/util"
 	"github.com/shopspring/decimal"
+	"github.com/thecolngroup/zerotoalgo/internal/dec"
+	"github.com/thecolngroup/zerotoalgo/internal/util"
 )
 
 var _ Sizer = (*SafeFSizer)(nil)

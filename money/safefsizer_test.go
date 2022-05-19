@@ -3,10 +3,10 @@ package money
 import (
 	"testing"
 
-	"github.com/colngroup/zero2algo/internal/dec"
 	"github.com/davecgh/go-spew/spew"
 	"github.com/shopspring/decimal"
 	"github.com/stretchr/testify/assert"
+	"github.com/thecolngroup/zerotoalgo/internal/dec"
 )
 
 func TestSafeFSizer_Size(t *testing.T) {

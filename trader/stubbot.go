@@ -3,8 +3,8 @@ package trader
 import (
 	"context"
 
-	"github.com/colngroup/zero2algo/broker"
-	"github.com/colngroup/zero2algo/market"
+	"github.com/thecolngroup/zerotoalgo/broker"
+	"github.com/thecolngroup/zerotoalgo/market"
 )
 
 var _ Bot = (*StubBot)(nil)

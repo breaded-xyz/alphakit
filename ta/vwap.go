@@ -1,7 +1,7 @@
 package ta
 
 import (
-	"github.com/colngroup/zero2algo/market"
+	"github.com/thecolngroup/zerotoalgo/market"
 )
 
 var _ Indicator[market.Kline] = (*VWAP)(nil)

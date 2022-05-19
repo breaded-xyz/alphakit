@@ -3,8 +3,8 @@ package optimize
 import (
 	"context"
 
-	"github.com/colngroup/zero2algo/market"
-	"github.com/colngroup/zero2algo/perf"
+	"github.com/thecolngroup/zerotoalgo/market"
+	"github.com/thecolngroup/zerotoalgo/perf"
 )
 
 type Phase int

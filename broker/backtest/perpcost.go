@@ -4,9 +4,9 @@ import (
 	"math"
 	"time"
 
-	"github.com/colngroup/zero2algo/broker"
-	"github.com/colngroup/zero2algo/internal/dec"
 	"github.com/shopspring/decimal"
+	"github.com/thecolngroup/zerotoalgo/broker"
+	"github.com/thecolngroup/zerotoalgo/internal/dec"
 )
 
 var _ Coster = (*PerpCost)(nil)

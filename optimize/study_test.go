@@ -3,8 +3,8 @@ package optimize
 import (
 	"testing"
 
-	"github.com/colngroup/zero2algo/perf"
 	"github.com/stretchr/testify/assert"
+	"github.com/thecolngroup/zerotoalgo/perf"
 )
 
 func TestSummarize(t *testing.T) {

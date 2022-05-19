@@ -7,14 +7,14 @@ import (
 	"path"
 	"testing"
 
-	"github.com/colngroup/zero2algo/broker/backtest"
-	"github.com/colngroup/zero2algo/internal/dec"
-	"github.com/colngroup/zero2algo/market"
-	"github.com/colngroup/zero2algo/money"
-	"github.com/colngroup/zero2algo/perf"
-	"github.com/colngroup/zero2algo/risk"
-	"github.com/colngroup/zero2algo/ta"
 	"github.com/stretchr/testify/assert"
+	"github.com/thecolngroup/zerotoalgo/broker/backtest"
+	"github.com/thecolngroup/zerotoalgo/internal/dec"
+	"github.com/thecolngroup/zerotoalgo/market"
+	"github.com/thecolngroup/zerotoalgo/money"
+	"github.com/thecolngroup/zerotoalgo/perf"
+	"github.com/thecolngroup/zerotoalgo/risk"
+	"github.com/thecolngroup/zerotoalgo/ta"
 )
 
 const testdataPath string = "../../internal/testdata/"

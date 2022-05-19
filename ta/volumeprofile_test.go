@@ -6,9 +6,9 @@ import (
 	"path"
 	"testing"
 
-	"github.com/colngroup/zero2algo/market"
 	"github.com/davecgh/go-spew/spew"
 	"github.com/stretchr/testify/assert"
+	"github.com/thecolngroup/zerotoalgo/market"
 	"golang.org/x/exp/slices"
 )
 

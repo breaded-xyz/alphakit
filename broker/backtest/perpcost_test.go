@@ -4,10 +4,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/colngroup/zero2algo/broker"
-	"github.com/colngroup/zero2algo/internal/dec"
 	"github.com/shopspring/decimal"
 	"github.com/stretchr/testify/assert"
+	"github.com/thecolngroup/zerotoalgo/broker"
+	"github.com/thecolngroup/zerotoalgo/internal/dec"
 )
 
 func TestPerpCostFunding(t *testing.T) {

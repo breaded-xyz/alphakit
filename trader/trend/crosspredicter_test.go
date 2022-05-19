@@ -4,11 +4,11 @@ import (
 	"context"
 	"testing"
 
-	"github.com/colngroup/zero2algo/internal/dec"
-	"github.com/colngroup/zero2algo/internal/util"
-	"github.com/colngroup/zero2algo/market"
-	"github.com/colngroup/zero2algo/ta"
 	"github.com/stretchr/testify/assert"
+	"github.com/thecolngroup/zerotoalgo/internal/dec"
+	"github.com/thecolngroup/zerotoalgo/internal/util"
+	"github.com/thecolngroup/zerotoalgo/market"
+	"github.com/thecolngroup/zerotoalgo/ta"
 )
 
 func TestCrossPredicter_ReceivePrice(t *testing.T) {

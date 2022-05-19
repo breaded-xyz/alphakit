@@ -4,11 +4,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/colngroup/zero2algo/broker"
-	"github.com/colngroup/zero2algo/internal/dec"
-	"github.com/colngroup/zero2algo/market"
 	"github.com/shopspring/decimal"
 	"github.com/stretchr/testify/assert"
+	"github.com/thecolngroup/zerotoalgo/broker"
+	"github.com/thecolngroup/zerotoalgo/internal/dec"
+	"github.com/thecolngroup/zerotoalgo/market"
 )
 
 var _fixed time.Time = time.Date(2022, time.January, 1, 0, 0, 0, 0, time.Local)

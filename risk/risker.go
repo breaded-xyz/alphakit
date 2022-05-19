@@ -3,8 +3,8 @@
 package risk
 
 import (
-	"github.com/colngroup/zero2algo/market"
 	"github.com/shopspring/decimal"
+	"github.com/thecolngroup/zerotoalgo/market"
 )
 
 // Risker is an interface that defines the methods needed to evaluate trade risk.

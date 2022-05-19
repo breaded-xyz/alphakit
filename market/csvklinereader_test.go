@@ -6,8 +6,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/colngroup/zero2algo/internal/dec"
 	"github.com/stretchr/testify/assert"
+	"github.com/thecolngroup/zerotoalgo/internal/dec"
 )
 
 func TestCSVKlineReader_Read(t *testing.T) {

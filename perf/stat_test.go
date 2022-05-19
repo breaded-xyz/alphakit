@@ -3,8 +3,8 @@ package perf
 import (
 	"testing"
 
-	"github.com/colngroup/zero2algo/internal/util"
 	"github.com/stretchr/testify/assert"
+	"github.com/thecolngroup/zerotoalgo/internal/util"
 )
 
 func TestCAGR(t *testing.T) {

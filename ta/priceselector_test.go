@@ -3,9 +3,9 @@ package ta
 import (
 	"testing"
 
-	"github.com/colngroup/zero2algo/internal/dec"
-	"github.com/colngroup/zero2algo/market"
 	"github.com/stretchr/testify/assert"
+	"github.com/thecolngroup/zerotoalgo/internal/dec"
+	"github.com/thecolngroup/zerotoalgo/market"
 )
 
 func TestHL2(t *testing.T) {

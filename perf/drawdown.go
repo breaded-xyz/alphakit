@@ -3,9 +3,9 @@ package perf
 import (
 	"time"
 
-	"github.com/colngroup/zero2algo/broker"
-	"github.com/colngroup/zero2algo/internal/dec"
 	"github.com/shopspring/decimal"
+	"github.com/thecolngroup/zerotoalgo/broker"
+	"github.com/thecolngroup/zerotoalgo/internal/dec"
 )
 
 // Drawdown is a pattern in the equity curve and represents a peak to valley and recovery.

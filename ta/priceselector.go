@@ -1,8 +1,8 @@
 package ta
 
 import (
-	"github.com/colngroup/zero2algo/market"
 	"github.com/shopspring/decimal"
+	"github.com/thecolngroup/zerotoalgo/market"
 )
 
 // PriceSelector is a selector that returns a price value for the given kline.

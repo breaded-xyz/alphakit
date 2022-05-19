@@ -3,8 +3,8 @@ package studyrun
 import (
 	"errors"
 
-	"github.com/colngroup/zero2algo/broker"
-	"github.com/colngroup/zero2algo/broker/backtest"
+	"github.com/thecolngroup/zerotoalgo/broker"
+	"github.com/thecolngroup/zerotoalgo/broker/backtest"
 )
 
 func ReadDealerFromConfig(config map[string]any) (broker.MakeSimulatedDealer, error) {

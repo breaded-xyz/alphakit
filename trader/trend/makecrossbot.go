@@ -1,13 +1,13 @@
 package trend
 
 import (
-	"github.com/colngroup/zero2algo/internal/dec"
-	"github.com/colngroup/zero2algo/internal/util"
-	"github.com/colngroup/zero2algo/market"
-	"github.com/colngroup/zero2algo/money"
-	"github.com/colngroup/zero2algo/risk"
-	"github.com/colngroup/zero2algo/ta"
-	"github.com/colngroup/zero2algo/trader"
+	"github.com/thecolngroup/zerotoalgo/internal/dec"
+	"github.com/thecolngroup/zerotoalgo/internal/util"
+	"github.com/thecolngroup/zerotoalgo/market"
+	"github.com/thecolngroup/zerotoalgo/money"
+	"github.com/thecolngroup/zerotoalgo/risk"
+	"github.com/thecolngroup/zerotoalgo/ta"
+	"github.com/thecolngroup/zerotoalgo/trader"
 )
 
 var _ trader.MakeFromConfig = MakeCrossBotFromConfig

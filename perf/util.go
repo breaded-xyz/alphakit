@@ -3,7 +3,7 @@ package perf
 import (
 	"time"
 
-	"github.com/colngroup/zero2algo/broker"
+	"github.com/thecolngroup/zerotoalgo/broker"
 )
 
 const (

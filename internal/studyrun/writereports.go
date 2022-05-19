@@ -7,8 +7,8 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/colngroup/zero2algo/optimize"
 	"github.com/jszwec/csvutil"
+	"github.com/thecolngroup/zerotoalgo/optimize"
 )
 
 const _filenameFriendlyTimeFormat = "20060102T150405"

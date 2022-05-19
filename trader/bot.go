@@ -7,8 +7,8 @@ import (
 	"context"
 	"errors"
 
-	"github.com/colngroup/zero2algo/broker"
-	"github.com/colngroup/zero2algo/market"
+	"github.com/thecolngroup/zerotoalgo/broker"
+	"github.com/thecolngroup/zerotoalgo/market"
 )
 
 // Bot is the primary interface for a trading algo.

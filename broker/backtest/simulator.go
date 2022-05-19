@@ -4,10 +4,10 @@ import (
 	"errors"
 	"time"
 
-	"github.com/colngroup/zero2algo/broker"
-	"github.com/colngroup/zero2algo/internal/dec"
-	"github.com/colngroup/zero2algo/market"
 	"github.com/shopspring/decimal"
+	"github.com/thecolngroup/zerotoalgo/broker"
+	"github.com/thecolngroup/zerotoalgo/internal/dec"
+	"github.com/thecolngroup/zerotoalgo/market"
 	"golang.org/x/exp/maps"
 )
 

@@ -3,9 +3,9 @@ package perf
 import (
 	"math"
 
-	"github.com/colngroup/zero2algo/broker"
-	"github.com/colngroup/zero2algo/internal/util"
 	"github.com/gonum/floats"
+	"github.com/thecolngroup/zerotoalgo/broker"
+	"github.com/thecolngroup/zerotoalgo/internal/util"
 )
 
 type TradeReport struct {

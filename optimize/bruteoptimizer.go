@@ -6,11 +6,11 @@ import (
 	"math"
 	"runtime"
 
-	"github.com/colngroup/zero2algo/broker"
-	"github.com/colngroup/zero2algo/market"
-	"github.com/colngroup/zero2algo/perf"
-	"github.com/colngroup/zero2algo/trader"
 	"github.com/gammazero/workerpool"
+	"github.com/thecolngroup/zerotoalgo/broker"
+	"github.com/thecolngroup/zerotoalgo/market"
+	"github.com/thecolngroup/zerotoalgo/perf"
+	"github.com/thecolngroup/zerotoalgo/trader"
 	"golang.org/x/exp/maps"
 	"golang.org/x/exp/slices"
 )

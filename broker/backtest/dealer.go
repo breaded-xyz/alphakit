@@ -3,10 +3,10 @@ package backtest
 import (
 	"context"
 
-	"github.com/colngroup/zero2algo/broker"
-	"github.com/colngroup/zero2algo/market"
-	"github.com/colngroup/zero2algo/netapi"
 	"github.com/shopspring/decimal"
+	"github.com/thecolngroup/zerotoalgo/broker"
+	"github.com/thecolngroup/zerotoalgo/market"
+	"github.com/thecolngroup/zerotoalgo/netapi"
 )
 
 // Enforce at compile time that the type implements the interface

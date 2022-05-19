@@ -3,8 +3,8 @@ package hodl
 import (
 	"testing"
 
-	"github.com/colngroup/zero2algo/trader"
 	"github.com/stretchr/testify/assert"
+	"github.com/thecolngroup/zerotoalgo/trader"
 )
 
 func TestMakeBotFromConfig(t *testing.T) {

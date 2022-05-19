@@ -4,10 +4,10 @@ package hodl
 import (
 	"context"
 
-	"github.com/colngroup/zero2algo/broker"
-	"github.com/colngroup/zero2algo/internal/dec"
-	"github.com/colngroup/zero2algo/market"
-	"github.com/colngroup/zero2algo/trader"
+	"github.com/thecolngroup/zerotoalgo/broker"
+	"github.com/thecolngroup/zerotoalgo/internal/dec"
+	"github.com/thecolngroup/zerotoalgo/market"
+	"github.com/thecolngroup/zerotoalgo/trader"
 )
 
 var _ trader.Bot = (*Bot)(nil)

@@ -1,9 +1,9 @@
 package money
 
 import (
-	"github.com/colngroup/zero2algo/internal/dec"
-	"github.com/colngroup/zero2algo/internal/util"
 	"github.com/shopspring/decimal"
+	"github.com/thecolngroup/zerotoalgo/internal/dec"
+	"github.com/thecolngroup/zerotoalgo/internal/util"
 )
 
 var _defaultStepSize = 0.01

@@ -3,8 +3,8 @@ package risk
 import (
 	"context"
 
-	"github.com/colngroup/zero2algo/market"
 	"github.com/shopspring/decimal"
+	"github.com/thecolngroup/zerotoalgo/market"
 )
 
 // FullRisker assumes that the current price is the maximum downside risk.

@@ -1,6 +1,6 @@
 package ta
 
-import "github.com/colngroup/zero2algo/internal/util"
+import "github.com/thecolngroup/zerotoalgo/internal/util"
 
 var _ Indicator[float64] = (*MMI)(nil)
 

@@ -1,4 +1,4 @@
-module github.com/colngroup/zero2algo
+module github.com/thecolngroup/zerotoalgo
 
 go 1.18
 
@@ -15,7 +15,7 @@ require (
 	github.com/shopspring/decimal v1.3.1
 	github.com/spf13/viper v1.11.0
 	github.com/stretchr/testify v1.7.1
-	golang.org/x/exp v0.0.0-20220428152302-39d4317da171
+	golang.org/x/exp v0.0.0-20220518171630-0b5c67f07fdf
 )
 
 require (

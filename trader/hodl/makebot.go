@@ -1,8 +1,8 @@
 package hodl
 
 import (
-	"github.com/colngroup/zero2algo/internal/util"
-	"github.com/colngroup/zero2algo/trader"
+	"github.com/thecolngroup/zerotoalgo/internal/util"
+	"github.com/thecolngroup/zerotoalgo/trader"
 )
 
 // MakeBotFromConfig builds a valid Bot from a given set of config params.

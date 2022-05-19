@@ -3,8 +3,8 @@ package perf
 import (
 	"time"
 
-	"github.com/colngroup/zero2algo/broker"
-	"github.com/colngroup/zero2algo/internal/util"
+	"github.com/thecolngroup/zerotoalgo/broker"
+	"github.com/thecolngroup/zerotoalgo/internal/util"
 )
 
 type PortfolioReport struct {

@@ -7,7 +7,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/colngroup/zero2algo/market"
+	"github.com/thecolngroup/zerotoalgo/market"
 )
 
 func ReadPricesFromConfig(config map[string]any) ([][]market.Kline, error) {

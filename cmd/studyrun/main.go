@@ -7,8 +7,8 @@ import (
 	"os"
 	"strings"
 
-	"github.com/colngroup/zero2algo/internal/studyrun"
 	"github.com/schollz/progressbar/v3"
+	"github.com/thecolngroup/zerotoalgo/internal/studyrun"
 	"golang.org/x/exp/maps"
 )
 
