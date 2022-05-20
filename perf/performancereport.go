@@ -7,8 +7,8 @@ import (
 	"time"
 
 	"github.com/olekukonko/tablewriter"
-	"github.com/thecolngroup/zerotoalgo/broker"
-	"github.com/thecolngroup/zerotoalgo/internal/util"
+	"github.com/thecolngroup/alphakit/broker"
+	"github.com/thecolngroup/alphakit/internal/util"
 )
 
 const _friendlyReportTimeFormat = time.RFC822

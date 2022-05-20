@@ -4,9 +4,9 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/thecolngroup/zerotoalgo/internal/util"
-	"github.com/thecolngroup/zerotoalgo/optimize"
-	"github.com/thecolngroup/zerotoalgo/trader"
+	"github.com/thecolngroup/alphakit/internal/util"
+	"github.com/thecolngroup/alphakit/optimize"
+	"github.com/thecolngroup/alphakit/trader"
 )
 
 func ReadBruteOptimizerFromConfig(config map[string]any) (*optimize.BruteOptimizer, error) {

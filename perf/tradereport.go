@@ -4,8 +4,8 @@ import (
 	"math"
 
 	"github.com/gonum/floats"
-	"github.com/thecolngroup/zerotoalgo/broker"
-	"github.com/thecolngroup/zerotoalgo/internal/util"
+	"github.com/thecolngroup/alphakit/broker"
+	"github.com/thecolngroup/alphakit/internal/util"
 )
 
 type TradeReport struct {

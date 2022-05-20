@@ -7,9 +7,9 @@ import (
 	"time"
 
 	"github.com/gonum/stat"
-	"github.com/thecolngroup/zerotoalgo/internal/studyrun"
-	"github.com/thecolngroup/zerotoalgo/market"
-	"github.com/thecolngroup/zerotoalgo/ta"
+	"github.com/thecolngroup/alphakit/internal/studyrun"
+	"github.com/thecolngroup/alphakit/market"
+	"github.com/thecolngroup/alphakit/ta"
 	"golang.org/x/exp/slices"
 )
 
@@ -50,7 +50,7 @@ func main() {
 
 	var err error
 
-	pricePath := "/Users/richklee/Dropbox/dev-share/github.com/thecolngroup/zerotoalgo/prices/spot/btcusdt-m1/all"
+	pricePath := "/Users/richklee/Dropbox/dev-share/github.com/thecolngroup/alphakit/prices/spot/btcusdt-m1/all"
 
 	sample, err := studyrun.ReadPriceSeries(pricePath)
 	if err != nil {

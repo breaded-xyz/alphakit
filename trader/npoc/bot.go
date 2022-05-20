@@ -4,13 +4,13 @@ package npoc
 import (
 	"context"
 
-	"github.com/thecolngroup/zerotoalgo/broker"
-	"github.com/thecolngroup/zerotoalgo/internal/dec"
-	"github.com/thecolngroup/zerotoalgo/market"
-	"github.com/thecolngroup/zerotoalgo/money"
-	"github.com/thecolngroup/zerotoalgo/risk"
-	"github.com/thecolngroup/zerotoalgo/trader"
 	"github.com/shopspring/decimal"
+	"github.com/thecolngroup/alphakit/broker"
+	"github.com/thecolngroup/alphakit/internal/dec"
+	"github.com/thecolngroup/alphakit/market"
+	"github.com/thecolngroup/alphakit/money"
+	"github.com/thecolngroup/alphakit/risk"
+	"github.com/thecolngroup/alphakit/trader"
 )
 
 var _ trader.Bot = (*Bot)(nil)

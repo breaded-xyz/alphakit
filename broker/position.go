@@ -4,7 +4,7 @@ import (
 	"time"
 
 	"github.com/shopspring/decimal"
-	"github.com/thecolngroup/zerotoalgo/market"
+	"github.com/thecolngroup/alphakit/market"
 )
 
 type PositionState int

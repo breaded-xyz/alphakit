@@ -1,8 +1,8 @@
 package backtest
 
 import (
-	"github.com/thecolngroup/zerotoalgo/broker"
-	"github.com/thecolngroup/zerotoalgo/internal/dec"
+	"github.com/thecolngroup/alphakit/broker"
+	"github.com/thecolngroup/alphakit/internal/dec"
 )
 
 func MakeDealerFromConfig(config map[string]any) (broker.SimulatedDealer, error) {

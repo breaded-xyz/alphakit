@@ -1,4 +1,4 @@
-module github.com/thecolngroup/zerotoalgo
+module github.com/thecolngroup/alphakit
 
 go 1.18
 

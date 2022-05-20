@@ -4,16 +4,16 @@ import (
 	"context"
 
 	"github.com/shopspring/decimal"
-	"github.com/thecolngroup/zerotoalgo/market"
-	"github.com/thecolngroup/zerotoalgo/netapi"
+	"github.com/thecolngroup/alphakit/market"
+	"github.com/thecolngroup/alphakit/web"
 )
 
 type Dealer interface {
-	GetBalance(context.Context) (*AccountBalance, *netapi.Response, error)
-	PlaceOrder(context.Context, Order) (*Order, *netapi.Response, error)
-	CancelOrders(context.Context) (*netapi.Response, error)
-	ListPositions(context.Context, *netapi.ListOpts) ([]Position, *netapi.Response, error)
-	ListTrades(context.Context, *netapi.ListOpts) ([]Trade, *netapi.Response, error)
+	GetBalance(context.Context) (*AccountBalance, *web.Response, error)
+	PlaceOrder(context.Context, Order) (*Order, *web.Response, error)
+	CancelOrders(context.Context) (*web.Response, error)
+	ListPositions(context.Context, *web.ListOpts) ([]Position, *web.Response, error)
+	ListTrades(context.Context, *web.ListOpts) ([]Trade, *web.Response, error)
 }
 
 type SimulatedDealer interface {

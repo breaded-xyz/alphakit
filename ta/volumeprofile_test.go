@@ -8,7 +8,7 @@ import (
 
 	"github.com/davecgh/go-spew/spew"
 	"github.com/stretchr/testify/assert"
-	"github.com/thecolngroup/zerotoalgo/market"
+	"github.com/thecolngroup/alphakit/market"
 	"golang.org/x/exp/slices"
 )
 

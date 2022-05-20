@@ -8,7 +8,7 @@ import (
 	"strings"
 
 	"github.com/schollz/progressbar/v3"
-	"github.com/thecolngroup/zerotoalgo/internal/studyrun"
+	"github.com/thecolngroup/alphakit/internal/studyrun"
 	"golang.org/x/exp/maps"
 )
 

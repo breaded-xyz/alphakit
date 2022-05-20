@@ -5,10 +5,10 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/thecolngroup/zerotoalgo/internal/dec"
-	"github.com/thecolngroup/zerotoalgo/internal/util"
-	"github.com/thecolngroup/zerotoalgo/market"
-	"github.com/thecolngroup/zerotoalgo/ta"
+	"github.com/thecolngroup/alphakit/internal/dec"
+	"github.com/thecolngroup/alphakit/internal/util"
+	"github.com/thecolngroup/alphakit/market"
+	"github.com/thecolngroup/alphakit/ta"
 )
 
 func TestCrossPredicter_ReceivePrice(t *testing.T) {

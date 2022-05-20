@@ -4,8 +4,8 @@ import (
 	"context"
 
 	"github.com/shopspring/decimal"
-	"github.com/thecolngroup/zerotoalgo/market"
-	"github.com/thecolngroup/zerotoalgo/netapi"
+	"github.com/thecolngroup/alphakit/market"
+	"github.com/thecolngroup/alphakit/web"
 )
 
 var _ SimulatedDealer = (*StubDealer)(nil)
@@ -21,23 +21,23 @@ func (d *StubDealer) Configure(map[string]any) error { return nil }
 
 func (d *StubDealer) SetInitialCapital(amount decimal.Decimal) {}
 
-func (d *StubDealer) GetBalance(ctx context.Context) (*AccountBalance, *netapi.Response, error) {
+func (d *StubDealer) GetBalance(ctx context.Context) (*AccountBalance, *web.Response, error) {
 	return nil, nil, nil
 }
 
-func (d *StubDealer) PlaceOrder(ctx context.Context, order Order) (*Order, *netapi.Response, error) {
+func (d *StubDealer) PlaceOrder(ctx context.Context, order Order) (*Order, *web.Response, error) {
 	return nil, nil, nil
 }
 
-func (d *StubDealer) CancelOrders(ctx context.Context) (*netapi.Response, error) {
+func (d *StubDealer) CancelOrders(ctx context.Context) (*web.Response, error) {
 	return nil, nil
 }
 
-func (d *StubDealer) ListPositions(ctx context.Context, opts *netapi.ListOpts) ([]Position, *netapi.Response, error) {
+func (d *StubDealer) ListPositions(ctx context.Context, opts *web.ListOpts) ([]Position, *web.Response, error) {
 	return nil, nil, nil
 }
 
-func (d *StubDealer) ListTrades(ctx context.Context, opts *netapi.ListOpts) ([]Trade, *netapi.Response, error) {
+func (d *StubDealer) ListTrades(ctx context.Context, opts *web.ListOpts) ([]Trade, *web.Response, error) {
 	return nil, nil, nil
 }
 

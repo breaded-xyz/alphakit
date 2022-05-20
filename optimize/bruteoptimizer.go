@@ -7,10 +7,10 @@ import (
 	"runtime"
 
 	"github.com/gammazero/workerpool"
-	"github.com/thecolngroup/zerotoalgo/broker"
-	"github.com/thecolngroup/zerotoalgo/market"
-	"github.com/thecolngroup/zerotoalgo/perf"
-	"github.com/thecolngroup/zerotoalgo/trader"
+	"github.com/thecolngroup/alphakit/broker"
+	"github.com/thecolngroup/alphakit/market"
+	"github.com/thecolngroup/alphakit/perf"
+	"github.com/thecolngroup/alphakit/trader"
 	"golang.org/x/exp/maps"
 	"golang.org/x/exp/slices"
 )

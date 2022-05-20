@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/thecolngroup/zerotoalgo/trader"
+	"github.com/thecolngroup/alphakit/trader"
 )
 
 func TestMakeBotFromConfig(t *testing.T) {

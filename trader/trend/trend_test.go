@@ -8,13 +8,13 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/thecolngroup/zerotoalgo/broker/backtest"
-	"github.com/thecolngroup/zerotoalgo/internal/dec"
-	"github.com/thecolngroup/zerotoalgo/market"
-	"github.com/thecolngroup/zerotoalgo/money"
-	"github.com/thecolngroup/zerotoalgo/perf"
-	"github.com/thecolngroup/zerotoalgo/risk"
-	"github.com/thecolngroup/zerotoalgo/ta"
+	"github.com/thecolngroup/alphakit/broker/backtest"
+	"github.com/thecolngroup/alphakit/internal/dec"
+	"github.com/thecolngroup/alphakit/market"
+	"github.com/thecolngroup/alphakit/money"
+	"github.com/thecolngroup/alphakit/perf"
+	"github.com/thecolngroup/alphakit/risk"
+	"github.com/thecolngroup/alphakit/ta"
 )
 
 const testdataPath string = "../../internal/testdata/"

@@ -5,8 +5,8 @@ import (
 	"time"
 
 	"github.com/shopspring/decimal"
-	"github.com/thecolngroup/zerotoalgo/broker"
-	"github.com/thecolngroup/zerotoalgo/internal/dec"
+	"github.com/thecolngroup/alphakit/broker"
+	"github.com/thecolngroup/alphakit/internal/dec"
 )
 
 var _ Coster = (*PerpCost)(nil)

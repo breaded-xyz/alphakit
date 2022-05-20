@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/shopspring/decimal"
-	"github.com/thecolngroup/zerotoalgo/market"
+	"github.com/thecolngroup/alphakit/market"
 )
 
 // FullRisker assumes that the current price is the maximum downside risk.

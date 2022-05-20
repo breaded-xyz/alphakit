@@ -1,9 +1,9 @@
 package optimize
 
 import (
-	"github.com/thecolngroup/zerotoalgo/internal/util"
-	"github.com/thecolngroup/zerotoalgo/market"
-	"github.com/thecolngroup/zerotoalgo/perf"
+	"github.com/thecolngroup/alphakit/internal/util"
+	"github.com/thecolngroup/alphakit/market"
+	"github.com/thecolngroup/alphakit/perf"
 )
 
 // Study is an optimization experiment, prepared and executed by an Optimizer.

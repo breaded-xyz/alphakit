@@ -1,9 +1,9 @@
 package studyrun
 
 import (
-	"github.com/thecolngroup/zerotoalgo/trader"
-	"github.com/thecolngroup/zerotoalgo/trader/hodl"
-	"github.com/thecolngroup/zerotoalgo/trader/trend"
+	"github.com/thecolngroup/alphakit/trader"
+	"github.com/thecolngroup/alphakit/trader/hodl"
+	"github.com/thecolngroup/alphakit/trader/trend"
 )
 
 var _typeRegistry = map[string]any{

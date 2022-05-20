@@ -2,7 +2,7 @@ package ta
 
 import (
 	"github.com/shopspring/decimal"
-	"github.com/thecolngroup/zerotoalgo/market"
+	"github.com/thecolngroup/alphakit/market"
 )
 
 // PriceSelector is a selector that returns a price value for the given kline.

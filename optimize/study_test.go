@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/thecolngroup/zerotoalgo/perf"
+	"github.com/thecolngroup/alphakit/perf"
 )
 
 func TestSummarize(t *testing.T) {

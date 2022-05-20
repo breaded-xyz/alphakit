@@ -3,9 +3,9 @@ package trend
 import (
 	"context"
 
-	"github.com/thecolngroup/zerotoalgo/market"
-	"github.com/thecolngroup/zerotoalgo/ta"
-	"github.com/thecolngroup/zerotoalgo/trader"
+	"github.com/thecolngroup/alphakit/market"
+	"github.com/thecolngroup/alphakit/ta"
+	"github.com/thecolngroup/alphakit/trader"
 )
 
 var _ trader.Predicter = (*CrossPredicter)(nil)

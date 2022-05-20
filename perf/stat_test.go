@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/thecolngroup/zerotoalgo/internal/util"
+	"github.com/thecolngroup/alphakit/internal/util"
 )
 
 func TestCAGR(t *testing.T) {

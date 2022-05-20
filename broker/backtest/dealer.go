@@ -4,9 +4,9 @@ import (
 	"context"
 
 	"github.com/shopspring/decimal"
-	"github.com/thecolngroup/zerotoalgo/broker"
-	"github.com/thecolngroup/zerotoalgo/market"
-	"github.com/thecolngroup/zerotoalgo/netapi"
+	"github.com/thecolngroup/alphakit/broker"
+	"github.com/thecolngroup/alphakit/market"
+	"github.com/thecolngroup/alphakit/web"
 )
 
 // Enforce at compile time that the type implements the interface
@@ -32,26 +32,26 @@ func (d *Dealer) SetInitialCapital(amount decimal.Decimal) {
 	d.simulator.SetInitialCapital(amount)
 }
 
-func (d *Dealer) GetBalance(ctx context.Context) (*broker.AccountBalance, *netapi.Response, error) {
+func (d *Dealer) GetBalance(ctx context.Context) (*broker.AccountBalance, *web.Response, error) {
 	acc := d.simulator.Balance()
 	return &acc, nil, nil
 }
 
-func (d *Dealer) PlaceOrder(ctx context.Context, order broker.Order) (*broker.Order, *netapi.Response, error) {
+func (d *Dealer) PlaceOrder(ctx context.Context, order broker.Order) (*broker.Order, *web.Response, error) {
 	order, err := d.simulator.AddOrder(order)
 	return &order, nil, err
 }
 
-func (d *Dealer) CancelOrders(ctx context.Context) (*netapi.Response, error) {
+func (d *Dealer) CancelOrders(ctx context.Context) (*web.Response, error) {
 	d.simulator.CancelOrders()
 	return nil, nil
 }
 
-func (d *Dealer) ListPositions(ctx context.Context, opts *netapi.ListOpts) ([]broker.Position, *netapi.Response, error) {
+func (d *Dealer) ListPositions(ctx context.Context, opts *web.ListOpts) ([]broker.Position, *web.Response, error) {
 	return d.simulator.Positions(), nil, nil
 }
 
-func (d *Dealer) ListTrades(ctx context.Context, opts *netapi.ListOpts) ([]broker.Trade, *netapi.Response, error) {
+func (d *Dealer) ListTrades(ctx context.Context, opts *web.ListOpts) ([]broker.Trade, *web.Response, error) {
 	return d.simulator.Trades(), nil, nil
 }
 

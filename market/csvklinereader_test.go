@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/thecolngroup/zerotoalgo/internal/dec"
+	"github.com/thecolngroup/alphakit/internal/dec"
 )
 
 func TestCSVKlineReader_Read(t *testing.T) {

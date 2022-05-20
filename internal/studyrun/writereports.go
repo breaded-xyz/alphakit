@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/jszwec/csvutil"
-	"github.com/thecolngroup/zerotoalgo/optimize"
+	"github.com/thecolngroup/alphakit/optimize"
 )
 
 const _filenameFriendlyTimeFormat = "20060102T150405"

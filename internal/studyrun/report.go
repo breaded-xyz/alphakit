@@ -5,9 +5,9 @@ import (
 	"os"
 
 	"github.com/olekukonko/tablewriter"
-	"github.com/thecolngroup/zerotoalgo/internal/util"
-	"github.com/thecolngroup/zerotoalgo/optimize"
-	"github.com/thecolngroup/zerotoalgo/perf"
+	"github.com/thecolngroup/alphakit/internal/util"
+	"github.com/thecolngroup/alphakit/optimize"
+	"github.com/thecolngroup/alphakit/perf"
 	"golang.org/x/exp/maps"
 	"golang.org/x/exp/slices"
 )

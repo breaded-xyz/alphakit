@@ -4,9 +4,9 @@ import (
 	"context"
 
 	"github.com/shopspring/decimal"
-	"github.com/thecolngroup/zerotoalgo/internal/dec"
-	"github.com/thecolngroup/zerotoalgo/market"
-	"github.com/thecolngroup/zerotoalgo/ta"
+	"github.com/thecolngroup/alphakit/internal/dec"
+	"github.com/thecolngroup/alphakit/market"
+	"github.com/thecolngroup/alphakit/ta"
 )
 
 var _ Risker = (*SDRisker)(nil)

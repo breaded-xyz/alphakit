@@ -7,10 +7,10 @@ import (
 
 	"github.com/shopspring/decimal"
 	"github.com/stretchr/testify/assert"
-	"github.com/thecolngroup/zerotoalgo/broker"
-	"github.com/thecolngroup/zerotoalgo/internal/dec"
-	"github.com/thecolngroup/zerotoalgo/market"
-	"github.com/thecolngroup/zerotoalgo/netapi"
+	"github.com/thecolngroup/alphakit/broker"
+	"github.com/thecolngroup/alphakit/internal/dec"
+	"github.com/thecolngroup/alphakit/market"
+	"github.com/thecolngroup/alphakit/web"
 )
 
 func TestBot_executeExitOrder(t *testing.T) {
@@ -37,8 +37,8 @@ func TestBot_executeExitOrder(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			var dealer broker.MockDealer
-			dealer.On("CancelOrders", context.Background()).Return((*netapi.Response)(nil), nil)
-			dealer.On("PlaceOrder", context.Background(), tt.want).Return(&tt.want, (*netapi.Response)(nil), nil)
+			dealer.On("CancelOrders", context.Background()).Return((*web.Response)(nil), nil)
+			dealer.On("PlaceOrder", context.Background(), tt.want).Return(&tt.want, (*web.Response)(nil), nil)
 			bot := Bot{dealer: &dealer}
 			act, err := bot.executeExitOrder(context.Background(), tt.giveSide, tt.giveSize)
 			assert.NoError(t, err)
@@ -117,9 +117,9 @@ func TestBot_executeEnterOrder(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			var dealer broker.MockDealer
-			dealer.On("CancelOrders", context.Background()).Return((*netapi.Response)(nil), nil)
-			dealer.On("PlaceOrder", context.Background(), tt.want.Enter).Return(&tt.want.Enter, (*netapi.Response)(nil), nil).Once()
-			dealer.On("PlaceOrder", context.Background(), tt.want.Stop).Return(&tt.want.Stop, (*netapi.Response)(nil), nil).Maybe()
+			dealer.On("CancelOrders", context.Background()).Return((*web.Response)(nil), nil)
+			dealer.On("PlaceOrder", context.Background(), tt.want.Enter).Return(&tt.want.Enter, (*web.Response)(nil), nil).Once()
+			dealer.On("PlaceOrder", context.Background(), tt.want.Stop).Return(&tt.want.Stop, (*web.Response)(nil), nil).Maybe()
 			bot := Bot{dealer: &dealer}
 			act, err := bot.executeEnterOrder(context.Background(), tt.giveSide, tt.givePrice, tt.giveSize, tt.giveRisk)
 			assert.NoError(t, err)
@@ -280,7 +280,7 @@ func TestBot_getOpenPosition(t *testing.T) {
 		{ID: "3", OpenedAt: fixed, ClosedAt: time.Now(), Side: broker.Buy},
 	}
 	var dealer broker.MockDealer
-	dealer.On("ListPositions", context.Background(), (*netapi.ListOpts)(nil)).Return(givePositions, (*netapi.Response)(nil), nil)
+	dealer.On("ListPositions", context.Background(), (*web.ListOpts)(nil)).Return(givePositions, (*web.Response)(nil), nil)
 
 	giveSide := broker.Sell
 	want := broker.Position{ID: "2", OpenedAt: fixed, Side: broker.Sell}
