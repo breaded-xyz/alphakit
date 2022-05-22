@@ -4,6 +4,10 @@ import (
 	"github.com/gonum/floats"
 )
 
+// OptimalF is a function that returns the 'OptimalF' for a series of trade returns as defined by Ralph Vince.
+// It is a method for sizing positions to maximize geometric return.
+// See: https://www.investopedia.com/terms/o/optimalf.asp
+// Param trades is the series of absolute returns (profits) for the algo.
 func OptimalF(trades []float64) float64 {
 
 	maxLoss := floats.Min(trades)

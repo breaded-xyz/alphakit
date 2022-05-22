@@ -25,6 +25,9 @@ var _summaryReportHeader = []string{
 	"calmar",
 }
 
+// PerformanceReport is a report on the performance of a trading algo.
+// It contains a TradeReport and a PortfolioReport, with metrics related to the discrete trades
+// and the portfolio equity curve respectively.
 type PerformanceReport struct {
 	ID         string           `csv:"id"`
 	Trade      *TradeReport     `csv:",inline"`
