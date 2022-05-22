@@ -19,7 +19,7 @@ func main() {
 }
 
 func run(args []string) error {
-	print(_titleArtMoney)
+	print(_titleArt)
 
 	print("\n ----- Build Info -----\n")
 	print("App: studyrun\n")
