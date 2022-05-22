@@ -1,4 +1,4 @@
-// Package web provides commons for interacting with web services such as those in the broker package.
+// Package web provides commons for interacting with 3rd party web services such as those in the broker package.
 package web
 
 import (

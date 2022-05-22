@@ -7,7 +7,7 @@ import "github.com/thecolngroup/alphakit/market"
 type Predicter interface {
 	market.Receiver
 
-	// Predict gives a score between -1 (short) and +1 (long) that a
+	// Predict gives a confidence score between -1 (short) and +1 (long) that a
 	// bot uses to generate buy and sell signals.
 	Predict() float64
 
