@@ -27,6 +27,6 @@ func TestKellyCriterion(t *testing.T) {
 func TestSharpeRatio(t *testing.T) {
 	give := []float64{0.1, 0.2, -0.15, 0.1, 0.8, -0.3, 0.2}
 	exp := 6.20
-	act := SharpeRatio(give, SharpeAnnualRiskFreeRate)
+	act := SharpeRatio(give, SharpeDefaultAnnualRiskFreeRate)
 	assert.Equal(t, exp, util.Round2DP(act))
 }

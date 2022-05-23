@@ -26,8 +26,11 @@ var _summaryReportHeader = []string{
 }
 
 // PerformanceReport is a report on the performance of a trading algo.
-// It contains a TradeReport and a PortfolioReport, with metrics related to the discrete trades
-// and the portfolio equity curve respectively.
+// It contains a TradeReport and a PortfolioReport.
+//
+// - TradeReport reports metrics related to the discrete trades (aka roundrtrip / roundturn).
+//
+//-  PorfolioReport reports metrics related to the portfolio equity curve.
 type PerformanceReport struct {
 	ID         string           `csv:"id"`
 	Trade      *TradeReport     `csv:",inline"`
@@ -35,6 +38,7 @@ type PerformanceReport struct {
 	Properties map[string]any   `csv:"properties"`
 }
 
+// NewPerformanceReport creates a new PerformanceReport.
 func NewPerformanceReport(trades []broker.Trade, equity broker.EquitySeries) PerformanceReport {
 	return PerformanceReport{
 		ID:         string(util.NewID()),
@@ -44,6 +48,7 @@ func NewPerformanceReport(trades []broker.Trade, equity broker.EquitySeries) Per
 	}
 }
 
+// PrintSummary prints a summary of the performance report to stdout.
 func PrintSummary(r PerformanceReport) {
 	if r.Trade == nil || r.Portfolio == nil {
 		println("No trades and/or equity data")

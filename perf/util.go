@@ -6,12 +6,6 @@ import (
 	"github.com/thecolngroup/alphakit/broker"
 )
 
-const (
-	SharpeAnnualRiskFreeRate  = 0.0
-	SharpeDailyToAnnualFactor = 252
-	SharpeDailyRiskFreeRate   = SharpeAnnualRiskFreeRate / SharpeDailyToAnnualFactor
-)
-
 func DiffReturns(curve broker.EquitySeries) []float64 {
 	diffs := make([]float64, len(curve)-1)
 	vs := curve.SortValuesByTime()

@@ -8,7 +8,7 @@ import (
 	"github.com/thecolngroup/alphakit/internal/dec"
 )
 
-// Drawdown is a pattern in the equity curve and represents a peak to valley and recovery.
+// Drawdown is a feature of the equity curve representing a peak to valley bottom and recovery to prior peak.
 type Drawdown struct {
 	HighAt  time.Time
 	LowAt   time.Time

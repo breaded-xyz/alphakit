@@ -5,9 +5,9 @@ import (
 )
 
 // OptimalF is a function that returns the 'OptimalF' for a series of trade returns as defined by Ralph Vince.
-// It is a method for sizing positions to maximize geometric return.
+// It is a method for sizing positions to maximize geometric return whilst accounting for biggest trading loss.
 // See: https://www.investopedia.com/terms/o/optimalf.asp
-// Param trades is the series of absolute returns (profits) for the algo.
+// Param trades is the series of profits (-ve amount for losses) for each trade
 func OptimalF(trades []float64) float64 {
 
 	maxLoss := floats.Min(trades)
