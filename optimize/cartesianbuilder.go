@@ -6,6 +6,7 @@ import (
 	"github.com/schwarmco/go-cartesian-product"
 )
 
+// CartesianProduct is a map of named params returned by CartesianBuilder.
 type CartesianProduct map[string]any
 
 type keyValuePair struct {
@@ -13,6 +14,8 @@ type keyValuePair struct {
 	v any
 }
 
+// CartesianBuilder is a utility to build a cartesian product of named params.
+// Used by the BruteOptimizer to find all param combinations.
 func CartesianBuilder(in map[string]any) []CartesianProduct {
 	products := make([]CartesianProduct, 0)
 

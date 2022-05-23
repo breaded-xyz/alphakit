@@ -50,6 +50,8 @@ type bruteOptimizerJob struct {
 	MakeDealer     broker.MakeSimulatedDealer
 }
 
+// NewBruteOptimizer creates a new BruteOptimizer instance.
+// Call Prepare before Start to set up the study.
 func NewBruteOptimizer() BruteOptimizer {
 	return BruteOptimizer{
 		SampleSplitPct: 0,
@@ -60,6 +62,8 @@ func NewBruteOptimizer() BruteOptimizer {
 	}
 }
 
+// Prepare prepares a study based on the given param ranges and price data samples.
+// Returned is the estimated number of trials to be performed.
 func (o *BruteOptimizer) Prepare(in ParamMap, samples [][]market.Kline) (int, error) {
 
 	products := CartesianBuilder(in)
@@ -81,9 +85,10 @@ func (o *BruteOptimizer) Prepare(in ParamMap, samples [][]market.Kline) (int, er
 	return steps, nil
 }
 
-func (o *BruteOptimizer) Start(ctx context.Context) (<-chan OptimizerStep, error) {
+// Start starts the prepared optimization process and returns with a channel to monitor the progress.
+func (o *BruteOptimizer) Start(ctx context.Context) (<-chan OptimizerTrial, error) {
 
-	outCh := make(chan OptimizerStep)
+	outCh := make(chan OptimizerTrial)
 
 	// Helper to append results to each phase
 	appendResult := func(phase Phase, results map[ParamSetID]Report, pset ParamSet, backtest perf.PerformanceReport) {
@@ -148,6 +153,7 @@ func (o *BruteOptimizer) Start(ctx context.Context) (<-chan OptimizerStep, error
 	return outCh, nil
 }
 
+// Study returns the current study. Call after the optimizer has finished to read the results.
 func (o *BruteOptimizer) Study() Study {
 	return o.study
 }
@@ -174,9 +180,9 @@ func (o *BruteOptimizer) enqueueJobs(pSets []ParamSet, samples [][]market.Kline)
 	return jobCh
 }
 
-func processBruteJobs(ctx context.Context, doneCh <-chan struct{}, jobCh <-chan bruteOptimizerJob, maxWorkers int) <-chan OptimizerStep {
+func processBruteJobs(ctx context.Context, doneCh <-chan struct{}, jobCh <-chan bruteOptimizerJob, maxWorkers int) <-chan OptimizerTrial {
 
-	outCh := make(chan OptimizerStep)
+	outCh := make(chan OptimizerTrial)
 
 	go func() {
 		defer close(outCh)
@@ -188,7 +194,7 @@ func processBruteJobs(ctx context.Context, doneCh <-chan struct{}, jobCh <-chan 
 		for next {
 			select {
 			case <-ctx.Done():
-				outCh <- OptimizerStep{Err: ctx.Err()}
+				outCh <- OptimizerTrial{Err: ctx.Err()}
 				next = false
 			case <-doneCh:
 				next = false
@@ -203,21 +209,21 @@ func processBruteJobs(ctx context.Context, doneCh <-chan struct{}, jobCh <-chan 
 						//defer wg.Done()
 						dealer, err := job.MakeDealer()
 						if err != nil {
-							outCh <- OptimizerStep{PSet: job.ParamSet, Err: err}
+							outCh <- OptimizerTrial{PSet: job.ParamSet, Err: err}
 							return
 						}
 						bot, err := job.MakeBot(job.ParamSet.Params)
 						if err != nil {
-							outCh <- OptimizerStep{PSet: job.ParamSet, Err: err}
+							outCh <- OptimizerTrial{PSet: job.ParamSet, Err: err}
 							return
 						}
 						bot.SetDealer(dealer)
 						if err := bot.Warmup(ctx, job.Sample[:job.WarmupBarCount]); err != nil {
-							outCh <- OptimizerStep{PSet: job.ParamSet, Err: err}
+							outCh <- OptimizerTrial{PSet: job.ParamSet, Err: err}
 							return
 						}
 						perf, err := runBacktest(ctx, bot, dealer, job.Sample[job.WarmupBarCount:])
-						outCh <- OptimizerStep{PSet: job.ParamSet, Result: perf, Err: err}
+						outCh <- OptimizerTrial{PSet: job.ParamSet, Result: perf, Err: err}
 					})
 			}
 		}

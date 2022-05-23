@@ -35,6 +35,8 @@ type Study struct {
 	ValidationResults map[ParamSetID]Report
 }
 
+// NewStudy returns a new study.
+// Use an Optimizer implementation to prepare and execute the study.
 func NewStudy() Study {
 	return Study{
 		ID:                string(util.NewID()),
@@ -43,19 +45,19 @@ func NewStudy() Study {
 	}
 }
 
+// ParamSet is a set of algo parameters to trial.
 type ParamSet struct {
 	ID     ParamSetID
 	Params ParamMap
 }
 
+// ParamSetID is a unique identifier for a ParamSet.
 type ParamSetID string
 
+// ParamMap is a map of algo parameters.
 type ParamMap map[string]any
 
-//func (pm ParamMap) MarshalCSV() ([]byte, error) {
-//	return []byte(fmt.Sprint(pm)), nil
-//}
-
+// NewParamSet returns a new param set with initialized ID
 func NewParamSet() ParamSet {
 	return ParamSet{
 		ID:     ParamSetID(util.NewID()),
@@ -63,6 +65,8 @@ func NewParamSet() ParamSet {
 	}
 }
 
+// Report is the aggregated performance of a ParamSet across one or more price samples (trials)
+// The summary method is owned by the Optimizer implementation, but will typically be the mean (avg) of the individual trials.
 type Report struct {
 	ID      string   `csv:"id"`
 	Phase   Phase    `csv:"phase"`
@@ -84,12 +88,14 @@ type Report struct {
 	Backtests []perf.PerformanceReport `csv:"-"`
 }
 
+// NewReport returns a new empty report with an initialized ID.
 func NewReport() Report {
 	return Report{
 		ID: string(util.NewID()),
 	}
 }
 
+// Summarize inspects the individual backtests in the report and updates the summary fields.
 func Summarize(report Report) Report {
 
 	for i := range report.Backtests {
