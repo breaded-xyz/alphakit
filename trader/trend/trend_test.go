@@ -17,7 +17,7 @@ import (
 	"github.com/thecolngroup/alphakit/ta"
 )
 
-const testdataPath string = "../../internal/testdata/"
+const testdataPath string = "testdata"
 
 func TestBotWithCrossPredicter(t *testing.T) {
 	dealer := backtest.NewDealer()
