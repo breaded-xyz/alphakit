@@ -1,3 +1,5 @@
+// Package perf provides performance metrics for a trading algo,
+// using a record of trades and the equity curve from a Dealer in package broker.
 package perf
 
 import (
