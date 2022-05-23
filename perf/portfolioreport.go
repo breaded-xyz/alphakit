@@ -4,7 +4,7 @@ import (
 	"time"
 
 	"github.com/thecolngroup/alphakit/broker"
-	"github.com/thecolngroup/alphakit/internal/util"
+	"github.com/thecolngroup/util"
 )
 
 // PortfolioReport is report on the portfolio metrics.

@@ -6,8 +6,8 @@ import (
 
 	"github.com/shopspring/decimal"
 	"github.com/thecolngroup/alphakit/broker"
-	"github.com/thecolngroup/alphakit/internal/dec"
 	"github.com/thecolngroup/alphakit/market"
+	"github.com/thecolngroup/dec"
 	"golang.org/x/exp/maps"
 )
 

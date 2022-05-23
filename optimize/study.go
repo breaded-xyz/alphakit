@@ -1,9 +1,9 @@
 package optimize
 
 import (
-	"github.com/thecolngroup/alphakit/internal/util"
 	"github.com/thecolngroup/alphakit/market"
 	"github.com/thecolngroup/alphakit/perf"
+	"github.com/thecolngroup/util"
 )
 
 // Study is an optimization experiment, prepared and executed by an Optimizer.

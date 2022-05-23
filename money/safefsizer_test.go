@@ -6,7 +6,7 @@ import (
 	"github.com/davecgh/go-spew/spew"
 	"github.com/shopspring/decimal"
 	"github.com/stretchr/testify/assert"
-	"github.com/thecolngroup/alphakit/internal/dec"
+	"github.com/thecolngroup/dec"
 )
 
 func TestSafeFSizer_Size(t *testing.T) {

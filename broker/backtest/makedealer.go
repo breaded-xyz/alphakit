@@ -2,7 +2,7 @@ package backtest
 
 import (
 	"github.com/thecolngroup/alphakit/broker"
-	"github.com/thecolngroup/alphakit/internal/dec"
+	"github.com/thecolngroup/dec"
 )
 
 func MakeDealerFromConfig(config map[string]any) (broker.SimulatedDealer, error) {

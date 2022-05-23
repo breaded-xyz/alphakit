@@ -10,7 +10,7 @@ import (
 
 	"github.com/olekukonko/tablewriter"
 	"github.com/thecolngroup/alphakit/broker"
-	"github.com/thecolngroup/alphakit/internal/util"
+	"github.com/thecolngroup/util"
 )
 
 const _friendlyReportTimeFormat = time.RFC822

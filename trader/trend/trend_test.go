@@ -9,12 +9,12 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/thecolngroup/alphakit/broker/backtest"
-	"github.com/thecolngroup/alphakit/internal/dec"
 	"github.com/thecolngroup/alphakit/market"
 	"github.com/thecolngroup/alphakit/money"
 	"github.com/thecolngroup/alphakit/perf"
 	"github.com/thecolngroup/alphakit/risk"
 	"github.com/thecolngroup/alphakit/ta"
+	"github.com/thecolngroup/dec"
 )
 
 const testdataPath string = "testdata"

@@ -5,7 +5,7 @@ import (
 
 	"github.com/gonum/floats"
 	"github.com/thecolngroup/alphakit/broker"
-	"github.com/thecolngroup/alphakit/internal/util"
+	"github.com/thecolngroup/util"
 )
 
 // TradeReport is a report on the trade metrics.

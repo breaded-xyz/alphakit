@@ -4,8 +4,8 @@ import (
 	"math"
 
 	"github.com/shopspring/decimal"
-	"github.com/thecolngroup/alphakit/internal/dec"
-	"github.com/thecolngroup/alphakit/internal/util"
+	"github.com/thecolngroup/dec"
+	"github.com/thecolngroup/util"
 )
 
 var _ Sizer = (*SafeFSizer)(nil)

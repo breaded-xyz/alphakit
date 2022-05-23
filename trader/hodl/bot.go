@@ -5,9 +5,9 @@ import (
 	"context"
 
 	"github.com/thecolngroup/alphakit/broker"
-	"github.com/thecolngroup/alphakit/internal/dec"
 	"github.com/thecolngroup/alphakit/market"
 	"github.com/thecolngroup/alphakit/trader"
+	"github.com/thecolngroup/dec"
 )
 
 var _ trader.Bot = (*Bot)(nil)

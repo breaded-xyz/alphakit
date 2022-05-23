@@ -6,7 +6,7 @@ import (
 
 	"github.com/shopspring/decimal"
 	"github.com/thecolngroup/alphakit/broker"
-	"github.com/thecolngroup/alphakit/internal/dec"
+	"github.com/thecolngroup/dec"
 )
 
 var _ Coster = (*PerpCost)(nil)

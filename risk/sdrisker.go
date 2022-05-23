@@ -4,9 +4,9 @@ import (
 	"context"
 
 	"github.com/shopspring/decimal"
-	"github.com/thecolngroup/alphakit/internal/dec"
 	"github.com/thecolngroup/alphakit/market"
 	"github.com/thecolngroup/alphakit/ta"
+	"github.com/thecolngroup/dec"
 )
 
 var _ Risker = (*SDRisker)(nil)

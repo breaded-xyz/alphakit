@@ -7,7 +7,7 @@ import (
 	"github.com/shopspring/decimal"
 	"github.com/stretchr/testify/assert"
 	"github.com/thecolngroup/alphakit/broker"
-	"github.com/thecolngroup/alphakit/internal/dec"
+	"github.com/thecolngroup/dec"
 )
 
 func TestPerpCostFunding(t *testing.T) {

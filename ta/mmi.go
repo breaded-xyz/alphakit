@@ -1,7 +1,5 @@
 package ta
 
-import "github.com/thecolngroup/alphakit/internal/util"
-
 var _ Indicator[float64] = (*MMI)(nil)
 
 // MMI (Market Meaness Index) is a statistical measure between 0 - 100
@@ -40,7 +38,7 @@ func (ind *MMI) Update(v ...float64) error {
 	for i := range v {
 		ind.sample = WindowAppend(ind.sample, ind.Length-1, v[i])
 
-		m := util.Median(ind.sample)
+		m := Median(ind.sample)
 		var nh, nl float64
 		for i := 1; i < len(ind.sample); i++ {
 			p1, p0 := Lookback(ind.sample, i), Lookback(ind.sample, i-1)

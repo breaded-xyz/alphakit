@@ -7,8 +7,8 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/thecolngroup/alphakit/broker"
-	"github.com/thecolngroup/alphakit/internal/dec"
 	"github.com/thecolngroup/alphakit/market"
+	"github.com/thecolngroup/dec"
 )
 
 func TestLongTradeWithCosts(t *testing.T) {

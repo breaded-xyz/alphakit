@@ -1,13 +1,13 @@
 package trend
 
 import (
-	"github.com/thecolngroup/alphakit/internal/dec"
-	"github.com/thecolngroup/alphakit/internal/util"
 	"github.com/thecolngroup/alphakit/market"
 	"github.com/thecolngroup/alphakit/money"
 	"github.com/thecolngroup/alphakit/risk"
 	"github.com/thecolngroup/alphakit/ta"
 	"github.com/thecolngroup/alphakit/trader"
+	"github.com/thecolngroup/dec"
+	"github.com/thecolngroup/util"
 )
 
 var _ trader.MakeFromConfig = MakeCrossBotFromConfig

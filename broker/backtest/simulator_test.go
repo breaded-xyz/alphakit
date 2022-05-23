@@ -7,8 +7,8 @@ import (
 	"github.com/shopspring/decimal"
 	"github.com/stretchr/testify/assert"
 	"github.com/thecolngroup/alphakit/broker"
-	"github.com/thecolngroup/alphakit/internal/dec"
 	"github.com/thecolngroup/alphakit/market"
+	"github.com/thecolngroup/dec"
 )
 
 var _fixed time.Time = time.Date(2022, time.January, 1, 0, 0, 0, 0, time.Local)

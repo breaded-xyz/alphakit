@@ -1,8 +1,8 @@
 package hodl
 
 import (
-	"github.com/thecolngroup/alphakit/internal/util"
 	"github.com/thecolngroup/alphakit/trader"
+	"github.com/thecolngroup/util"
 )
 
 // MakeBotFromConfig builds a valid Bot from a given set of config params.
