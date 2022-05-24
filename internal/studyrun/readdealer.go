@@ -1,3 +1,4 @@
+// Package studyrun is internal and not part of exported API.
 package studyrun
 
 import (

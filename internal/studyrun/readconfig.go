@@ -13,8 +13,11 @@ func ReadConfig(filename string) (map[string]any, error) {
 	if err != nil {
 		return nil, err
 	}
+	//nolint:errcheck
 	defer file.Close()
 	viper.SetConfigType(_configFormat)
-	viper.ReadConfig(file)
+	if err := viper.ReadConfig(file); err != nil {
+		return nil, err
+	}
 	return viper.AllSettings(), nil
 }

@@ -53,7 +53,8 @@ func SaveStructToCSV(filename string, data interface{}) error {
 	if err != nil {
 		return err
 	}
-	defer f.Close()
+	// nolint:errcheck // Explicit err check via sync at end of function
+	f.Close()
 
 	// Wrap file in CSV struct encoder
 	w := csv.NewWriter(f)
@@ -80,7 +81,15 @@ func SaveStructToCSV(filename string, data interface{}) error {
 	if err != nil {
 		return err
 	}
+
+	// Flush and check for errors
 	w.Flush()
+	if w.Error() != nil {
+		return w.Error()
+	}
+	if err := f.Sync(); err != nil {
+		return err
+	}
 
 	return nil
 }
