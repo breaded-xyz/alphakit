@@ -74,6 +74,7 @@ func TestBruteOptimizer_Start(t *testing.T) {
 					"1": {PRR: 2, Subject: ParamSet{ID: "1", Params: map[string]any{"A": 1, "B": 10}}},
 					"2": {PRR: 4, Subject: ParamSet{ID: "2", Params: map[string]any{"A": 2, "B": 10}}},
 				},
+				ValidationResults: make(map[ParamSetID]Report),
 			},
 			wantStudy: Study{
 				Training: []ParamSet{
@@ -86,6 +87,9 @@ func TestBruteOptimizer_Start(t *testing.T) {
 				},
 				Validation: []ParamSet{
 					{ID: "2", Params: map[string]any{"A": 2, "B": 10}},
+				},
+				ValidationResults: map[ParamSetID]Report{
+					"2": {PRR: 4, Subject: ParamSet{ID: "2", Params: map[string]any{"A": 2, "B": 10}}},
 				},
 			},
 		},
