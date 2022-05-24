@@ -52,6 +52,6 @@ func TestSortedMapKeys(t *testing.T) {
 		1: "1",
 	}
 	want := []string{"0", "1", "2"}
-	act := SortedMapValues(m)
+	act := SortMapValues(m)
 	assert.Equal(t, want, act)
 }
