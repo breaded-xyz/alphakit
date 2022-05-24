@@ -1,3 +1,5 @@
+// Package broker provides an API for interacting with 3rd party exchanges,
+// and a simulated dealer for backtesting in the child package backtest.
 package broker
 
 import (
@@ -8,6 +10,7 @@ import (
 	"github.com/thecolngroup/alphakit/web"
 )
 
+// Dealer is an interface for interacting with a 3rd party exchange and placing orders in the market.
 type Dealer interface {
 	GetBalance(context.Context) (*AccountBalance, *web.Response, error)
 	PlaceOrder(context.Context, Order) (*Order, *web.Response, error)
@@ -16,6 +19,7 @@ type Dealer interface {
 	ListTrades(context.Context, *web.ListOpts) ([]Trade, *web.Response, error)
 }
 
+// SimulatedDealer is a Dealer that can be used for backtesting.
 type SimulatedDealer interface {
 	Dealer
 	market.Receiver
@@ -23,4 +27,5 @@ type SimulatedDealer interface {
 	SetInitialCapital(amount decimal.Decimal)
 }
 
+// MakeSimulatedDealer returns a new SimulatedDealer
 type MakeSimulatedDealer func() (SimulatedDealer, error)
