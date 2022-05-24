@@ -7,6 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/thecolngroup/alphakit/broker"
 	"github.com/thecolngroup/alphakit/market"
+	"github.com/thecolngroup/alphakit/perf"
 	"github.com/thecolngroup/alphakit/trader"
 	"github.com/thecolngroup/dec"
 )
@@ -89,7 +90,7 @@ func TestBruteOptimizer_Start(t *testing.T) {
 					{ID: "2", Params: map[string]any{"A": 2, "B": 10}},
 				},
 				ValidationResults: map[ParamSetID]Report{
-					"2": {PRR: 4, Subject: ParamSet{ID: "2", Params: map[string]any{"A": 2, "B": 10}}},
+					"2": {},
 				},
 			},
 		},
@@ -159,6 +160,7 @@ func TestProcessBruteJobs(t *testing.T) {
 
 	var act []OptimizerTrial
 	for step := range outChan {
+		step.Result = perf.PerformanceReport{} // Set to empty for test equality
 		act = append(act, step)
 	}
 

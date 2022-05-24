@@ -188,7 +188,6 @@ func processBruteJobs(ctx context.Context, doneCh <-chan struct{}, jobCh <-chan 
 		defer close(outCh)
 
 		wp := workerpool.New(maxWorkers)
-		//var wg sync.WaitGroup
 		next := true
 
 		for next {
@@ -203,10 +202,8 @@ func processBruteJobs(ctx context.Context, doneCh <-chan struct{}, jobCh <-chan 
 					next = false
 					break
 				}
-				//wg.Add(1)
 				wp.Submit(
 					func() {
-						//defer wg.Done()
 						dealer, err := job.MakeDealer()
 						if err != nil {
 							outCh <- OptimizerTrial{PSet: job.ParamSet, Err: err}
@@ -227,7 +224,6 @@ func processBruteJobs(ctx context.Context, doneCh <-chan struct{}, jobCh <-chan 
 					})
 			}
 		}
-		//wg.
 		wp.StopWait()
 	}()
 

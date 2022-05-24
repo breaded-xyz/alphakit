@@ -98,6 +98,10 @@ func NewReport() Report {
 // Summarize inspects the individual backtests in the report and updates the summary fields.
 func Summarize(report Report) Report {
 
+	if len(report.Backtests) == 0 {
+		return report
+	}
+
 	for i := range report.Backtests {
 		backtest := report.Backtests[i]
 
