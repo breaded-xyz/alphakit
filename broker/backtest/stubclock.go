@@ -19,7 +19,7 @@ func (c *StubClock) Start(start time.Time, tock time.Duration) {
 	// Intentionally empty
 }
 
-// NextEpoch not implemented.
+// Advance not implemented.
 func (c *StubClock) Advance(epoch time.Time) {
 	// Intentionally empty
 }
@@ -29,7 +29,7 @@ func (c *StubClock) Now() time.Time {
 	return c.Fixed
 }
 
-// Now returns Fixed.
+// Peek returns Fixed.
 func (c *StubClock) Peek() time.Time {
 	return c.Fixed
 }

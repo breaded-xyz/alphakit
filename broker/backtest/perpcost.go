@@ -9,9 +9,10 @@ import (
 	"github.com/thecolngroup/dec"
 )
 
-var _ Coster = (*PerpCost)(nil)
+var _ Coster = (*PerpCoster)(nil)
 
-type PerpCost struct {
+// PerpCoster implements the Coster interface for Perpetual Future style assets.
+type PerpCoster struct {
 	SpreadPct      decimal.Decimal
 	SlippagePct    decimal.Decimal
 	TransactionPct decimal.Decimal
@@ -20,23 +21,30 @@ type PerpCost struct {
 	lastFundingHour float64
 }
 
-func NewPerpCost() *PerpCost {
-	return &PerpCost{}
+// NewPerpCoster creates a new PerpCoster.
+func NewPerpCoster() *PerpCoster {
+	return &PerpCoster{}
 }
 
-func (c *PerpCost) Slippage(price decimal.Decimal) decimal.Decimal {
+// Slippage returns the cost of slippage incurred by an order.
+// Slippage is a fraction of the order price.
+func (c *PerpCoster) Slippage(price decimal.Decimal) decimal.Decimal {
 	return price.Mul(c.SlippagePct)
 }
 
-func (c *PerpCost) Spread(price decimal.Decimal) decimal.Decimal {
+// Spread returns the cost of the spread incurred by an order.
+// Spread is a fraction of the order price.
+func (c *PerpCoster) Spread(price decimal.Decimal) decimal.Decimal {
 	return price.Mul(c.SpreadPct)
 }
 
-func (c *PerpCost) Transaction(order broker.Order) decimal.Decimal {
+// Transaction returns the cost of a transaction, calculated as a fraction of the order price and size.
+func (c *PerpCoster) Transaction(order broker.Order) decimal.Decimal {
 	return order.FilledPrice.Mul(order.FilledSize).Mul(c.TransactionPct)
 }
 
-func (c *PerpCost) Funding(position broker.Position, price decimal.Decimal, elapsed time.Duration) decimal.Decimal {
+// Funding returns the funding fee for a position, calculated on an hourly basis.
+func (c *PerpCoster) Funding(position broker.Position, price decimal.Decimal, elapsed time.Duration) decimal.Decimal {
 
 	if position.State() != broker.OrderOpen {
 		return decimal.Zero

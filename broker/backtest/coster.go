@@ -7,6 +7,7 @@ import (
 	"github.com/thecolngroup/alphakit/broker"
 )
 
+// Coster is a cost model used by a dealer to apply trading charges and fees.
 type Coster interface {
 	Slippage(price decimal.Decimal) decimal.Decimal
 	Spread(price decimal.Decimal) decimal.Decimal

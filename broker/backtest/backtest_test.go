@@ -21,7 +21,7 @@ func TestLongTradeWithCosts(t *testing.T) {
 		{Start: start.Add(4 * time.Hour), O: dec.New(10), H: dec.New(20), L: dec.New(3), C: dec.New(5)},
 	}
 
-	cost := &PerpCost{
+	cost := &PerpCoster{
 		SpreadPct:      dec.New(0.01),
 		SlippagePct:    dec.New(0.01),
 		TransactionPct: dec.New(0.1),
@@ -30,7 +30,7 @@ func TestLongTradeWithCosts(t *testing.T) {
 	dealer := NewDealerWithCost(cost)
 
 	for i, price := range prices {
-		dealer.ReceivePrice(context.Background(), price)
+		assert.NoError(t, dealer.ReceivePrice(context.Background(), price))
 		switch i {
 		case 1:
 			_, _, err := dealer.PlaceOrder(context.Background(), broker.Order{
@@ -66,7 +66,7 @@ func TestShortTradeWithStop(t *testing.T) {
 
 	dealer := NewDealer()
 	for i, price := range prices {
-		dealer.ReceivePrice(context.Background(), price)
+		assert.NoError(t, dealer.ReceivePrice(context.Background(), price))
 		switch i {
 		case 1:
 			_, _, err := dealer.PlaceOrder(context.Background(), broker.Order{

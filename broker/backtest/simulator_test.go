@@ -323,7 +323,7 @@ func TestSimulator_ReceivePrice(t *testing.T) {
 		L:     dec.New(5),
 		C:     dec.New(10)}
 
-	sim.Next(price)
+	assert.NoError(t, sim.Next(price))
 
 	t.Run("all open orders are closed", func(t *testing.T) {
 		for _, v := range sim.orders {

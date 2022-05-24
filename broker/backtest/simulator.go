@@ -13,9 +13,20 @@ import (
 
 const _defaultTockInterval = time.Millisecond
 
+// ErrInvalidOrderState is returned when an order is not in a valid state for the simulator to open it.
 var ErrInvalidOrderState = errors.New("order is not valid for processing")
+
+// ErrRejectedOrder is returned when an order is rejected during processing due to an exceptional condition.
 var ErrRejectedOrder = errors.New("order rejected during processing")
 
+// Simulator is a backtest simulator that simulates the execution of orders against a market.
+// Only a single position can be opened at a time, and must be closed in full before another can be opened.
+// Partial fills are not supported.
+// Account balance can go negative and trading will continue.
+// Inspect the equity curve to understand equity change over time and the capital requirements for the algo.
+// To advance the simulation call Next() with the next market price.
+// Market and Limit orders are supported. Market orders execute immediately with the last available close price.
+// To place a stop loss or take profit style order use a limit order with 'ReduceOnly' set to true.
 type Simulator struct {
 	clock       Clocker
 	balance     broker.AccountBalance
@@ -29,10 +40,12 @@ type Simulator struct {
 	equity    broker.EquitySeries
 }
 
+// NewSimulator create a new backtest simulator with zero cost model.
 func NewSimulator() *Simulator {
-	return NewSimulatorWithCost(NewPerpCost())
+	return NewSimulatorWithCost(NewPerpCoster())
 }
 
+// NewSimulatorWithCost creates a new backtest simulator with the given cost model.
 func NewSimulatorWithCost(cost Coster) *Simulator {
 	return &Simulator{
 		balance: broker.AccountBalance{},
@@ -42,10 +55,12 @@ func NewSimulatorWithCost(cost Coster) *Simulator {
 	}
 }
 
+// SetInitialCapital sets the initial trade balance.
 func (s *Simulator) SetInitialCapital(amount decimal.Decimal) {
 	s.balance.Trade = amount
 }
 
+// AddOrder adds an order to the simulator and returns the processed order or an error.
 func (s *Simulator) AddOrder(order broker.Order) (broker.Order, error) {
 	var empty broker.Order
 	if order.Side == 0 || order.Type == 0 || order.State() != broker.OrderPending || !order.Size.IsPositive() {
@@ -61,6 +76,7 @@ func (s *Simulator) AddOrder(order broker.Order) (broker.Order, error) {
 	return order, nil
 }
 
+// Next advances the simulation by one kline.
 func (s *Simulator) Next(price market.Kline) error {
 
 	// Init simulation clock the first time a price is received
@@ -97,6 +113,7 @@ func (s *Simulator) Next(price market.Kline) error {
 	return nil
 }
 
+// CancelOrders cancels all open orders and returns the cancelled orders.
 func (s *Simulator) CancelOrders() []broker.Order {
 	cancelled := make([]broker.Order, 0, len(s.orders))
 	for i := range s.orders {
@@ -110,30 +127,35 @@ func (s *Simulator) CancelOrders() []broker.Order {
 	return cancelled
 }
 
+// Orders returns a copy of all historical and open orders.
 func (s *Simulator) Orders() []broker.Order {
 	copied := make([]broker.Order, len(s.orders))
 	copy(copied, s.orders)
 	return s.orders
 }
 
+// Positions returns a copy of all historical and open positions.
 func (s *Simulator) Positions() []broker.Position {
 	copied := make([]broker.Position, len(s.positions))
 	copy(copied, s.positions)
 	return copied
 }
 
+// Trades returns a copy of all historical trades.
 func (s *Simulator) Trades() []broker.Trade {
 	copied := make([]broker.Trade, len(s.trades))
 	copy(copied, s.trades)
 	return copied
 }
 
+// EquityHistory returns a copy of the equity curve.
 func (s *Simulator) EquityHistory() broker.EquitySeries {
 	copied := make(broker.EquitySeries, len(s.equity))
 	maps.Copy(copied, s.equity)
 	return copied
 }
 
+// Balance returns the current account balance.
 func (s *Simulator) Balance() broker.AccountBalance {
 	return s.balance
 }

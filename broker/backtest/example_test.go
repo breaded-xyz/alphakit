@@ -13,6 +13,7 @@ import (
 	"github.com/thecolngroup/dec"
 )
 
+//nolint
 func Example() {
 	// Verbose error handling ommitted for brevity
 

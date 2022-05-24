@@ -13,7 +13,7 @@ import (
 func TestPerpCostFunding(t *testing.T) {
 	// Test evaluates how state mutates over time in response to elapsed duration input
 	// Same PerpCost instance is used in all sub tests
-	cost := PerpCost{
+	cost := PerpCoster{
 		FundingHourPct: dec.New(0.1),
 	}
 	givePosition := broker.Position{
@@ -62,7 +62,7 @@ func TestPerpCostFunding(t *testing.T) {
 }
 
 func TestPerpCostSlippage(t *testing.T) {
-	cost := PerpCost{
+	cost := PerpCoster{
 		SlippagePct: dec.New(0.1),
 	}
 	exp := dec.New(1)
@@ -71,7 +71,7 @@ func TestPerpCostSlippage(t *testing.T) {
 }
 
 func TestPerpCostSpread(t *testing.T) {
-	cost := PerpCost{
+	cost := PerpCoster{
 		SpreadPct: dec.New(0.2),
 	}
 	exp := dec.New(2)
@@ -80,7 +80,7 @@ func TestPerpCostSpread(t *testing.T) {
 }
 
 func TestPerpCostTransaction(t *testing.T) {
-	cost := PerpCost{
+	cost := PerpCoster{
 		TransactionPct: dec.New(0.5),
 	}
 	order := broker.Order{
