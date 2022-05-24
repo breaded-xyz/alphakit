@@ -222,6 +222,8 @@ github.com/subosito/gotenv v1.3.0 h1:mjC+YW8QpAdXibNi+vNWgzmgBH4+5l5dCXv8cNysBLI
 github.com/subosito/gotenv v1.3.0/go.mod h1:YzJjq/33h7nrwdY+iHMhEOEEbW0ovIz0tB6t6PwAXzs=
 github.com/thecolngroup/dec v0.0.0-20220523185153-1a64204cf578 h1:ZIn173U8PVYWKTEUm1cUWOaJdrOofGW92hszwUpWbvY=
 github.com/thecolngroup/dec v0.0.0-20220523185153-1a64204cf578/go.mod h1:esq+P1OvkRZYmhAmX2e9+dAKIouiAJb3CzMEsg2CoOQ=
+github.com/thecolngroup/dec v0.0.1 h1:fxZAEYwR7OWAIP8JFL+x8tV4qmCby5mWuP3wZZg6PsM=
+github.com/thecolngroup/dec v0.0.1/go.mod h1:esq+P1OvkRZYmhAmX2e9+dAKIouiAJb3CzMEsg2CoOQ=
 github.com/thecolngroup/util v0.0.0-20220523184422-c073590ffa25 h1:FN6PLBvhBshG/fMK9af69CCTzzHRmt6k/9dkgHpFocI=
 github.com/thecolngroup/util v0.0.0-20220523184422-c073590ffa25/go.mod h1:GySrP22xEhoCwYffmRzSghbPNgV2dCfYc1kzCca1dVg=
 github.com/thecolngroup/util v0.0.0-20220524085043-4667f4c0760b h1:1bT5KhQJw/x03NEaL4/run1AN28jGr7BsCUQT2O09Ys=
