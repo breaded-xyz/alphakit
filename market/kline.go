@@ -1,3 +1,4 @@
+// Package market provides an API to read and process market price data
 package market
 
 import (
@@ -6,6 +7,7 @@ import (
 	"github.com/shopspring/decimal"
 )
 
+// Kline represents a single candlestick.
 type Kline struct {
 	Start  time.Time
 	O      decimal.Decimal
