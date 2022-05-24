@@ -10,6 +10,7 @@ import (
 
 var _ Sizer = (*SafeFSizer)(nil)
 
+// SafeFSizer is a Sizer that uses a fixed fraction method (e.g. Kelly / OptimalF) with a safety margin.
 type SafeFSizer struct {
 	InitialCapital decimal.Decimal
 	F              float64
@@ -17,15 +18,21 @@ type SafeFSizer struct {
 	StepSize       float64
 }
 
+// NewSafeFSizer returns a new SafeFSizer with the given initial capital, fixed fraction, scale factor, and step size.
 func NewSafeFSizer(initialCapital decimal.Decimal, f, scaleF float64) *SafeFSizer {
 	return &SafeFSizer{
 		InitialCapital: initialCapital,
 		F:              f,
 		ScaleF:         scaleF,
-		StepSize:       _defaultStepSize,
+		StepSize:       DefaultStepSize,
 	}
 }
 
+// Size moderates a fixed fraction position size by:
+//
+// - scaling f using the ScaleF fraction (typically 0.5)
+//
+// - only using the square root of the profits as trading capital.
 func (s *SafeFSizer) Size(price, capital, risk decimal.Decimal) decimal.Decimal {
 
 	sqrtGrowthFactor := 1.0
