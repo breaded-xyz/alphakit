@@ -18,7 +18,7 @@ func ReadPricesFromConfig(config map[string]any) ([][]market.Kline, error) {
 	var prices [][]market.Kline
 	for _, v := range paths {
 		path := v.(string)
-		series, err := market.CSVKlineReadAllDir(path)
+		series, err := market.ReadKlinesFromCSV(path)
 		if err != nil {
 			return nil, err
 		}

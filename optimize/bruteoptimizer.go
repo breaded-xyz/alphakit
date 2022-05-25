@@ -8,6 +8,7 @@ import (
 
 	"github.com/gammazero/workerpool"
 	"github.com/thecolngroup/alphakit/broker"
+	"github.com/thecolngroup/alphakit/broker/backtest"
 	"github.com/thecolngroup/alphakit/market"
 	"github.com/thecolngroup/alphakit/perf"
 	"github.com/thecolngroup/alphakit/trader"
@@ -50,12 +51,13 @@ type bruteOptimizerJob struct {
 	MakeDealer     broker.MakeSimulatedDealer
 }
 
-// NewBruteOptimizer creates a new BruteOptimizer instance.
+// NewBruteOptimizer creates a new BruteOptimizer instance with sensible defaults.
 // Call Prepare before Start to set up the study.
 func NewBruteOptimizer() BruteOptimizer {
 	return BruteOptimizer{
 		SampleSplitPct: 0,
 		WarmupBarCount: 0,
+		MakeDealer:     func() (broker.SimulatedDealer, error) { return backtest.NewDealer(), nil },
 		Ranker:         SharpeRanker,
 		MaxWorkers:     runtime.NumCPU(),
 		study:          NewStudy(),

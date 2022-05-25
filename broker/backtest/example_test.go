@@ -25,7 +25,7 @@ func Example() {
 	asset := market.NewAsset("BTCUSD")
 
 	// Read a .csv file of historical prices (aka candlestick data)
-	file, _ := os.Open("prices.csv")
+	file, _ := os.Open("testdata/BTCUSDT-1h-2021-Q1.csv")
 	defer file.Close()
 	reader := market.NewCSVKlineReader(csv.NewReader(file))
 
@@ -52,5 +52,7 @@ func Example() {
 	trades, _, _ := dealer.ListTrades(context.Background(), nil)
 	equity := dealer.EquityHistory()
 	report := perf.NewPerformanceReport(trades, equity)
+
+	// Output: Your backtest return is 2974.54%
 	fmt.Printf("Your backtest return is %.2f%%", report.Portfolio.EquityReturn*100)
 }

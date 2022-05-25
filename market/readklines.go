@@ -7,8 +7,9 @@ import (
 	"path/filepath"
 )
 
-// CSVKlineReadAllDir reads all the .csv files in a given directory into a slice of Klines.
-func CSVKlineReadAllDir(path string) ([]Kline, error) {
+// ReadKlinesFromCSV reads all the .csv files in a given directory or a single file into a slice of Klines.
+// Wraps a CSVKlineReader for convenience. For finer grained memory management use the base kline reader.
+func ReadKlinesFromCSV(path string) ([]Kline, error) {
 	var prices []Kline
 
 	err := filepath.WalkDir(path, func(path string, d fs.DirEntry, err error) error {
