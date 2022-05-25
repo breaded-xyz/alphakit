@@ -11,42 +11,43 @@ import (
 
 const _filenameFriendlyTimeFormat = "20060102T150405"
 
+// WriteStudy writes a study to CSV.
 func WriteStudy(path string, study optimize.Study) error {
 
 	summaries, backtests := PrepareStudyForCSV(study)
 
-	if err := WriteSummaryReports(path, summaries); err != nil {
+	if err := writeSummaryReports(path, summaries); err != nil {
 		return err
 	}
 
-	if err := WriteBacktestReports(path, backtests); err != nil {
+	if err := writeBacktestReports(path, backtests); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func WriteSummaryReports(path string, reports []SummaryReport) error {
+func writeSummaryReports(path string, reports []SummaryReport) error {
 	prefix := time.Now().UTC().Format(_filenameFriendlyTimeFormat)
 	out := filepath.Join(path, fmt.Sprintf("%s-summaryreports.csv", prefix))
-	if err := SaveDataToCSV(out, reports); err != nil {
+	if err := saveDataToCSV(out, reports); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func WriteBacktestReports(path string, reports []BacktestReport) error {
+func writeBacktestReports(path string, reports []BacktestReport) error {
 	prefix := time.Now().UTC().Format(_filenameFriendlyTimeFormat)
 	out := filepath.Join(path, fmt.Sprintf("%s-backtestreports.csv", prefix))
-	if err := SaveDataToCSV(out, reports); err != nil {
+	if err := saveDataToCSV(out, reports); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func SaveDataToCSV(filename string, data interface{}) error {
+func saveDataToCSV(filename string, data interface{}) error {
 
 	encMap := func(m map[string]any) ([]byte, error) {
 		return []byte(fmt.Sprint(m)), nil

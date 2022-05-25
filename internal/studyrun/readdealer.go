@@ -8,8 +8,8 @@ import (
 	"github.com/thecolngroup/alphakit/broker/backtest"
 )
 
+// ReadDealerFromConfig creates a new simulated dealer from a config file params.
 func ReadDealerFromConfig(config map[string]any) (broker.MakeSimulatedDealer, error) {
-
 	var makeDealer broker.MakeSimulatedDealer
 
 	if _, ok := config["dealer"]; !ok {

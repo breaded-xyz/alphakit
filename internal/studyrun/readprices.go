@@ -6,6 +6,7 @@ import (
 	"github.com/thecolngroup/alphakit/market"
 )
 
+// ReadPricesFromConfig reads the price samples from a config file params.
 func ReadPricesFromConfig(config map[string]any) ([][]market.Kline, error) {
 
 	root, ok := config["samples"]

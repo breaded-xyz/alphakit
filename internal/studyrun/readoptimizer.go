@@ -9,6 +9,7 @@ import (
 	"github.com/thecolngroup/util"
 )
 
+// ReadBruteOptimizerFromConfig creates a new brute optimizer from a config file params.
 func ReadBruteOptimizerFromConfig(config map[string]any) (*optimize.BruteOptimizer, error) {
 
 	var optimizer optimize.BruteOptimizer

@@ -25,17 +25,20 @@ var _summaryReportHeader = []string{
 	"Trades",
 }
 
+// SummaryReport is a wrapper on optimize.Report that adds a PK for saving to CSV.
 type SummaryReport struct {
 	StudyID string          `csv:"study_id"`
 	Summary optimize.Report `csv:",inline"`
 }
 
+// BacktestReport is a wrapper on perf.PerformanceReport that adds a compound key for saving to CSV.
 type BacktestReport struct {
 	StudyID   string                 `csv:"study_id"`
 	SummaryID string                 `csv:"summary_id"`
 	Backtest  perf.PerformanceReport `csv:",inline"`
 }
 
+// PrepareStudyForCSV returns data that is ready for saving to CSV.
 func PrepareStudyForCSV(study optimize.Study) ([]SummaryReport, []BacktestReport) {
 
 	var summaries []SummaryReport
@@ -64,6 +67,7 @@ func PrepareStudyForCSV(study optimize.Study) ([]SummaryReport, []BacktestReport
 	return summaries, backtests
 }
 
+// PrintSummaryReport prints a summary report to stdout.
 func PrintSummaryReport(report optimize.Report) {
 	table := tablewriter.NewWriter(os.Stdout)
 	table.SetHeader(_summaryReportHeader)
@@ -83,6 +87,7 @@ func PrintSummaryReport(report optimize.Report) {
 
 }
 
+// PrintParams pretty prints a map.
 func PrintParams(params map[string]any) {
 	keys := maps.Keys(params)
 	slices.Sort(keys)
