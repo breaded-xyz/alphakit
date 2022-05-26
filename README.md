@@ -1,8 +1,22 @@
-# Alpha Kit
+# Alphakit
 
-A framework for algorithmic trading in Go and serverless cloud
+```    
+           /$$           /$$                 /$$       /$$   /$$    
+          | $$          | $$                | $$      |__/  | $$    
+  /$$$$$$ | $$  /$$$$$$ | $$$$$$$   /$$$$$$ | $$   /$$ /$$ /$$$$$$  
+ |____  $$| $$ /$$__  $$| $$__  $$ |____  $$| $$  /$$/| $$|_  $$_/  
+  /$$$$$$$| $$| $$  \ $$| $$  \ $$  /$$$$$$$| $$$$$$/ | $$  | $$    
+ /$$__  $$| $$| $$  | $$| $$  | $$ /$$__  $$| $$_  $$ | $$  | $$ /$$
+|  $$$$$$$| $$| $$$$$$$/| $$  | $$|  $$$$$$$| $$ \  $$| $$  |  $$$$/
+ \_______/|__/| $$____/ |__/  |__/ \_______/|__/  \__/|__/   \___/  
+              | $$                                                  
+              | $$                                                  
+              |__/                                                  
+```
 
-_"Master the latest features of Go and learn how to design, validate and deploy sound algorithmic trading strategies."_
+Introducing a framework for algorithmic trading in Go and serverless cloud
+
+> "Master the latest features of Go and learn how to design, validate and deploy sound algorithmic trading strategies."
 
 Companion code repository for the forthcoming book __Zero to Algo__.
 
@@ -28,16 +42,16 @@ A complete starter kit for developing algorithmic trading strategies in the Go l
 
 ## Install
 
-go get "github.com/thecolngroup/alphakit"
+`go get "github.com/thecolngroup/alphakit"`
 
 ## Getting started
 
-The canonical example that brings together many of the framework components is in the optimize package. A further well documented example in the backtest package demonstrates how to use the simulated dealer to study algos without an optimizer.
+The canonical example that brings together many of the framework components is in the `optimize` package and reproduced below. A further well documented example in the `backtest` package demonstrates how to use a simulated dealer to study algos without an optimizer.
 
 ```go
 
 func Example() {
-	// Verbose error handling ommitted for brevity
+	// Verbose error handling omitted for brevity
 
 	// Identify the bot (algo) to optimize by supplying a factory function
 	// Here we're using the classic moving average (MA) cross variant of trend bot
@@ -46,7 +60,7 @@ func Example() {
 	// Define the parameter space to optimize
 	// Param names must match those expected by the MakeBot function passed to optimizer
 	// Here we're optimizing the lookback period of a fast and slow MA
-	// and the Market Meaness Index (MMI) filter
+	// and the Market Meanness Index (MMI) filter
 	paramSpace := ParamMap{
 		"mafastlength": []any{30, 90, 180},
 		"maslowlength": []any{90, 180, 360},
@@ -95,23 +109,85 @@ func Example() {
 }
 
 ```
+## Fundamental architecture patterns
+
+The core assumption underlying the framework is that price data enters the system at a defined interval. Each time a new kline arrives it triggers an evaluation process owned by a bot that may result in 1 or more new orders being issued to a dealer.
+
+Every component that participates in this processing implements the `market.Receiver` interface and accepts a kline (and a context to control long running operations).
+
+The `broker` package offers an API to mediate the interaction between bot and trading venue. A bot creates market positions by placing orders through an implementation of `Dealer`. A simulated dealer in the `backtest` package (also a price receiver) allows you study and validate algos.
+
+In future releases new `Dealer` implementations will enable you to connect to specific trading venues.
+
 
 ## Working with price data
 
+The price data used in the unit tests and examples is sourced from Binance. It's a good source of clean crypto data going back to late 2017. See https://github.com/binance/binance-public-data/.
+
+Alphakit offers an API for price data in the `market` package. The primary representation is in the form of a candlestick (OHLC) - also known as a kline. `CSVKlineReader` expects the timestamp denoting the start of the kline interval to be provided in unix millisecond format. Convenience functions for reading individual CSV files or walking a directory are also included.
+
 ## Building a trading bot
 
-In the trader package you will find a couple of example bots: hodl and trend. The hodl bot is useful for benchmarking an asset, and the trend bot serves as a template for developing your own algo.
+In the `trader` package you will find a couple of example bots: hodl and trend. The hodl bot is useful for benchmarking an asset, and the trend bot serves as a template for developing your own algo.
+
+The following notes refer to how the bot in the `trend` package operates.
 
 ### Prediction
 
+`trader.Predicter` is a simple interface that returns a value between -1 and 1. A value of 1 signals maximum confidence in opening a long position, whilst -1 maximum confidence in opening a short position. 0 indicates no directional bias.
+
+`CrossPredicter` uses a fast and slow moving average cross with a Market Meanness Index (MMI) filter to determine the prediction.
+
+`ApexPredicter` uses peak and valley detection in a smoothed price series with an MMI filter.
+
+To understand more about trend following and MMI this is a great starting point: https://financial-hacker.com/trend-and-exploiting-it/
+
+The trend bot interprets the prediction value according to a set of threshold values for opening and closing positions, namely:
+
+- `EnterLong`
+- `EnterShort`
+- `ExitLong`
+- `ExitShort`
+
+By varying these threshold values you can create asymmetric entry and exit conditions.
+
 ### Risk Management
+
+Package `risk` provides methods to calculate unit risk, used as an input to position sizing and stop loss specification.
+
+By default 'full-risk' will be used which assumes no stop-loss. As an alternative a standard deviation method is also provided.
 
 ### Money Management
 
+Package `money` provides methods to size a position. By default (and recommended for initial backtesting) a position based on a fixed capital amount is used.
+
+A more sophisticated option is to a use a fixed fraction method given by the `SafeFSizer` type. You can determine the optimal value of 'f' by using the OptimalF or Kelly value from a performance report.
+
 ## Command app: studyrun
+
+The command app `studyrun` enables you to execute optimization studies by specifying a `.toml` config file.
+
+See the test in `cmd/studyrun` to understand the syntax and play with a working example.
+
+If you wish to use your own custom bots with the command app you'll need to update the type registry inside `internal/studyrun`. In a later release we may implement a plug-in architecture to negate this step.
+
+The command app will execute an optimization study using `BruteOptimizer` and dump out the results in .csv format.
 
 ## Connecting to a live trading venue
 
+Future releases will provide implementations of `broker.Dealer` for specific trading venues. Contributions welcome!
+
 ## Further reading
 
+- https://financial-hacker.com/
+- https://robotwealth.com/
+- https://quantocracy.com/
+
 ## Contributing
+
+Please fork and raise a PR or submit an issue. 
+
+Contributions should comply with:
+
+- Default golangci linters (see config file in root)
+- Uber style guide: https://github.com/uber-go/guide/blob/master/style.md
