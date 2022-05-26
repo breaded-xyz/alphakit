@@ -1,6 +1,8 @@
 # Alphakit
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![made-with-Go](https://img.shields.io/badge/Made%20with-Go-1f425f.svg)](https://go.dev/)
+[![GitHub go.mod Go version of a Go module](https://img.shields.io/github/go-mod/go-version/gomods/athens.svg)](https://github.com/gomods/athens)
 
 Introducing a framework for algorithmic trading in Go and serverless cloud
 
@@ -47,6 +49,8 @@ A complete starter kit for developing algorithmic trading strategies in the Go l
 `go get "github.com/thecolngroup/alphakit"`
 
 ## Getting started
+
+⚠️  API is pre v1 and is not stable
 
 The canonical example that brings together many of the framework components is in the `optimize` package and reproduced below. A further well documented example in the `backtest` package demonstrates how to use a simulated dealer to study algos without an optimizer.
 
