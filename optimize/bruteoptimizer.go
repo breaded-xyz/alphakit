@@ -19,17 +19,29 @@ import (
 // BruteOptimizer implements a 'brute-force peak objective' optimization approach which
 // tests all given parameter combinations and selects the highest ranked (peak) param set.
 // Optima is selected by the given ObjectiveRanker func.
+// Optimization trials are executed concurrently using a worker pool.
 // Optimization method in 3 stages:
+//
 // Prepare:
+//
 // - Accept 1 or more price data samples
+//
 // - Split sample price data into in-sample (training) and out-of-sample (validation) datasets
+//
 // - Generate 1 or more param sets using the cartesian product of given ranges that define the param space
+//
 // Train:
+//
 // - Execute each algo param set over the in-sample price data
+//
 // - Average the performance for each param set over the in-sample data
+//
 // - Rank the param sets based on the performance objective (Profit Factor, Sharpe etc)
+//
 // Validate:
+//
 // - Execute the highest ranked ("trained") algo param set over the out-of-sample price data
+//
 // - Accept or reject the hypothesis based on statistical significance of the study report
 type BruteOptimizer struct {
 	SampleSplitPct float64
