@@ -1,5 +1,7 @@
 # Alphakit
 
+Introducing a framework for algorithmic trading in Go and serverless cloud
+
 ```    
            /$$           /$$                 /$$       /$$   /$$    
           | $$          | $$                | $$      |__/  | $$    
@@ -14,13 +16,11 @@
               |__/                                                  
 ```
 
-Introducing a framework for algorithmic trading in Go and serverless cloud
+
 
 > "Master the latest features of Go and learn how to design, validate and deploy sound algorithmic trading strategies."
 
 Companion code repository for the forthcoming book __Zero to Algo__.
-
-<<Insert gif of studyrun execution>>
 
 ## Inspiration
 
