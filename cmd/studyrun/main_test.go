@@ -9,7 +9,7 @@ import (
 func Test(t *testing.T) {
 	args := []string{
 		"./testdata/study.toml",
-		"./testdata/.out/",
+		"./testdata/out/",
 	}
 	err := run(args)
 	assert.NoError(t, err)
