@@ -123,6 +123,10 @@ func Summarize(report Report) Report {
 		report.OptimalF += backtest.Trade.OptimalF
 	}
 
+	if report.TradeCount == 0 {
+		return report
+	}
+
 	count := float64(report.SampleCount)
 	report.PRR /= count
 	report.MDD /= count

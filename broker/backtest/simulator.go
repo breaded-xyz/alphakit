@@ -13,6 +13,8 @@ import (
 
 const _defaultTockInterval = time.Millisecond
 
+const _defaultInitialCapital = 1000
+
 // ErrInvalidOrderState is returned when an order is not in a valid state for the simulator to open it.
 var ErrInvalidOrderState = errors.New("order is not valid for processing")
 

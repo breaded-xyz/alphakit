@@ -12,7 +12,7 @@ import (
 
 var _ trader.MakeFromConfig = MakeCrossBotFromConfig
 
-// MakeCrossBotFromConfig returns a bot configured with a CrossPredicter.
+// MakeCrossBotFromConfig returns a bot configured with a CrossPredicter and sensible defaults if config is missing.
 func MakeCrossBotFromConfig(config map[string]any) (trader.Bot, error) {
 
 	var bot Bot
@@ -40,7 +40,7 @@ func MakeCrossBotFromConfig(config map[string]any) (trader.Bot, error) {
 		bot.Risker = risk.NewFullRisker()
 	}
 
-	initialCapital := dec.New(util.ToFloat(config["initialcapital"]))
+	initialCapital := dec.New(util.NNZ(util.ToFloat(config["initialcapital"]), 1000))
 	sizerF := util.ToFloat(config["sizerf"])
 	if sizerF > 0 {
 		bot.Sizer = money.NewSafeFSizer(initialCapital, sizerF, util.ToFloat(config["sizerscalef"]))

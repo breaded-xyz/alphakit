@@ -9,15 +9,15 @@ import (
 	"github.com/thecolngroup/dec"
 )
 
-func TestDiffReturns(t *testing.T) {
+func TestDiffPctReturns(t *testing.T) {
 	give := broker.EquitySeries{
 		1: dec.New(10),
 		2: dec.New(20), // 20 - 10 = 10 / 10 = 1
 		3: dec.New(30), // 30 - 20 = 10 / 20 = 0.5
-		4: dec.New(5),  // 5 - 30 = -25 / 30 = -0.8333333333333333
+		4: dec.New(5),  // 5 - 30 = -25 / 30 = -0.8333333333333334
 	}
-	want := []float64{1, 0.5, -0.8333333333333333}
-	act := DiffReturns(give)
+	want := []float64{1, 0.5, -0.8333333333333334}
+	act := DiffPctReturns(give)
 	assert.Equal(t, want, act)
 }
 

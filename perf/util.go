@@ -4,18 +4,20 @@ import (
 	"time"
 
 	"github.com/thecolngroup/alphakit/broker"
+	"github.com/thecolngroup/util"
 )
 
-// DiffReturns converts an equity curve of absolute amounts
+// DiffPctReturns converts an equity curve of absolute amounts
 // into a series of percentage differences.
-func DiffReturns(curve broker.EquitySeries) []float64 {
+func DiffPctReturns(curve broker.EquitySeries) []float64 {
 	diffs := make([]float64, len(curve)-1)
 	vs := curve.SortValuesByTime()
 	for i := range vs {
 		if i == 0 {
 			continue
 		}
-		diffs[i-1] = (vs[i].Sub(vs[i-1]).Div(vs[i-1])).InexactFloat64()
+		t0, t1 := vs[i].InexactFloat64(), util.NNZ(vs[i-1].InexactFloat64(), 1)
+		diffs[i-1] = (t0 - t1) / t1
 	}
 	return diffs
 }

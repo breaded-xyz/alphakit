@@ -135,7 +135,11 @@ func (o *BruteOptimizer) Start(ctx context.Context) (<-chan OptimizerTrial, erro
 		// Select top ranked result for validation phase
 		results := maps.Values(o.study.TrainingResults)
 		slices.SortFunc(results, o.Ranker)
-		optima := results[len(results)-1].Subject
+		optimaReport := results[len(results)-1]
+		if optimaReport.TradeCount == 0 {
+			return
+		}
+		optima := optimaReport.Subject
 		o.study.Validation = append(o.study.Validation, optima)
 
 		// Validation phase
@@ -259,7 +263,7 @@ func runBacktest(ctx context.Context, bot trader.Bot, dealer broker.SimulatedDea
 	return report, nil
 }
 
-func splitSample(sample []market.Kline, splitPct float64) (a, b []market.Kline) {
+func splitSample(sample []market.Kline, splitPct float64) (is, oos []market.Kline) {
 	if splitPct == 0 {
 		return sample, sample
 	}

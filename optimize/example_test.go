@@ -12,42 +12,56 @@ func Example() {
 	// Verbose error handling ommitted for brevity
 
 	// Identify the bot (algo) to optimize by supplying a factory function
-	// Here we're using the classic MA cross variant of trend bot
+	// Here we're using the classic moving average (MA) cross variant of trend bot
 	bot := trend.MakeCrossBotFromConfig
 
 	// Define the parameter space to optimize
 	// Param names must match those expected by the MakeBot function passed to optimizer
+	// Here we're optimizing the lookback period of a fast and slow MA
+	// and the Market Meaness Index (MMI) filter
 	paramSpace := ParamMap{
-		"mafastlength": []float64{1, 10, 20, 30},
-		"maslowlength": []float64{30, 40, 50, 60},
-		"mmilength":    []float64{200, 300},
+		"mafastlength": []any{30, 90, 180},
+		"maslowlength": []any{90, 180, 360},
+		"mmilength":    []any{200, 300},
 	}
 
 	// Read price samples to use for optimization
-	btcPriceSample, _ := market.ReadKlinesFromCSV("testdata/")
-	ethPriceSample, _ := market.ReadKlinesFromCSV("testdata/")
-	priceSamples := [][]market.Kline{btcPriceSample, ethPriceSample}
+	btc, _ := market.ReadKlinesFromCSV("testdata/btcusdt-1h/")
+	eth, _ := market.ReadKlinesFromCSV("testdata/ethusdt-1h/")
+	priceSamples := [][]market.Kline{btc, eth}
 
-	// Create a new brute style optimizer
+	// Create a new brute style optimizer with a default simulated dealer (no broker costs)
 	optimizer := NewBruteOptimizer()
-	optimizer.SampleSplitPct = 0.5
-	optimizer.WarmupBarCount = 300
-	optimizer.MakeBot = bot
+	optimizer.SampleSplitPct = 0   // Do not split samples due to small sample size
+	optimizer.WarmupBarCount = 360 // Set as maximum lookback of your param space
+	optimizer.MakeBot = bot        // Tell the optimizer which bot to use
 
 	// Prepare the optimizer and get an estimate on the number of trials (backtests) required
 	trialCount, _ := optimizer.Prepare(paramSpace, priceSamples)
-	fmt.Printf("%d trials to run during optimization\n", trialCount)
+	fmt.Printf("%d backtest trials to run during optimization\n", trialCount)
 
-	// Start the optimization process and monitor with a receive channel
+	// Start the optimization process and monitor with a receive-only channel
+	// Trials will execute concurrently with a default worker pool matching num of CPUs
 	trials, _ := optimizer.Start(context.Background())
 	for range trials {
 	}
 
-	// Inspect the study to get the optimized param set and results
+	// Inspect the study results following optimization
 	study := optimizer.Study()
-	optimaPSet := study.Validation[0]
-	optimaResult := study.ValidationResults[optimaPSet.ID]
+	if len(study.ValidationResults) == 0 {
+		fmt.Println("Optima not found because highest ranked param set made no trades during optimization trials.")
+		return
+	}
 
-	// Output: Optima sharpe ratio is 0.0
+	// Read out the optimal param set and results
+	optimaPSet := study.Validation[0]
+	fmt.Printf("Optima params: fast: %d slow: %d MMI: %d\n",
+		optimaPSet.Params["mafastlength"], optimaPSet.Params["maslowlength"], optimaPSet.Params["mmilength"])
+	optimaResult := study.ValidationResults[optimaPSet.ID]
 	fmt.Printf("Optima sharpe ratio is %.2f", optimaResult.Sharpe)
+
+	// Output:
+	// 38 backtest trials to run during optimization
+	// Optima params: fast: 90 slow: 360 MMI: 200
+	// Optima sharpe ratio is 1.83
 }

@@ -76,7 +76,7 @@ func NewPortfolioReport(curve broker.EquitySeries) *PortfolioReport {
 	report.MaxDrawdown = report.mdd.Pct
 	report.MDDRecovery = report.mdd.Recovery
 
-	returns := DiffReturns(daily)
+	returns := DiffPctReturns(daily)
 	report.Sharpe = SharpeRatio(returns, SharpeDefaultAnnualRiskFreeRate)
 	report.Calmar = CalmarRatio(report.CAGR, report.MaxDrawdown)
 
