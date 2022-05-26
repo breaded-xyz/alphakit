@@ -1,5 +1,7 @@
 # Alphakit
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 Introducing a framework for algorithmic trading in Go and serverless cloud
 
 ```    
