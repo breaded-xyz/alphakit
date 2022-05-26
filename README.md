@@ -34,7 +34,7 @@ go get "github.com/thecolngroup/alphakit"
 
 The canonical example that brings together many of the framework components is in the optimize package. A further well documented example in the backtest package demonstrates how to use the simulated dealer to study algos without an optimizer.
 
-```
+```go
 
 func Example() {
 	// Verbose error handling ommitted for brevity
