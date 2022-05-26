@@ -3,6 +3,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![made-with-Go](https://img.shields.io/badge/Made%20with-Go-1f425f.svg)](https://go.dev/)
 [![GitHub go.mod Go version of a Go module](https://img.shields.io/github/go-mod/go-version/gomods/athens.svg)](https://github.com/gomods/athens)
+[![Go Report Card](https://goreportcard.com/badge/github.com/thecolngroup/alphakit)](https://goreportcard.com/report/github.com/thecolngroup/alphakit)
 
 Introducing a framework for algorithmic trading in Go and serverless cloud
 
@@ -42,6 +43,7 @@ A complete starter kit for developing algorithmic trading strategies in the Go l
 - Uses latest Go language (1.18) features including generics
 - Idiomatic Go style using community accepted best practises
 - Pragmatic use of concurrency, go routines and channels
+- Extensive test coverage
 
 ## Install
 
