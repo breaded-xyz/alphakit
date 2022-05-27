@@ -7,15 +7,20 @@ require (
 	github.com/gammazero/workerpool v1.1.2
 	github.com/gonum/floats v0.0.0-20181209220543-c233463c7e82
 	github.com/gonum/stat v0.0.0-20181125101827-41a0da705a5b
-	github.com/jszwec/csvutil v1.6.0
-	github.com/oklog/ulid/v2 v2.0.2
 	github.com/olekukonko/tablewriter v0.0.5
 	github.com/schollz/progressbar/v3 v3.8.6
 	github.com/schwarmco/go-cartesian-product v0.0.0-20180515110546-d5ee747a6dc9
 	github.com/shopspring/decimal v1.3.1
-	github.com/spf13/viper v1.11.0
+	github.com/spf13/viper v1.12.0
 	github.com/stretchr/testify v1.7.1
 	golang.org/x/exp v0.0.0-20220518171630-0b5c67f07fdf
+)
+
+require (
+	github.com/gonum/integrate v0.0.0-20181209220457-a422b5c0fdf2 // indirect
+	github.com/jszwec/csvutil v1.7.0 // indirect
+	github.com/oklog/ulid/v2 v2.0.2 // indirect
+	gopkg.in/yaml.v2 v2.4.0 // indirect
 )
 
 require (
@@ -42,11 +47,10 @@ require (
 	github.com/subosito/gotenv v1.3.0 // indirect
 	github.com/thecolngroup/dec v0.0.1
 	github.com/thecolngroup/util v0.0.2
-	golang.org/x/crypto v0.0.0-20220518034528-6f7dac969898 // indirect
+	golang.org/x/crypto v0.0.0-20220525230936-793ad666bf5e // indirect
 	golang.org/x/sys v0.0.0-20220520151302-bc2c85ada10a // indirect
-	golang.org/x/term v0.0.0-20220411215600-e5f449aeb171 // indirect
+	golang.org/x/term v0.0.0-20220526004731-065cf7ba2467 // indirect
 	golang.org/x/text v0.3.7 // indirect
 	gopkg.in/ini.v1 v1.66.4 // indirect
-	gopkg.in/yaml.v2 v2.4.0 // indirect
-	gopkg.in/yaml.v3 v3.0.0 // indirect
+	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
