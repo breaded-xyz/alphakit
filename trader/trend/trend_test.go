@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/csv"
 	"os"
-	"path"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -16,8 +15,6 @@ import (
 	"github.com/thecolngroup/alphakit/ta"
 	"github.com/thecolngroup/dec"
 )
-
-const testdataPath string = "testdata"
 
 func TestBotWithCrossPredicter(t *testing.T) {
 	dealer := backtest.NewDealer()
@@ -39,7 +36,8 @@ func TestBotWithCrossPredicter(t *testing.T) {
 		Sizer:      money.NewFixedSizer(dec.New(1000)),
 	}
 
-	file, _ := os.Open(path.Join(testdataPath, "btcusdt-1h-2021-Q1.csv"))
+	file, err := os.Open("./testdat/btcusdt-1h-2021-Q1.csv")
+	assert.NoError(t, err)
 	defer func() {
 		assert.NoError(t, file.Close())
 	}()

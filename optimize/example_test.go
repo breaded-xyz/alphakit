@@ -26,8 +26,8 @@ func Example() {
 	}
 
 	// Read price samples to use for optimization
-	btc, _ := market.ReadKlinesFromCSV("testdata/btcusdt-1h/")
-	eth, _ := market.ReadKlinesFromCSV("testdata/ethusdt-1h/")
+	btc, _ := market.ReadKlinesFromCSV("./testdata/btcusdt-1h/")
+	eth, _ := market.ReadKlinesFromCSV("./testdata/ethusdt-1h/")
 	priceSamples := [][]market.Kline{btc, eth}
 
 	// Create a new brute style optimizer with a default simulated dealer (no broker costs)
