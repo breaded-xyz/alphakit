@@ -1,7 +1,6 @@
 # Alphakit
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![made-with-Go](https://img.shields.io/badge/Made%20with-Go-1f425f.svg)](https://go.dev/)
 [![GitHub go.mod Go version of a Go module](https://img.shields.io/github/go-mod/go-version/gomods/athens.svg)](https://github.com/gomods/athens)
 [![Go Report Card](https://goreportcard.com/badge/github.com/thecolngroup/alphakit)](https://goreportcard.com/report/github.com/thecolngroup/alphakit)
 
@@ -28,7 +27,7 @@ Companion code repository for the forthcoming book __Zero to Algo__
 
 ## Inspiration
 
-The majority of open source algo trading frameworks, especially in Go, focus purely on trade execution - that's a sure fire way to get rekt. The most important activity is researching and validating practical market edges - which is the focus of alphakit. Furthermore, I wanted a clean architecture that could easily be composed and executed serverless in the cloud, rather than a monolithic black box running on a carpet server under a desk!
+The majority of open source algo trading frameworks, especially in Go, focus purely on trade execution - that's a sure fire way to get rekt. The most important precursor to a successful trading system is researching and validating practical market edges - which is the focus of alphakit. Furthermore, I wanted a composable architecture that could easily be executed serverless in the cloud using features such as cloud functions and messaging queues.
 
 ## What's included?
 
@@ -39,11 +38,11 @@ A complete starter kit for developing algorithmic trading strategies in the Go l
 - Performance reports and metrics
 - Brute force parameter optimization method
 - Command app to execute research studies from a config file
-- Path to serverless production deployment in the cloud (coming soon)
+- Scaffold for serverless production deployment in the cloud (coming soon)
 - Uses latest Go language (1.18) features including generics
-- Idiomatic Go style using community accepted best practises
+- Idiomatic Go style using community accepted best practices
 - Pragmatic use of concurrency, go routines and channels
-- Extensive test coverage
+- Extensive test coverage where it matters
 
 ## Install
 
@@ -80,8 +79,9 @@ func Example() {
 	priceSamples := [][]market.Kline{btc, eth}
 
 	// Create a new brute style optimizer with a default simulated dealer (no broker costs)
+	// The default optimization objective is the param set with the highest sharpe ratio
 	optimizer := NewBruteOptimizer()
-	optimizer.SampleSplitPct = 0   // Do not split samples due to small sample size
+	optimizer.SampleSplitPct = 0   // Do not split samples due to small price sample size
 	optimizer.WarmupBarCount = 360 // Set as maximum lookback of your param space
 	optimizer.MakeBot = bot        // Tell the optimizer which bot to use
 
@@ -90,17 +90,13 @@ func Example() {
 	fmt.Printf("%d backtest trials to run during optimization\n", trialCount)
 
 	// Start the optimization process and monitor with a receive-only channel
-	// Trials will execute concurrently with a default worker pool matching num of CPUs
+	// Trials will execute concurrently with a default worker pool matching the num of CPUs
 	trials, _ := optimizer.Start(context.Background())
 	for range trials {
 	}
 
 	// Inspect the study results following optimization
 	study := optimizer.Study()
-	if len(study.ValidationResults) == 0 {
-		fmt.Println("Optima not found because highest ranked param set made no trades during optimization trials.")
-		return
-	}
 
 	// Read out the optimal param set and results
 	optimaPSet := study.Validation[0]
@@ -126,12 +122,21 @@ The `broker` package offers an API to mediate the interaction between bot and tr
 
 In future releases new `Dealer` implementations will enable you to connect to specific trading venues.
 
-
 ## Working with price data
 
 The price data used in the unit tests and examples is sourced from Binance. It's a good source of clean crypto data going back to late 2017. See https://github.com/binance/binance-public-data/.
 
 Alphakit offers an API for price data in the `market` package. The primary representation is in the form of a candlestick (OHLC) - also known as a kline. `CSVKlineReader` expects the timestamp denoting the start of the kline interval to be provided in unix millisecond format. Convenience functions for reading individual CSV files or walking a directory are also included.
+
+## Performance reports
+
+Package `perf` provides comprehensive performance reporting for your algo, enabling you to track industry strandard merics such as CAGR, return rate, sharpe ratio, and drawdowns.
+
+To create a new report use the equity history and trade history data from a dealer.
+
+## Trading costs
+
+Many algos appear to be viable until you corrctly factor in tradings costs! Package `backtest` offers a `PerpCoster` implementation that simulates typical costs you might expect trading crypto perpetual futures, including an hourly funding rate fee. See the tests in package `backtest` to understand how costs are applied during backtesting.
 
 ## Building a trading bot
 
@@ -141,7 +146,7 @@ The following notes refer to how the bot in the `trend` package operates.
 
 ### Prediction
 
-`trader.Predicter` is a simple interface that returns a value between -1 and 1. A value of 1 signals maximum confidence in opening a long position, whilst -1 maximum confidence in opening a short position. 0 indicates no directional bias.
+`trader.Predicter` is a simple interface that returns a value between -1 and 1. A value of 1 signals maximum confidence in opening a long position, whilst -1 maximum confidence in opening a short position. 0 indicates no directional bias. Other values between -1 and 1 values indicate varying confidence in direction.
 
 `CrossPredicter` uses a fast and slow moving average cross with a Market Meanness Index (MMI) filter to determine the prediction.
 
@@ -189,6 +194,7 @@ Future releases will provide implementations of `broker.Dealer` for specific tra
 - https://financial-hacker.com/
 - https://robotwealth.com/
 - https://quantocracy.com/
+- https://zorro-project.com/manual/
 
 ## Contributing
 
