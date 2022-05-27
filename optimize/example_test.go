@@ -9,7 +9,7 @@ import (
 )
 
 func Example() {
-	// Verbose error handling ommitted for brevity
+	// Verbose error handling omitted for brevity
 
 	// Identify the bot (algo) to optimize by supplying a factory function
 	// Here we're using the classic moving average (MA) cross variant of trend bot
@@ -18,7 +18,7 @@ func Example() {
 	// Define the parameter space to optimize
 	// Param names must match those expected by the MakeBot function passed to optimizer
 	// Here we're optimizing the lookback period of a fast and slow MA
-	// and the Market Meaness Index (MMI) filter
+	// and the Market Meanness Index (MMI) filter
 	paramSpace := ParamMap{
 		"mafastlength": []any{30, 90, 180},
 		"maslowlength": []any{90, 180, 360},
@@ -31,6 +31,7 @@ func Example() {
 	priceSamples := [][]market.Kline{btc, eth}
 
 	// Create a new brute style optimizer with a default simulated dealer (no broker costs)
+	// The default optimization objective is the param set with the highest sharpe ratio
 	optimizer := NewBruteOptimizer()
 	optimizer.SampleSplitPct = 0   // Do not split samples due to small sample size
 	optimizer.WarmupBarCount = 360 // Set as maximum lookback of your param space

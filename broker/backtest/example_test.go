@@ -15,7 +15,7 @@ import (
 
 //nolint
 func Example() {
-	// Verbose error handling ommitted for brevity
+	// Verbose error handling omitted for brevity
 
 	// Create a special simulated dealer for backtesting with initial capital of 1000
 	dealer := NewDealer()
