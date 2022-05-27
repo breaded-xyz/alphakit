@@ -82,7 +82,7 @@ func Example() {
 	// Create a new brute style optimizer with a default simulated dealer (no broker costs)
 	// The default optimization objective is the param set with the highest sharpe ratio
 	optimizer := NewBruteOptimizer()
-	optimizer.SampleSplitPct = 0   // Do not split samples due to small price sample size
+	optimizer.SampleSplitPct = 0.5   // Use first 50% as in-sample training data, and remainder for out-of-sample validation
 	optimizer.WarmupBarCount = 360 // Set as maximum lookback of your param space
 	optimizer.MakeBot = bot        // Tell the optimizer which bot to use
 
@@ -120,7 +120,7 @@ The core assumption underlying the framework is that price data enters the syste
 
 Every component that participates in this processing implements the `market.Receiver` interface and accepts a kline (and a context to control long running operations).
 
-The `broker` package offers an API to mediate the interaction between bot and trading venue. A bot creates market positions by placing orders through an implementation of `Dealer`. A simulated dealer in the `backtest` package (also a price receiver) allows you study and validate algos.
+The `broker` package offers an API to mediate the interaction between bot and trading venue. A bot creates market positions by placing orders through an implementation of `Dealer`. A simulated dealer in the `backtest` package (also a price receiver) allows you study and validate algos outsde of an optimizer.
 
 In future releases new `Dealer` implementations will enable you to connect to specific trading venues.
 
@@ -132,13 +132,13 @@ Alphakit offers an API for price data in the `market` package. The primary repre
 
 ## Performance reports
 
-Package `perf` provides comprehensive performance reporting for your algo, enabling you to track industry strandard merics such as CAGR, return rate, sharpe ratio, and drawdowns.
+Package `perf` provides comprehensive performance reporting for your algo, enabling you to track industry standard metrics such as CAGR, return rate, sharpe ratio, and drawdowns.
 
 To create a new report use the equity history and trade history data from a dealer.
 
 ## Trading costs
 
-Many algos appear to be viable until you corrctly factor in tradings costs! Package `backtest` offers a `PerpCoster` implementation that simulates typical costs you might expect trading crypto perpetual futures, including an hourly funding rate fee. See the tests in package `backtest` to understand how costs are applied during backtesting.
+Many algos appear to be viable until you correctly factor in trading costs! Package `backtest` offers a `PerpCoster` implementation that simulates typical costs you might expect when trading crypto perpetual futures, including an hourly funding rate fee. See the tests in package `backtest` to understand how costs are applied during backtesting.
 
 ## Building a trading bot
 
@@ -148,7 +148,7 @@ The following notes refer to how the bot in the `trend` package operates.
 
 ### Prediction
 
-`trader.Predicter` is a simple interface that returns a value between -1 and 1. A value of 1 signals maximum confidence in opening a long position, whilst -1 maximum confidence in opening a short position. 0 indicates no directional bias. Other values between -1 and 1 values indicate varying confidence in direction.
+`trader.Predicter` is a simple interface that returns a value between -1 and 1. A value of 1 signals maximum confidence in opening a long position, whilst -1 maximum confidence in opening a short position. 0 indicates no directional bias. Other values between -1 and 1 indicate varying confidence in direction.
 
 `CrossPredicter` uses a fast and slow moving average cross with a Market Meanness Index (MMI) filter to determine the prediction.
 
