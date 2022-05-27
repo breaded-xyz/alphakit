@@ -66,10 +66,10 @@ func Example() {
 	fmt.Printf("Optima params: fast: %d slow: %d MMI: %d\n",
 		optimaPSet.Params["mafastlength"], optimaPSet.Params["maslowlength"], optimaPSet.Params["mmilength"])
 	optimaResult := study.ValidationResults[optimaPSet.ID]
-	fmt.Printf("Optima sharpe ratio is %.2f", optimaResult.Sharpe)
+	fmt.Printf("Optima sharpe ratio is %.1f", optimaResult.Sharpe)
 
 	// Output:
 	// 38 backtest trials to run during optimization
 	// Optima params: fast: 30 slow: 90 MMI: 200
-	// Optima sharpe ratio is 2.46
+	// Optima sharpe ratio is 2.5
 }
