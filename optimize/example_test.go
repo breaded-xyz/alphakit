@@ -3,6 +3,7 @@ package optimize
 import (
 	"context"
 	"fmt"
+	"log"
 
 	"github.com/thecolngroup/alphakit/market"
 	"github.com/thecolngroup/alphakit/trader/trend"
@@ -26,8 +27,14 @@ func Example() {
 	}
 
 	// Read price samples to use for optimization
-	btc, _ := market.ReadKlinesFromCSV("./testdata/btcusdt-1h/")
-	eth, _ := market.ReadKlinesFromCSV("./testdata/ethusdt-1h/")
+	btc, err := market.ReadKlinesFromCSV("./testdata/btcusdt-1h/")
+	if err != nil {
+		log.Fatal(err)
+	}
+	eth, err := market.ReadKlinesFromCSV("./testdata/ethusdt-1h/")
+	if err != nil {
+		log.Fatal(err)
+	}
 	priceSamples := [][]market.Kline{btc, eth}
 
 	// Create a new brute style optimizer with a default simulated dealer (no broker costs)

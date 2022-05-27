@@ -36,7 +36,7 @@ func TestBotWithCrossPredicter(t *testing.T) {
 		Sizer:      money.NewFixedSizer(dec.New(1000)),
 	}
 
-	file, err := os.Open("./testdat/btcusdt-1h-2021-Q1.csv")
+	file, err := os.Open("./testdata/btcusdt-1h-2021-Q1.csv")
 	assert.NoError(t, err)
 	defer func() {
 		assert.NoError(t, file.Close())
