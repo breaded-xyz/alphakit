@@ -93,6 +93,7 @@ func Example() {
 	// Trials will execute concurrently with a default worker pool matching the num of CPUs
 	trials, _ := optimizer.Start(context.Background())
 	for range trials {
+	  // Monitor for errors and progress
 	}
 
 	// Inspect the study results following optimization
