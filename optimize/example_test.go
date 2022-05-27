@@ -27,11 +27,11 @@ func Example() {
 	}
 
 	// Read price samples to use for optimization
-	btc, err := market.ReadKlinesFromCSV("./testdata/btcusdt-1h/")
+	btc, err := market.ReadKlinesFromCSV("./testdata/BTCUSDT-1H/")
 	if err != nil {
 		log.Fatal(err)
 	}
-	eth, err := market.ReadKlinesFromCSV("./testdata/ethusdt-1h/")
+	eth, err := market.ReadKlinesFromCSV("./testdata/ETHUSDT-1H/")
 	if err != nil {
 		log.Fatal(err)
 	}
