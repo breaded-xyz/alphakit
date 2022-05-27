@@ -3,6 +3,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![GitHub go.mod Go version of a Go module](https://img.shields.io/github/go-mod/go-version/gomods/athens.svg)](https://github.com/gomods/athens)
 [![Go Report Card](https://goreportcard.com/badge/github.com/thecolngroup/alphakit)](https://goreportcard.com/report/github.com/thecolngroup/alphakit)
+[![Go](https://github.com/thecolngroup/alphakit/actions/workflows/go.yml/badge.svg)](https://github.com/thecolngroup/alphakit/actions/workflows/go.yml)
 
 Introducing a framework for algorithmic trading in Go and serverless cloud
 
