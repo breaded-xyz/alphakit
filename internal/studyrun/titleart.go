@@ -1,4 +1,4 @@
-package main
+package studyrun
 
 var _titleArt = `           
            /$$           /$$                 /$$       /$$   /$$    

@@ -9,8 +9,8 @@ import (
 	"github.com/thecolngroup/util"
 )
 
-// ReadBruteOptimizerFromConfig creates a new brute optimizer from a config file params.
-func ReadBruteOptimizerFromConfig(config map[string]any) (*optimize.BruteOptimizer, error) {
+// readBruteOptimizerFromConfig creates a new brute optimizer from a config file params.
+func readBruteOptimizerFromConfig(config map[string]any, botRegistry map[string]trader.MakeFromConfig) (*optimize.BruteOptimizer, error) {
 
 	var optimizer optimize.BruteOptimizer
 
@@ -25,12 +25,12 @@ func ReadBruteOptimizerFromConfig(config map[string]any) (*optimize.BruteOptimiz
 		return nil, errors.New("'bot' key not found")
 	}
 	bot := util.ToString(root["bot"])
-	if _, ok := _typeRegistry[bot]; !ok {
+	if _, ok := botRegistry[bot]; !ok {
 		return nil, fmt.Errorf("'%s' key not found in type registry", bot)
 	}
 
 	optimizer = optimize.NewBruteOptimizer()
-	optimizer.MakeBot = _typeRegistry[bot].(trader.MakeFromConfig)
+	optimizer.MakeBot = botRegistry[bot]
 	optimizer.SampleSplitPct = util.ToFloat(root["samplesplitpct"])
 	optimizer.WarmupBarCount = util.ToInt(root["warmupbarcount"])
 	optimizer.Ranker = optimize.SharpeRanker

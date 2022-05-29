@@ -11,10 +11,10 @@ import (
 
 const _filenameFriendlyTimeFormat = "20060102T150405"
 
-// WriteStudy writes a study to CSV.
-func WriteStudy(path string, study optimize.Study) error {
+// writeStudy writes a study to CSV.
+func writeStudy(path string, study optimize.Study) error {
 
-	summaries, backtests := PrepareStudyForCSV(study)
+	summaries, backtests := prepareStudyForCSV(study)
 
 	if err := writeSummaryReports(path, summaries); err != nil {
 		return err
@@ -27,7 +27,7 @@ func WriteStudy(path string, study optimize.Study) error {
 	return nil
 }
 
-func writeSummaryReports(path string, reports []SummaryReport) error {
+func writeSummaryReports(path string, reports []summaryReport) error {
 	prefix := time.Now().UTC().Format(_filenameFriendlyTimeFormat)
 	out := filepath.Join(path, fmt.Sprintf("%s-summaryreports.csv", prefix))
 	if err := saveDataToCSV(out, reports); err != nil {
@@ -37,7 +37,7 @@ func writeSummaryReports(path string, reports []SummaryReport) error {
 	return nil
 }
 
-func writeBacktestReports(path string, reports []BacktestReport) error {
+func writeBacktestReports(path string, reports []backtestReport) error {
 	prefix := time.Now().UTC().Format(_filenameFriendlyTimeFormat)
 	out := filepath.Join(path, fmt.Sprintf("%s-backtestreports.csv", prefix))
 	if err := saveDataToCSV(out, reports); err != nil {

@@ -8,8 +8,8 @@ import (
 
 const _configFormat = "toml"
 
-// ReadConfig reads the toml configuration file and returns a string map of params.
-func ReadConfig(filename string) (map[string]any, error) {
+// readConfig reads the toml configuration file and returns a string map of params.
+func readConfig(filename string) (map[string]any, error) {
 	file, err := os.Open(filename)
 	if err != nil {
 		return nil, err
