@@ -25,34 +25,34 @@ var _summaryReportHeader = []string{
 	"Trades",
 }
 
-// SummaryReport is a wrapper on optimize.Report that adds a PK for saving to CSV.
-type SummaryReport struct {
+// summaryReport is a wrapper on optimize.Report that adds a PK for saving to CSV.
+type summaryReport struct {
 	StudyID string          `csv:"study_id"`
 	Summary optimize.Report `csv:",inline"`
 }
 
-// BacktestReport is a wrapper on perf.PerformanceReport that adds a compound key for saving to CSV.
-type BacktestReport struct {
+// backtestReport is a wrapper on perf.PerformanceReport that adds a compound key for saving to CSV.
+type backtestReport struct {
 	StudyID   string                 `csv:"study_id"`
 	SummaryID string                 `csv:"summary_id"`
 	Backtest  perf.PerformanceReport `csv:",inline"`
 }
 
-// PrepareStudyForCSV returns data that is ready for saving to CSV.
-func PrepareStudyForCSV(study optimize.Study) ([]SummaryReport, []BacktestReport) {
+// prepareStudyForCSV returns data that is ready for saving to CSV.
+func prepareStudyForCSV(study optimize.Study) ([]summaryReport, []backtestReport) {
 
-	var summaries []SummaryReport
-	var backtests []BacktestReport
+	var summaries []summaryReport
+	var backtests []backtestReport
 
 	flattenResults := func(results map[optimize.ParamSetID]optimize.Report) {
 		for k := range results {
 			report := results[k]
-			summaries = append(summaries, SummaryReport{
+			summaries = append(summaries, summaryReport{
 				StudyID: study.ID,
 				Summary: report,
 			})
 			for i := range report.Backtests {
-				backtests = append(backtests, BacktestReport{
+				backtests = append(backtests, backtestReport{
 					StudyID:   study.ID,
 					SummaryID: report.ID,
 					Backtest:  report.Backtests[i],
@@ -67,8 +67,8 @@ func PrepareStudyForCSV(study optimize.Study) ([]SummaryReport, []BacktestReport
 	return summaries, backtests
 }
 
-// PrintSummaryReport prints a summary report to stdout.
-func PrintSummaryReport(report optimize.Report) {
+// printSummaryReport prints a summary report to stdout.
+func printSummaryReport(report optimize.Report) {
 	table := tablewriter.NewWriter(os.Stdout)
 	table.SetHeader(_summaryReportHeader)
 	table.Append([]string{
@@ -87,8 +87,8 @@ func PrintSummaryReport(report optimize.Report) {
 
 }
 
-// PrintParams pretty prints a map.
-func PrintParams(params map[string]any) {
+// printParams pretty prints a map.
+func printParams(params map[string]any) {
 	keys := maps.Keys(params)
 	slices.Sort(keys)
 	for _, k := range keys {
