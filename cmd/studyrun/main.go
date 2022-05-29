@@ -4,6 +4,7 @@ import (
 	"log"
 	"os"
 
+	"github.com/thecolngroup/alphakit/cmd/studyrun/app"
 	"github.com/thecolngroup/alphakit/trader"
 	"github.com/thecolngroup/alphakit/trader/hodl"
 	"github.com/thecolngroup/alphakit/trader/trend"
@@ -16,14 +17,14 @@ func main() {
 }
 
 func run(args []string) error {
-	return RunApp(
+	return app.Run(
 		args,
 		map[string]trader.MakeFromConfig{
 			"hodl":        trader.MakeFromConfig(hodl.MakeBotFromConfig),
 			"trend.cross": trader.MakeFromConfig(trend.MakeCrossBotFromConfig),
 			"trend.apex":  trader.MakeFromConfig(trend.MakeApexBotFromConfig),
 		},
-		BuildVersion{
+		app.BuildVersion{
 			GitTag:    buildGitTag,
 			GitCommit: buildGitCommit,
 			Time:      buildTime,

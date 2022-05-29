@@ -1,4 +1,4 @@
-package main
+package app
 
 import (
 	"github.com/thecolngroup/alphakit/internal/studyrun"
@@ -15,11 +15,11 @@ type BuildVersion struct {
 	User      string
 }
 
-// RunApp is the entrypoint for executing the studyrun cmd outside of the alphakit project.
+// Run is the entrypoint for executing the studyrun cmd outside of the alphakit project.
 // Param args are the cmd line args and excludes the app name.
 // Param botRegistry enables injection of bots to be loaded by string name from config.
 // Param build is optional and will render key build version info to the console during execution.
-func RunApp(args []string, botRegistry map[string]trader.MakeFromConfig, build BuildVersion) error {
+func Run(args []string, botRegistry map[string]trader.MakeFromConfig, build BuildVersion) error {
 	app := studyrun.App{
 		Args:      args,
 		GitCommit: build.GitCommit,
