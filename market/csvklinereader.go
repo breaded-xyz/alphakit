@@ -13,6 +13,9 @@ type CSVKlineReader struct {
 	decoder CSVKlineDecoder
 }
 
+// MakeCSVKlineReader is a factory method type that creates a new CSVKlineReader.
+type MakeCSVKlineReader func(csv *csv.Reader) *CSVKlineReader
+
 // NewCSVKlineReader creates a new CSVKlineReader with the default Binance decoder.
 func NewCSVKlineReader(csv *csv.Reader) *CSVKlineReader {
 	return &CSVKlineReader{

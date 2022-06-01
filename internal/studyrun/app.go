@@ -6,19 +6,20 @@ import (
 	"strings"
 
 	"github.com/schollz/progressbar/v3"
-	"github.com/thecolngroup/alphakit/trader"
 	"golang.org/x/exp/maps"
 )
 
+// App exposes an entry point to execute the studyrun application.
 type App struct {
-	Args        []string
-	GitTag      string
-	GitCommit   string
-	BuildTime   string
-	BuildUser   string
-	BotRegistry map[string]trader.MakeFromConfig
+	Args         []string
+	GitTag       string
+	GitCommit    string
+	BuildTime    string
+	BuildUser    string
+	TypeRegistry map[string]any
 }
 
+// Run executes the studyrun application. Should be called from main.
 func (app *App) Run() error {
 	print(_titleArt)
 
@@ -41,7 +42,7 @@ func (app *App) Run() error {
 	print("done\n")
 
 	print("Reading price samples... ")
-	samples, err := readPricesFromConfig(config)
+	samples, err := readPricesFromConfig(config, app.TypeRegistry)
 	if err != nil {
 		return err
 	}
@@ -62,7 +63,7 @@ func (app *App) Run() error {
 	print("done\n")
 
 	print("Reading optimizer... ")
-	optimizer, err := readBruteOptimizerFromConfig(config, app.BotRegistry)
+	optimizer, err := readBruteOptimizerFromConfig(config, app.TypeRegistry)
 	if err != nil {
 		return err
 	}

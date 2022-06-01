@@ -2,9 +2,6 @@ package app
 
 import (
 	"github.com/thecolngroup/alphakit/internal/studyrun"
-	"github.com/thecolngroup/alphakit/trader"
-	"github.com/thecolngroup/alphakit/trader/hodl"
-	"github.com/thecolngroup/alphakit/trader/trend"
 )
 
 // BuildVersion describes key info to identify the build of the app.
@@ -19,18 +16,14 @@ type BuildVersion struct {
 // Param args are the cmd line args and excludes the app name.
 // Param botRegistry enables injection of bots to be loaded by string name from config.
 // Param build is optional and will render key build version info to the console during execution.
-func Run(args []string, botRegistry map[string]trader.MakeFromConfig, build BuildVersion) error {
+func Run(args []string, typeRegistry map[string]any, build BuildVersion) error {
 	app := studyrun.App{
-		Args:      args,
-		GitCommit: build.GitCommit,
-		GitTag:    build.GitTag,
-		BuildTime: build.Time,
-		BuildUser: build.User,
-		BotRegistry: map[string]trader.MakeFromConfig{
-			"hodl":        trader.MakeFromConfig(hodl.MakeBotFromConfig),
-			"trend.cross": trader.MakeFromConfig(trend.MakeCrossBotFromConfig),
-			"trend.apex":  trader.MakeFromConfig(trend.MakeApexBotFromConfig),
-		},
+		Args:         args,
+		GitCommit:    build.GitCommit,
+		GitTag:       build.GitTag,
+		BuildTime:    build.Time,
+		BuildUser:    build.User,
+		TypeRegistry: typeRegistry,
 	}
 	return app.Run()
 }

@@ -8,8 +8,8 @@ warmupBarCount = 64
 ranker = "sharpe"
 
 [samples]
-btcusdt = "./testdata/btcusdt-h1/"
-ethusdt = "./testdata/ethusdt-h1/"
+decoder = "binance"
+paths = ["./testdata/btcusdt-h1/", "./testdata/ethusdt-h1/"]
 
 [dealer]
 initialCapital = 1000.0

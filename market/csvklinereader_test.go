@@ -107,9 +107,9 @@ func TestCSVKlineReader_ReadWithMetaTraderDecoder(t *testing.T) {
 	}{
 		{
 			name: "Read DOHLCV",
-			give: "11/12/2008;00:00;779.527679;780.964756;777.527679;779.964756;5",
+			give: "11/12/2008;16:00;779.527679;780.964756;777.527679;779.964756;5",
 			want: Kline{
-				Start:  time.Date(2008, 12, 11, 0, 0, 0, 0, time.UTC),
+				Start:  time.Date(2008, 12, 11, 16, 0, 0, 0, time.UTC),
 				O:      dec.New(779.527679),
 				H:      dec.New(780.964756),
 				L:      dec.New(777.527679),
