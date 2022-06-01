@@ -13,7 +13,7 @@ type CSVKlineReader struct {
 	decoder CSVKlineDecoder
 }
 
-// NewCSVKlineReader creates a new CSVKlineReader.
+// NewCSVKlineReader creates a new CSVKlineReader with the default Binance decoder.
 func NewCSVKlineReader(csv *csv.Reader) *CSVKlineReader {
 	return &CSVKlineReader{
 		csv:     csv,
@@ -21,6 +21,7 @@ func NewCSVKlineReader(csv *csv.Reader) *CSVKlineReader {
 	}
 }
 
+// NewCSVKlineReaderWithDecoder creates a new CSVKlineReader with the given decoder.
 func NewCSVKlineReaderWithDecoder(csv *csv.Reader, decoder CSVKlineDecoder) *CSVKlineReader {
 	return &CSVKlineReader{
 		csv:     csv,

@@ -10,6 +10,7 @@ import (
 	"github.com/shopspring/decimal"
 )
 
+// MetaTraderTimeFormat is the time format expected by the MetaTrader decoder when cols [0] and [1] are used.
 const MetaTraderTimeFormat = "02/01/2006 03:04"
 
 var (
@@ -26,8 +27,10 @@ var (
 	ErrInvalidVolumeFormat = errors.New("volume must be in valid float format")
 )
 
+// CSVKlineDecoder is an extension point for CSVKlineReader to support custom file formats.
 type CSVKlineDecoder func(record []string) (Kline, error)
 
+// NewBinanceCSVKlineReader creates a new CSVKlineReader for Binance CSV files.
 func NewBinanceCSVKlineReader(csv *csv.Reader) CSVKlineReader {
 	return CSVKlineReader{
 		csv:     csv,
@@ -35,6 +38,7 @@ func NewBinanceCSVKlineReader(csv *csv.Reader) CSVKlineReader {
 	}
 }
 
+// BinanceCSVKlineDecoder decodes a CSV record from Binance into a Kline.
 func BinanceCSVKlineDecoder(record []string) (Kline, error) {
 	var k, empty Kline
 	var err error
@@ -71,6 +75,7 @@ func BinanceCSVKlineDecoder(record []string) (Kline, error) {
 	return k, nil
 }
 
+// NewMetaTraderCSVKlineReader creates a new CSVKlineReader for MetaTrader CSV files.
 func NewMetaTraderCSVKlineReader(csv *csv.Reader) CSVKlineReader {
 	csv.Comma = ';'
 	return CSVKlineReader{
@@ -79,6 +84,7 @@ func NewMetaTraderCSVKlineReader(csv *csv.Reader) CSVKlineReader {
 	}
 }
 
+// MetaTraderCSVKlineDecoder decodes a CSV record from MetaTrader into a Kline.
 func MetaTraderCSVKlineDecoder(record []string) (Kline, error) {
 	var k, empty Kline
 	var err error
