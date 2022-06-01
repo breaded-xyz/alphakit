@@ -3,7 +3,7 @@ package ta
 import (
 	"sort"
 
-	"github.com/gonum/stat"
+	"gonum.org/v1/gonum/stat"
 )
 
 // Median returns the median of the given values.
