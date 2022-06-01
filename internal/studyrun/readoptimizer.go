@@ -10,7 +10,7 @@ import (
 )
 
 // readBruteOptimizerFromConfig creates a new brute optimizer from a config file params.
-func readBruteOptimizerFromConfig(config map[string]any, botRegistry map[string]trader.MakeFromConfig) (*optimize.BruteOptimizer, error) {
+func readBruteOptimizerFromConfig(config map[string]any, typeRegistry map[string]any) (*optimize.BruteOptimizer, error) {
 
 	var optimizer optimize.BruteOptimizer
 
@@ -25,12 +25,12 @@ func readBruteOptimizerFromConfig(config map[string]any, botRegistry map[string]
 		return nil, errors.New("'bot' key not found")
 	}
 	bot := util.ToString(root["bot"])
-	if _, ok := botRegistry[bot]; !ok {
+	if _, ok := typeRegistry[bot]; !ok {
 		return nil, fmt.Errorf("'%s' key not found in type registry", bot)
 	}
 
 	optimizer = optimize.NewBruteOptimizer()
-	optimizer.MakeBot = botRegistry[bot]
+	optimizer.MakeBot = typeRegistry[bot].(trader.MakeFromConfig)
 	optimizer.SampleSplitPct = util.ToFloat(root["samplesplitpct"])
 	optimizer.WarmupBarCount = util.ToInt(root["warmupbarcount"])
 	optimizer.Ranker = optimize.SharpeRanker

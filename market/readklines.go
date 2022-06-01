@@ -8,8 +8,14 @@ import (
 )
 
 // ReadKlinesFromCSV reads all the .csv files in a given directory or a single file into a slice of Klines.
-// Wraps a CSVKlineReader for convenience. For finer grained memory management use the base kline reader.
+// Wraps a default CSVKlineReader with Binance decoder for convenience.
+// For finer grained memory management use the base kline reader.
 func ReadKlinesFromCSV(path string) ([]Kline, error) {
+	return ReadKlinesFromCSVWithDecoder(path, MakeCSVKlineReader(NewBinanceCSVKlineReader))
+}
+
+// ReadKlinesFromCSVWithDecoder permits using a custom CSVKlineReader.
+func ReadKlinesFromCSVWithDecoder(path string, maker MakeCSVKlineReader) ([]Kline, error) {
 	var prices []Kline
 
 	err := filepath.WalkDir(path, func(path string, d fs.DirEntry, err error) error {
@@ -28,7 +34,8 @@ func ReadKlinesFromCSV(path string) ([]Kline, error) {
 		}
 		//nolint:errcheck // Read ops only so safe to ignore err return
 		defer file.Close()
-		klines, err := NewCSVKlineReader(csv.NewReader(file)).ReadAll()
+		reader := maker(csv.NewReader(file))
+		klines, err := reader.ReadAll()
 		if err != nil {
 			return err
 		}

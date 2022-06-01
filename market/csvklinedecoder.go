@@ -11,7 +11,7 @@ import (
 )
 
 // MetaTraderTimeFormat is the time format expected by the MetaTrader decoder when cols [0] and [1] are used.
-const MetaTraderTimeFormat = "02/01/2006 03:04"
+const MetaTraderTimeFormat = "02/01/2006 15:04"
 
 var (
 	// ErrNotEnoughColumns is returned when the CSV price record does not have enough columns.
@@ -31,8 +31,8 @@ var (
 type CSVKlineDecoder func(record []string) (Kline, error)
 
 // NewBinanceCSVKlineReader creates a new CSVKlineReader for Binance CSV files.
-func NewBinanceCSVKlineReader(csv *csv.Reader) CSVKlineReader {
-	return CSVKlineReader{
+func NewBinanceCSVKlineReader(csv *csv.Reader) *CSVKlineReader {
+	return &CSVKlineReader{
 		csv:     csv,
 		decoder: BinanceCSVKlineDecoder,
 	}
@@ -76,9 +76,9 @@ func BinanceCSVKlineDecoder(record []string) (Kline, error) {
 }
 
 // NewMetaTraderCSVKlineReader creates a new CSVKlineReader for MetaTrader CSV files.
-func NewMetaTraderCSVKlineReader(csv *csv.Reader) CSVKlineReader {
+func NewMetaTraderCSVKlineReader(csv *csv.Reader) *CSVKlineReader {
 	csv.Comma = ';'
-	return CSVKlineReader{
+	return &CSVKlineReader{
 		csv:     csv,
 		decoder: MetaTraderCSVKlineDecoder,
 	}
