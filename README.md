@@ -203,9 +203,11 @@ The command app `studyrun` enables you to execute optimization studies by specif
 
 See the test in `cmd/studyrun` to understand the syntax and play with a working example.
 
-If you wish to use your own custom bots with the command app you'll need to update the type registry inside `internal/studyrun`. In a later release we may implement a plug-in architecture to negate this step.
+If you wish to use your own custom bots or price data decoders with the command app you'll need to update the contents of the type registry passed to the app from `main`.
 
 The command app will execute an optimization study using `BruteOptimizer` and dump out the results in .csv format.
+
+If you wish to execute the `studyrun` process from outside Alphakit, an entrypoint function is availble in the package `github.com/thecolngroup/alphakit/cmd/studyrun/app`.
 
 ## Connecting to a live trading venue
 
