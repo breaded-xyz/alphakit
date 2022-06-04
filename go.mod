@@ -5,8 +5,6 @@ go 1.18
 require (
 	github.com/davecgh/go-spew v1.1.1
 	github.com/gammazero/workerpool v1.1.2
-	github.com/gonum/floats v0.0.0-20181209220543-c233463c7e82
-	github.com/gonum/stat v0.0.0-20181125101827-41a0da705a5b
 	github.com/olekukonko/tablewriter v0.0.5
 	github.com/schollz/progressbar/v3 v3.8.6
 	github.com/schwarmco/go-cartesian-product v0.0.0-20180515110546-d5ee747a6dc9
@@ -14,10 +12,10 @@ require (
 	github.com/spf13/viper v1.12.0
 	github.com/stretchr/testify v1.7.1
 	golang.org/x/exp v0.0.0-20220518171630-0b5c67f07fdf
+	gonum.org/v1/gonum v0.11.0
 )
 
 require (
-	github.com/gonum/integrate v0.0.0-20181209220457-a422b5c0fdf2 // indirect
 	github.com/jszwec/csvutil v1.7.0 // indirect
 	github.com/oklog/ulid/v2 v2.0.2 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
@@ -26,10 +24,6 @@ require (
 require (
 	github.com/fsnotify/fsnotify v1.5.4 // indirect
 	github.com/gammazero/deque v0.1.1 // indirect
-	github.com/gonum/blas v0.0.0-20181208220705-f22b278b28ac // indirect
-	github.com/gonum/internal v0.0.0-20181124074243-f884aa714029 // indirect
-	github.com/gonum/lapack v0.0.0-20181123203213-e4cdc5a0bff9 // indirect
-	github.com/gonum/matrix v0.0.0-20181209220409-c518dec07be9 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/magiconair/properties v1.8.6 // indirect
 	github.com/mattn/go-runewidth v0.0.13 // indirect

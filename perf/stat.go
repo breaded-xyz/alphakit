@@ -3,7 +3,7 @@ package perf
 import (
 	"math"
 
-	"github.com/gonum/stat"
+	"gonum.org/v1/gonum/stat"
 )
 
 const (

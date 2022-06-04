@@ -1,6 +1,6 @@
 package ta
 
-import "github.com/gonum/stat"
+import "gonum.org/v1/gonum/stat"
 
 // SD is a sample standard deviation indicator.
 type SD struct {

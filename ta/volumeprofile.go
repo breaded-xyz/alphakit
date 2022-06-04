@@ -3,8 +3,8 @@ package ta
 import (
 	"math"
 
-	"github.com/gonum/floats"
-	"github.com/gonum/stat"
+	"gonum.org/v1/gonum/floats"
+	"gonum.org/v1/gonum/stat"
 )
 
 // DefaultValueAreaPercentage is the percentage of the total volume used to calculate the value area.

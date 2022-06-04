@@ -1,7 +1,7 @@
 package perf
 
 import (
-	"github.com/gonum/floats"
+	"gonum.org/v1/gonum/floats"
 )
 
 // OptimalF is a function that returns the 'OptimalF' for a series of trade returns as defined by Ralph Vince.

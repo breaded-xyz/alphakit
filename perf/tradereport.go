@@ -3,9 +3,10 @@ package perf
 import (
 	"math"
 
-	"github.com/gonum/floats"
-	"github.com/thecolngroup/alphakit/broker"
 	"github.com/thecolngroup/util"
+	"gonum.org/v1/gonum/floats"
+
+	"github.com/thecolngroup/alphakit/broker"
 )
 
 // TradeReport is a report on the trade metrics.
