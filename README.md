@@ -83,7 +83,7 @@ func Example() {
 	// The default optimization objective is the param set with the highest sharpe ratio
 	optimizer := NewBruteOptimizer()
 	optimizer.SampleSplitPct = 0.5   // Use first 50% as in-sample training data, and remainder for out-of-sample validation
-	optimizer.WarmupBarCount = 360 // Set as maximum lookback of your param space
+	optimizer.WarmupBarCount = 360 // Set as maximum lookback of your param space - 360 is the longest lookback for slow MA
 	optimizer.MakeBot = bot        // Tell the optimizer which bot to use
 
 	// Prepare the optimizer and get an estimate on the number of trials (backtests) required
@@ -114,6 +114,24 @@ func Example() {
 }
 
 ```
+
+## Beware testing bias
+
+Alphakit's aim is to demonstrate best practice when developing algo strategies. This requires a sound approach to backtesting and performance analysis in order to mimimize bias, the most important of which is overfitting whereby you mistake random chance for edge. This is a good summary of the challenges: https://robotwealth.com/backtesting-bias-feels-good-until-you-blow-up/.
+
+To this end, the `BruteOptimizer` implementation enables you to split the given price samples into in-sample and out-of-sample buckets.
+
+```go
+
+// Use first 50% of data as in-sample training data, and remainder for out-of-sample validation
+optimizer.SampleSplitPct = 0.5 
+
+```
+
+Training is conducted on the in-sample and performance validation on the out-of-sample. However, this is not a pancea and can still result in an overfitted algo if you attempt to optimize too many parameters at the same time.
+
+There are a number of useful articles on https://financial-hacker.com/ that explore the pitfalls of backtesting in more detail.
+
 ## Fundamental architecture patterns
 
 The core assumption underlying the framework is that price data enters the system at a defined interval. Each time a new kline arrives it triggers an evaluation process owned by a bot that may result in 1 or more new orders being issued to a dealer.
@@ -128,7 +146,9 @@ In future releases new `Dealer` implementations will enable you to connect to sp
 
 The price data used in the unit tests and examples is sourced from Binance. It's a good source of clean crypto data going back to late 2017. See https://github.com/binance/binance-public-data/.
 
-Alphakit offers an API for price data in the `market` package. The primary representation is in the form of a candlestick (OHLC) - also known as a kline. `CSVKlineReader` expects the timestamp denoting the start of the kline interval to be provided in unix millisecond format. Convenience functions for reading individual CSV files or walking a directory are also included.
+Alphakit offers an API for price data in the `market` package. The primary representation is in the form of a candlestick (OHLC) - also known as a kline. `CSVKlineReader` reads klines from a .csv file, it can be extended to decode data from various sources with a `CSVKlineDecoder`. The default decoder supports the Binance data format which uses a unix millisecond format. A further decoder is also provided for MetaTrader data files.
+
+Convenience functions for reading individual CSV files or walking a directory are also included.
 
 ## Performance reports
 
