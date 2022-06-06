@@ -57,6 +57,20 @@ type VolumeLevel struct {
 	Volume float64
 }
 
+// NewVolumeProfileFixedBinWidth creates a new volume profile with a variable number of bins dictated by binWidth.
+func NewVolumeProfileFixedBinWidth(binWidth float64, levels []VolumeLevel) *VolumeProfile {
+
+	var sortedPrices []float64
+	for _, level := range levels {
+		sortedPrices = append(sortedPrices, level.Price)
+	}
+	max := floats.Max(sortedPrices)
+	min := floats.Min(sortedPrices)
+	nBins := int(math.Floor((max-min)/binWidth)) + 1
+
+	return NewVolumeProfile(nBins, levels)
+}
+
 // NewVolumeProfile creates a new profile for the price and volume series given by levels.
 // nBins is the number of bins to use for the profile histogram.
 func NewVolumeProfile(nBins int, levels []VolumeLevel) *VolumeProfile {

@@ -51,3 +51,7 @@ func TestMarketProfileWithPriceFile(t *testing.T) {
 	assert.Equal(t, 36408.572222222225, vp.VAH)
 	assert.Equal(t, 36617.433333333334, vp.High)
 }
+
+func TestVolumeProfile_FixedBinWidth(t *testing.T) {
+
+}
