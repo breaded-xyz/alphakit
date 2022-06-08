@@ -58,7 +58,12 @@ type VolumeLevel struct {
 }
 
 // NewVolumeProfileFixedBinWidth creates a new volume profile with a variable number of bins dictated by binWidth.
+// Returns nil if binWidth is not positive.
 func NewVolumeProfileFixedBinWidth(binWidth float64, levels []VolumeLevel) *VolumeProfile {
+
+	if binWidth <= 0 {
+		return nil
+	}
 
 	var sortedPrices []float64
 	for _, level := range levels {
