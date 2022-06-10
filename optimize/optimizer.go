@@ -26,9 +26,14 @@ func (p Phase) String() string {
 	return [...]string{"None", "Training", "Validation"}[p]
 }
 
+// MarshalText is used to output the phase as a string for CSV rendering.
+func (p Phase) MarshalText() ([]byte, error) {
+	return []byte(p.String()), nil
+}
+
 // Optimizer is the interface for an optimization method.
 type Optimizer interface {
-	Prepare(ParamMap, [][]market.Kline) (int, error)
+	Prepare(ParamMap, map[AssetID][]market.Kline) (int, error)
 	Start(context.Context) (<-chan OptimizerTrial, error)
 	Study() Study
 }

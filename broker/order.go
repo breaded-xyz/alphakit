@@ -22,6 +22,11 @@ func (s OrderSide) String() string {
 	return [...]string{"None", "Buy", "Sell"}[s]
 }
 
+// MarshalText is used to output as a string for CSV rendering.
+func (s OrderSide) MarshalText() ([]byte, error) {
+	return []byte(s.String()), nil
+}
+
 // Opposite returns the opposite side of the order.
 func (s OrderSide) Opposite() OrderSide {
 	switch s {
@@ -44,8 +49,13 @@ const (
 	Limit
 )
 
-func (s OrderType) String() string {
-	return [...]string{"None", "Market", "Limit"}[s]
+func (t OrderType) String() string {
+	return [...]string{"None", "Market", "Limit"}[t]
+}
+
+// MarshalText is used to output as a string for CSV rendering.
+func (t OrderType) MarshalText() ([]byte, error) {
+	return []byte(t.String()), nil
 }
 
 // OrderState represents the state of an order as it is processed by a dealer.
