@@ -35,7 +35,7 @@ func Example() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	priceSamples := [][]market.Kline{btc, eth}
+	priceSamples := map[AssetID][]market.Kline{"btc": btc, "eth": eth}
 
 	// Create a new brute style optimizer with a default simulated dealer (no broker costs)
 	// The default optimization objective is the param set with the highest sharpe ratio

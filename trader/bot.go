@@ -20,6 +20,9 @@ type Bot interface {
 	// Sets the dealer to be used for order execution.
 	SetDealer(broker.Dealer)
 
+	// Sets the asset to trade.
+	SetAsset(market.Asset)
+
 	// Receive gives the bot the next market price and evaluates the algo,
 	// potentially generating new broker orders.
 	market.Receiver

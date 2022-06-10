@@ -52,6 +52,11 @@ func (b *Bot) SetDealer(dealer broker.Dealer) {
 	b.dealer = dealer
 }
 
+// SetAsset sets the asset to trade.
+func (b *Bot) SetAsset(asset market.Asset) {
+	b.Asset = asset
+}
+
 // Warmup seeds the Predicter and Risker with historical price data.
 func (b *Bot) Warmup(ctx context.Context, prices []market.Kline) error {
 	for i := range prices {

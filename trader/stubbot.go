@@ -17,6 +17,10 @@ type StubBot struct {
 func (b *StubBot) SetDealer(dealer broker.Dealer) {
 }
 
+// SetAsset not implemented.
+func (b *StubBot) SetAsset(asset market.Asset) {
+}
+
 // Warmup not implemented.
 func (b *StubBot) Warmup(ctx context.Context, prices []market.Kline) error {
 	return nil

@@ -43,6 +43,11 @@ func (b *Bot) SetDealer(dealer broker.Dealer) {
 	b.dealer = dealer
 }
 
+// SetAsset sets the asset to trade.
+func (b *Bot) SetAsset(asset market.Asset) {
+	b.asset = asset
+}
+
 // Warmup is not used.
 func (b *Bot) Warmup(ctx context.Context, prices []market.Kline) error {
 	return nil

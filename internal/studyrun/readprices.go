@@ -5,35 +5,44 @@ import (
 	"fmt"
 
 	"github.com/thecolngroup/alphakit/market"
+	"github.com/thecolngroup/alphakit/optimize"
 	"github.com/thecolngroup/util"
 )
 
 // readPricesFromConfig reads the price samples from a config file params.
-func readPricesFromConfig(config map[string]any, typeRegistry map[string]any) ([][]market.Kline, error) {
+func readPricesFromConfig(config map[string]any, typeRegistry map[string]any) (map[optimize.AssetID][]market.Kline, error) {
 
 	if _, ok := config["samples"]; !ok {
 		return nil, errors.New("'samples' key not found")
 	}
-	root := config["samples"].(map[string]any)
+	root := config["samples"].([]any)
+	samples := make(map[optimize.AssetID][]market.Kline)
 
-	// Load decoder from type registry
-	if _, ok := root["decoder"]; !ok {
-		return nil, errors.New("'decoder' key not found")
-	}
-	decoder := util.ToString(root["decoder"])
-	if _, ok := typeRegistry[decoder]; !ok {
-		return nil, fmt.Errorf("'%s' key not found in type registry", decoder)
-	}
-	maker := typeRegistry[decoder].(market.MakeCSVKlineReader)
+	for _, sub := range root {
 
-	var prices [][]market.Kline
-	for _, v := range root["paths"].([]any) {
-		path := v.(string)
+		cfg := sub.(map[string]any)
+
+		// Load decoder from type registry
+		if _, ok := cfg["decoder"]; !ok {
+			return nil, errors.New("'decoder' key not found")
+		}
+		decoder := util.ToString(cfg["decoder"])
+		if _, ok := typeRegistry[decoder]; !ok {
+			return nil, fmt.Errorf("'%s' key not found in type registry", decoder)
+		}
+		maker := typeRegistry[decoder].(market.MakeCSVKlineReader)
+
+		// Load path to price files from config
+		path := cfg["path"].(string)
 		series, err := market.ReadKlinesFromCSVWithDecoder(path, maker)
 		if err != nil {
 			return nil, err
 		}
-		prices = append(prices, series)
+
+		// Load asset key from config
+		assetID := optimize.AssetID(cfg["asset"].(string))
+		samples[assetID] = series
 	}
-	return prices, nil
+
+	return samples, nil
 }

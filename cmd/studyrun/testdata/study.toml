@@ -7,9 +7,15 @@ sampleSplitPct = 0.7
 warmupBarCount = 64
 ranker = "sharpe"
 
-[samples]
+[[samples]]
 decoder = "binance"
-paths = ["./testdata/btcusdt-h1/", "./testdata/ethusdt-h1/"]
+asset = "btc"
+path = "./testdata/btcusdt-h1/"
+
+[[samples]]
+decoder = "binance"
+asset = "eth"
+path = "./testdata/ethusdt-h1/"
 
 [dealer]
 initialCapital = 1000.0

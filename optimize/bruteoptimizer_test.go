@@ -10,13 +10,14 @@ import (
 	"github.com/thecolngroup/alphakit/perf"
 	"github.com/thecolngroup/alphakit/trader"
 	"github.com/thecolngroup/dec"
+	"golang.org/x/exp/maps"
 )
 
 func TestBruteOptimizer_Prepare(t *testing.T) {
 	tests := []struct {
 		name               string
 		giveParamRange     ParamMap
-		giveSamples        [][]market.Kline
+		giveSamples        map[AssetID][]market.Kline
 		giveSampleSplitPct float64
 		wantSteps          int
 		wantStudy          Study
@@ -24,9 +25,10 @@ func TestBruteOptimizer_Prepare(t *testing.T) {
 		{
 			name:           "ok",
 			giveParamRange: map[string]any{"A": []any{1, 2}, "B": []any{10}},
-			giveSamples: [][]market.Kline{
-				{{C: dec.New(10)}, {C: dec.New(20)}, {C: dec.New(30)}, {C: dec.New(40)}},
-				{{C: dec.New(50)}, {C: dec.New(60)}, {C: dec.New(70)}}},
+			giveSamples: map[AssetID][]market.Kline{
+				AssetID("asset_x"): {{C: dec.New(10)}, {C: dec.New(20)}, {C: dec.New(30)}, {C: dec.New(40)}},
+				AssetID("asset_y"): {{C: dec.New(50)}, {C: dec.New(60)}, {C: dec.New(70)}},
+			},
 			giveSampleSplitPct: 0.5,
 			wantSteps:          6,
 			wantStudy: Study{
@@ -34,26 +36,26 @@ func TestBruteOptimizer_Prepare(t *testing.T) {
 					{Params: map[string]any{"A": 1, "B": 10}},
 					{Params: map[string]any{"A": 2, "B": 10}},
 				},
-				TrainingSamples: [][]market.Kline{
-					{{C: dec.New(10)}, {C: dec.New(20)}},
-					{{C: dec.New(50)}, {C: dec.New(60)}},
+				TrainingSamples: map[AssetID][]market.Kline{
+					AssetID("asset_x"): {{C: dec.New(10)}, {C: dec.New(20)}},
+					AssetID("asset_y"): {{C: dec.New(50)}, {C: dec.New(60)}},
 				},
-				ValidationSamples: [][]market.Kline{
-					{{C: dec.New(30)}},
-					{{C: dec.New(60)}},
+				ValidationSamples: map[AssetID][]market.Kline{
+					AssetID("asset_x"): {{C: dec.New(30)}},
+					AssetID("asset_y"): {{C: dec.New(60)}},
 				},
 			},
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			var optimizer BruteOptimizer
+			optimizer := NewBruteOptimizer()
 			optimizer.SampleSplitPct = tt.giveSampleSplitPct
 			actSteps, err := optimizer.Prepare(tt.giveParamRange, tt.giveSamples)
 			assert.NoError(t, err)
 			assert.Equal(t, tt.wantSteps, actSteps)
 			assert.Len(t, optimizer.study.Training, len(tt.wantStudy.Training))
-			assert.ElementsMatch(t, optimizer.study.TrainingSamples, tt.wantStudy.TrainingSamples)
+			assert.ElementsMatch(t, maps.Values(optimizer.study.TrainingSamples), maps.Values(tt.wantStudy.TrainingSamples))
 		})
 	}
 }
@@ -120,9 +122,9 @@ func TestBruteOptimizer_enqueueJobs(t *testing.T) {
 		{ID: "0", Params: map[string]any{"A": 0, "B": 1}},
 		{ID: "1", Params: map[string]any{"Y": 25, "Z": 26}},
 	}
-	giveSamples := [][]market.Kline{
-		{{C: dec.New(10)}, {C: dec.New(20)}},
-		{{C: dec.New(30)}, {C: dec.New(40)}, {C: dec.New(50)}},
+	giveSamples := map[AssetID][]market.Kline{
+		"asset_x": {{C: dec.New(10)}, {C: dec.New(20)}},
+		"asset_y": {{C: dec.New(30)}, {C: dec.New(40)}, {C: dec.New(50)}},
 	}
 	want := 4 // Expect 4 enqueued jobs in buffered channel
 

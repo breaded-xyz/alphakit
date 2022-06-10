@@ -57,6 +57,7 @@ type BruteOptimizer struct {
 
 type bruteOptimizerJob struct {
 	ParamSet       ParamSet
+	Asset          market.Asset
 	Sample         []market.Kline
 	WarmupBarCount int
 	MakeBot        trader.MakeFromConfig
@@ -78,7 +79,7 @@ func NewBruteOptimizer() BruteOptimizer {
 
 // Prepare prepares a study based on the given param ranges and price data samples.
 // Returned is the estimated number of trials to be performed.
-func (o *BruteOptimizer) Prepare(in ParamMap, samples [][]market.Kline) (int, error) {
+func (o *BruteOptimizer) Prepare(in ParamMap, samples map[AssetID][]market.Kline) (int, error) {
 
 	products := CartesianBuilder(in)
 	for i := range products {
@@ -87,10 +88,10 @@ func (o *BruteOptimizer) Prepare(in ParamMap, samples [][]market.Kline) (int, er
 		o.study.Training = append(o.study.Training, pSet)
 	}
 
-	for i := range samples {
-		training, validation := splitSample(samples[i], o.SampleSplitPct)
-		o.study.TrainingSamples = append(o.study.TrainingSamples, training)
-		o.study.ValidationSamples = append(o.study.ValidationSamples, validation)
+	for k := range samples {
+		training, validation := splitSample(samples[k], o.SampleSplitPct)
+		o.study.TrainingSamples[k] = training
+		o.study.ValidationSamples[k] = validation
 	}
 
 	steps := len(o.study.Training) * len(samples) // Training phase
@@ -176,7 +177,7 @@ func (o *BruteOptimizer) Study() Study {
 	return o.study
 }
 
-func (o *BruteOptimizer) enqueueJobs(pSets []ParamSet, samples [][]market.Kline) <-chan bruteOptimizerJob {
+func (o *BruteOptimizer) enqueueJobs(pSets []ParamSet, samples map[AssetID][]market.Kline) <-chan bruteOptimizerJob {
 
 	// A buffered channel enables us to enqueue jobs and close the channel in a single function to simplify the call flow
 	// Without a buffer the loop would block awaiting a ready receiver for the jobs
@@ -185,10 +186,11 @@ func (o *BruteOptimizer) enqueueJobs(pSets []ParamSet, samples [][]market.Kline)
 
 	// Enqueue a job for each pset and price series combination
 	for i := range pSets {
-		for j := range samples {
+		for k := range samples {
 			jobCh <- bruteOptimizerJob{
 				ParamSet:       pSets[i],
-				Sample:         samples[j],
+				Asset:          market.NewAsset(string(k)),
+				Sample:         samples[k],
 				WarmupBarCount: o.WarmupBarCount,
 				MakeBot:        o.MakeBot,
 				MakeDealer:     o.MakeDealer,
@@ -232,12 +234,14 @@ func processBruteJobs(ctx context.Context, doneCh <-chan struct{}, jobCh <-chan 
 							outCh <- OptimizerTrial{PSet: job.ParamSet, Err: err}
 							return
 						}
+						bot.SetAsset(job.Asset)
 						bot.SetDealer(dealer)
+
 						if err := bot.Warmup(ctx, job.Sample[:job.WarmupBarCount]); err != nil {
 							outCh <- OptimizerTrial{PSet: job.ParamSet, Err: err}
 							return
 						}
-						perf, err := runBacktest(ctx, bot, dealer, job.Sample[job.WarmupBarCount:])
+						perf, err := runBacktest(ctx, bot, dealer, job.Asset, job.Sample[job.WarmupBarCount:])
 						outCh <- OptimizerTrial{PSet: job.ParamSet, Result: perf, Err: err}
 					})
 			}
@@ -248,7 +252,7 @@ func processBruteJobs(ctx context.Context, doneCh <-chan struct{}, jobCh <-chan 
 	return outCh
 }
 
-func runBacktest(ctx context.Context, bot trader.Bot, dealer broker.SimulatedDealer, prices []market.Kline) (perf.PerformanceReport, error) {
+func runBacktest(ctx context.Context, bot trader.Bot, dealer broker.SimulatedDealer, asset market.Asset, prices []market.Kline) (perf.PerformanceReport, error) {
 	var empty perf.PerformanceReport
 
 	for i := range prices {
@@ -271,6 +275,7 @@ func runBacktest(ctx context.Context, bot trader.Bot, dealer broker.SimulatedDea
 	}
 	equity := dealer.EquityHistory()
 	report := perf.NewPerformanceReport(trades, equity)
+	report.Asset = asset
 
 	return report, nil
 }

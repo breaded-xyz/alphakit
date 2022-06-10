@@ -10,6 +10,7 @@ import (
 
 	"github.com/olekukonko/tablewriter"
 	"github.com/thecolngroup/alphakit/broker"
+	"github.com/thecolngroup/alphakit/market"
 	"github.com/thecolngroup/util"
 )
 
@@ -35,6 +36,7 @@ var _summaryReportHeader = []string{
 //-  PorfolioReport reports metrics related to the portfolio equity curve.
 type PerformanceReport struct {
 	ID         string           `csv:"id"`
+	Asset      market.Asset     `csv:"asset_,inline"`
 	Trade      *TradeReport     `csv:",inline"`
 	Portfolio  *PortfolioReport `csv:",inline"`
 	Properties map[string]any   `csv:"properties"`

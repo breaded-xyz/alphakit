@@ -27,11 +27,11 @@ type Study struct {
 	ID string
 
 	Training        []ParamSet
-	TrainingSamples [][]market.Kline
+	TrainingSamples map[AssetID][]market.Kline
 	TrainingResults map[ParamSetID]Report
 
 	Validation        []ParamSet
-	ValidationSamples [][]market.Kline
+	ValidationSamples map[AssetID][]market.Kline
 	ValidationResults map[ParamSetID]Report
 }
 
@@ -40,10 +40,16 @@ type Study struct {
 func NewStudy() Study {
 	return Study{
 		ID:                string(util.NewID()),
+		TrainingSamples:   make(map[AssetID][]market.Kline),
 		TrainingResults:   make(map[ParamSetID]Report),
+		ValidationSamples: make(map[AssetID][]market.Kline),
 		ValidationResults: make(map[ParamSetID]Report),
 	}
 }
+
+// AssetID is a string identifer for the asset associated with a sample.
+// Typically the symbol of the asset, e.g. btcusdt.
+type AssetID string
 
 // ParamSet is a set of algo parameters to trial.
 type ParamSet struct {
