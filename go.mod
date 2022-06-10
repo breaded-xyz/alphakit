@@ -11,6 +11,8 @@ require (
 	github.com/shopspring/decimal v1.3.1
 	github.com/spf13/viper v1.12.0
 	github.com/stretchr/testify v1.7.1
+	github.com/thecolngroup/dec v0.0.1
+	github.com/thecolngroup/util v0.0.2
 	golang.org/x/exp v0.0.0-20220518171630-0b5c67f07fdf
 	gonum.org/v1/gonum v0.11.0
 )
@@ -39,8 +41,6 @@ require (
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/stretchr/objx v0.4.0 // indirect
 	github.com/subosito/gotenv v1.3.0 // indirect
-	github.com/thecolngroup/dec v0.0.1
-	github.com/thecolngroup/util v0.0.2
 	golang.org/x/crypto v0.0.0-20220525230936-793ad666bf5e // indirect
 	golang.org/x/sys v0.0.0-20220520151302-bc2c85ada10a // indirect
 	golang.org/x/term v0.0.0-20220526004731-065cf7ba2467 // indirect
