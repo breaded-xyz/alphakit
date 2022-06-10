@@ -237,6 +237,12 @@ func processBruteJobs(ctx context.Context, doneCh <-chan struct{}, jobCh <-chan 
 						bot.SetAsset(job.Asset)
 						bot.SetDealer(dealer)
 
+						if len(job.Sample) < job.WarmupBarCount {
+							err := errors.New("price sample length < required warmup bar count")
+							outCh <- OptimizerTrial{PSet: job.ParamSet, Err: err}
+							return
+						}
+
 						if err := bot.Warmup(ctx, job.Sample[:job.WarmupBarCount]); err != nil {
 							outCh <- OptimizerTrial{PSet: job.ParamSet, Err: err}
 							return

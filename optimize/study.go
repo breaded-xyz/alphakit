@@ -92,6 +92,10 @@ func Summarize(report PhaseReport) PhaseReport {
 	for i := range report.Trials {
 		backtest := report.Trials[i]
 
+		if backtest.PortfolioReport == nil || backtest.TradeReport == nil {
+			continue
+		}
+
 		if backtest.TradeReport.TradeCount == 0 {
 			continue
 		}

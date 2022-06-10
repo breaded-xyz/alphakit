@@ -99,6 +99,11 @@ func prepareStudyForCSV(study *Study) ([]phaseReport, []trialReport, []tradeDeta
 					PhaseReportID: report.ID,
 					Backtest:      trial,
 				})
+
+				if trial.PortfolioReport == nil || trial.TradeReport == nil {
+					continue
+				}
+
 				for _, trade := range trial.TradeReport.Trades {
 					tradeRows = append(tradeRows, tradeDetailRow{
 						StudyID:       study.ID,
