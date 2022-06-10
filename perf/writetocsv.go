@@ -10,7 +10,7 @@ import (
 )
 
 // WritePerformanceReportToCSV writes a performance report to a CSV file.
-func WritePeformanceReportToCSV(filename string, report *PerformanceReport) error {
+func WritePerformanceReportToCSV(filename string, report *PerformanceReport) error {
 	encMap := func(m map[string]any) ([]byte, error) {
 		return []byte(fmt.Sprint(m)), nil
 	}
