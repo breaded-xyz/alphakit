@@ -52,7 +52,7 @@ type BruteOptimizer struct {
 
 	MaxWorkers int
 
-	study Study
+	study *Study
 }
 
 type bruteOptimizerJob struct {
@@ -173,7 +173,7 @@ func (o *BruteOptimizer) Start(ctx context.Context) (<-chan OptimizerTrial, erro
 }
 
 // Study returns the current study. Call after the optimizer has finished to read the results.
-func (o *BruteOptimizer) Study() Study {
+func (o *BruteOptimizer) Study() *Study {
 	return o.study
 }
 

@@ -37,8 +37,8 @@ type Study struct {
 
 // NewStudy returns a new study.
 // Use an Optimizer implementation to prepare and execute the study.
-func NewStudy() Study {
-	return Study{
+func NewStudy() *Study {
+	return &Study{
 		ID:                string(util.NewID()),
 		TrainingSamples:   make(map[AssetID][]market.Kline),
 		TrainingResults:   make(map[ParamSetID]PhaseReport),

@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/schollz/progressbar/v3"
+	"github.com/thecolngroup/alphakit/optimize"
 	"golang.org/x/exp/maps"
 )
 
@@ -102,7 +103,7 @@ func (app *App) Run() error {
 	}
 
 	fmt.Printf("Writing study results to output directory '%s'... ", outputPath)
-	if err := writeStudy(outputPath, optimizer.Study()); err != nil {
+	if err := optimize.WriteStudyResultToCSV(outputPath, optimizer.Study()); err != nil {
 		return err
 	}
 	print("done\n")

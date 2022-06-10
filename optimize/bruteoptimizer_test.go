@@ -63,12 +63,12 @@ func TestBruteOptimizer_Prepare(t *testing.T) {
 func TestBruteOptimizer_Start(t *testing.T) {
 	tests := []struct {
 		name      string
-		giveStudy Study
-		wantStudy Study
+		giveStudy *Study
+		wantStudy *Study
 	}{
 		{
 			name: "select top ranked pset for validation",
-			giveStudy: Study{
+			giveStudy: &Study{
 				Training: []ParamSet{
 					{ID: "1", Params: map[string]any{"A": 1, "B": 10}},
 					{ID: "2", Params: map[string]any{"A": 2, "B": 10}},
@@ -79,7 +79,7 @@ func TestBruteOptimizer_Start(t *testing.T) {
 				},
 				ValidationResults: make(map[ParamSetID]PhaseReport),
 			},
-			wantStudy: Study{
+			wantStudy: &Study{
 				Training: []ParamSet{
 					{ID: "1", Params: map[string]any{"A": 1, "B": 10}},
 					{ID: "2", Params: map[string]any{"A": 2, "B": 10}},

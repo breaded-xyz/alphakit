@@ -35,7 +35,7 @@ func (p Phase) MarshalText() ([]byte, error) {
 type Optimizer interface {
 	Prepare(ParamMap, map[AssetID][]market.Kline) (int, error)
 	Start(context.Context) (<-chan OptimizerTrial, error)
-	Study() Study
+	Study() *Study
 }
 
 // OptimizerTrial is a discrete trial conducted by an Optimizer on a single ParamSet.
