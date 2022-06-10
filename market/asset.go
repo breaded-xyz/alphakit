@@ -2,7 +2,7 @@ package market
 
 // Asset represents a tradeable asset identified by its symbol, e.g. BTCUSD.
 type Asset struct {
-	Symbol string
+	Symbol string `csv:"symbol"`
 }
 
 // NewAsset creates a new Asset with the given symbol.

@@ -16,20 +16,20 @@ func writeStudy(path string, study optimize.Study) error {
 
 	summaries, backtests := prepareStudyForCSV(study)
 
-	if err := writeSummaryReports(path, summaries); err != nil {
+	if err := writePhaseReports(path, summaries); err != nil {
 		return err
 	}
 
-	if err := writeBacktestReports(path, backtests); err != nil {
+	if err := writeTrialReports(path, backtests); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func writeSummaryReports(path string, reports []summaryReport) error {
+func writePhaseReports(path string, reports []phaseReport) error {
 	prefix := time.Now().UTC().Format(_filenameFriendlyTimeFormat)
-	out := filepath.Join(path, fmt.Sprintf("%s-summaryreports.csv", prefix))
+	out := filepath.Join(path, fmt.Sprintf("%s-phasereports.csv", prefix))
 	if err := saveDataToCSV(out, reports); err != nil {
 		return err
 	}
@@ -37,9 +37,9 @@ func writeSummaryReports(path string, reports []summaryReport) error {
 	return nil
 }
 
-func writeBacktestReports(path string, reports []backtestReport) error {
+func writeTrialReports(path string, reports []trialReport) error {
 	prefix := time.Now().UTC().Format(_filenameFriendlyTimeFormat)
-	out := filepath.Join(path, fmt.Sprintf("%s-backtestreports.csv", prefix))
+	out := filepath.Join(path, fmt.Sprintf("%s-trialreports.csv", prefix))
 	if err := saveDataToCSV(out, reports); err != nil {
 		return err
 	}

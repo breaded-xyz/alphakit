@@ -28,11 +28,11 @@ type Study struct {
 
 	Training        []ParamSet
 	TrainingSamples map[AssetID][]market.Kline
-	TrainingResults map[ParamSetID]Report
+	TrainingResults map[ParamSetID]PhaseReport
 
 	Validation        []ParamSet
 	ValidationSamples map[AssetID][]market.Kline
-	ValidationResults map[ParamSetID]Report
+	ValidationResults map[ParamSetID]PhaseReport
 }
 
 // NewStudy returns a new study.
@@ -41,9 +41,9 @@ func NewStudy() Study {
 	return Study{
 		ID:                string(util.NewID()),
 		TrainingSamples:   make(map[AssetID][]market.Kline),
-		TrainingResults:   make(map[ParamSetID]Report),
+		TrainingResults:   make(map[ParamSetID]PhaseReport),
 		ValidationSamples: make(map[AssetID][]market.Kline),
-		ValidationResults: make(map[ParamSetID]Report),
+		ValidationResults: make(map[ParamSetID]PhaseReport),
 	}
 }
 
@@ -71,12 +71,12 @@ func NewParamSet() ParamSet {
 	}
 }
 
-// Report is the aggregated performance of a ParamSet across one or more price samples (trials)
+// PhaseReport is the aggregated performance of a ParamSet across one or more price samples (trials)
 // The summary method is owned by the Optimizer implementation, but will typically be the mean (avg) of the individual trials.
-type Report struct {
+type PhaseReport struct {
 	ID      string   `csv:"id"`
 	Phase   Phase    `csv:"phase"`
-	Subject ParamSet `csv:",inline"`
+	Subject ParamSet `csv:"paramset_,inline"`
 
 	PRR    float64 `csv:"prr"`
 	MDD    float64 `csv:"mdd"`
@@ -91,27 +91,32 @@ type Report struct {
 	SampleCount int `csv:"sample_count"`
 	TradeCount  int `csv:"trade_count"`
 
-	Backtests []perf.PerformanceReport `csv:"-"`
+	Trials []perf.PerformanceReport `csv:"-"`
 }
 
 // NewReport returns a new empty report with an initialized ID.
-func NewReport() Report {
-	return Report{
+func NewReport() PhaseReport {
+	return PhaseReport{
 		ID: string(util.NewID()),
 	}
 }
 
 // Summarize inspects the individual backtests in the report and updates the summary fields.
-func Summarize(report Report) Report {
+// Summary takes the average of the metric across all the trials in a phase.
+func Summarize(report PhaseReport) PhaseReport {
 
-	if len(report.Backtests) == 0 {
+	if len(report.Trials) == 0 {
 		return report
 	}
 
-	for i := range report.Backtests {
-		backtest := report.Backtests[i]
+	for i := range report.Trials {
+		backtest := report.Trials[i]
 
 		if backtest.Trade == nil || backtest.Portfolio == nil {
+			continue
+		}
+
+		if backtest.Trade.TradeCount == 0 {
 			continue
 		}
 

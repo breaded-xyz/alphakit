@@ -106,7 +106,7 @@ func (o *BruteOptimizer) Start(ctx context.Context) (<-chan OptimizerTrial, erro
 	outCh := make(chan OptimizerTrial)
 
 	// Helper to append results to each phase
-	appendResult := func(phase Phase, results map[ParamSetID]Report, pset ParamSet, backtest perf.PerformanceReport) {
+	appendResult := func(phase Phase, results map[ParamSetID]PhaseReport, pset ParamSet, backtest perf.PerformanceReport) {
 		report, ok := results[pset.ID]
 		if !ok {
 			report = NewReport()
@@ -114,7 +114,7 @@ func (o *BruteOptimizer) Start(ctx context.Context) (<-chan OptimizerTrial, erro
 			report.Phase = phase
 		}
 		backtest.Properties = pset.Params
-		report.Backtests = append(report.Backtests, backtest)
+		report.Trials = append(report.Trials, backtest)
 		results[pset.ID] = report
 	}
 

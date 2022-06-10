@@ -9,8 +9,8 @@ import (
 
 func TestSummarize(t *testing.T) {
 
-	give := Report{
-		Backtests: []perf.PerformanceReport{
+	give := PhaseReport{
+		Trials: []perf.PerformanceReport{
 			{
 				Trade:     &perf.TradeReport{PRR: 2.0, TradeCount: 5},
 				Portfolio: &perf.PortfolioReport{MaxDrawdown: 0.3, CAGR: 0.8, Sharpe: 1.0, Calmar: 2.0},
@@ -21,7 +21,7 @@ func TestSummarize(t *testing.T) {
 			},
 		},
 	}
-	want := Report{
+	want := PhaseReport{
 		PRR:         3.0,
 		MDD:         0.25,
 		CAGR:        1.15,
@@ -29,7 +29,7 @@ func TestSummarize(t *testing.T) {
 		Calmar:      2.0,
 		SampleCount: 2,
 		TradeCount:  15,
-		Backtests: []perf.PerformanceReport{
+		Trials: []perf.PerformanceReport{
 			{
 				Trade:     &perf.TradeReport{PRR: 2.0, TradeCount: 5},
 				Portfolio: &perf.PortfolioReport{MaxDrawdown: 0.3, CAGR: 0.8, Sharpe: 1.0, Calmar: 2.0},

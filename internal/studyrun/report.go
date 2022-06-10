@@ -25,37 +25,37 @@ var _summaryReportHeader = []string{
 	"Trades",
 }
 
-// summaryReport is a wrapper on optimize.Report that adds a PK for saving to CSV.
-type summaryReport struct {
-	StudyID string          `csv:"study_id"`
-	Summary optimize.Report `csv:",inline"`
+// phaseReport is a wrapper on optimize.PhaseReport that adds a PK for saving to CSV.
+type phaseReport struct {
+	StudyID string               `csv:"study_id"`
+	Report  optimize.PhaseReport `csv:"phasereport_,inline"`
 }
 
-// backtestReport is a wrapper on perf.PerformanceReport that adds a compound key for saving to CSV.
-type backtestReport struct {
-	StudyID   string                 `csv:"study_id"`
-	SummaryID string                 `csv:"summary_id"`
-	Backtest  perf.PerformanceReport `csv:",inline"`
+// trialReport is a wrapper on perf.PerformanceReport that adds a compound key for saving to CSV.
+type trialReport struct {
+	StudyID       string                 `csv:"study_id"`
+	PhaseReportID string                 `csv:"phasereport_id"`
+	Backtest      perf.PerformanceReport `csv:"backtest_,inline"`
 }
 
 // prepareStudyForCSV returns data that is ready for saving to CSV.
-func prepareStudyForCSV(study optimize.Study) ([]summaryReport, []backtestReport) {
+func prepareStudyForCSV(study optimize.Study) ([]phaseReport, []trialReport) {
 
-	var summaries []summaryReport
-	var backtests []backtestReport
+	var summaries []phaseReport
+	var backtests []trialReport
 
-	flattenResults := func(results map[optimize.ParamSetID]optimize.Report) {
+	flattenResults := func(results map[optimize.ParamSetID]optimize.PhaseReport) {
 		for k := range results {
 			report := results[k]
-			summaries = append(summaries, summaryReport{
+			summaries = append(summaries, phaseReport{
 				StudyID: study.ID,
-				Summary: report,
+				Report:  report,
 			})
-			for i := range report.Backtests {
-				backtests = append(backtests, backtestReport{
-					StudyID:   study.ID,
-					SummaryID: report.ID,
-					Backtest:  report.Backtests[i],
+			for i := range report.Trials {
+				backtests = append(backtests, trialReport{
+					StudyID:       study.ID,
+					PhaseReportID: report.ID,
+					Backtest:      report.Trials[i],
 				})
 			}
 		}
@@ -67,8 +67,8 @@ func prepareStudyForCSV(study optimize.Study) ([]summaryReport, []backtestReport
 	return summaries, backtests
 }
 
-// printSummaryReport prints a summary report to stdout.
-func printSummaryReport(report optimize.Report) {
+// printSummary prints a summary report to stdout.
+func printSummary(report optimize.PhaseReport) {
 	table := tablewriter.NewWriter(os.Stdout)
 	table.SetHeader(_summaryReportHeader)
 	table.Append([]string{

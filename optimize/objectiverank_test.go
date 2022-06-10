@@ -8,13 +8,13 @@ import (
 )
 
 func TestSharpeRanker(t *testing.T) {
-	give := []Report{
+	give := []PhaseReport{
 		{Sharpe: 2},
 		{Sharpe: 0.9},
 		{Sharpe: 2.5},
 	}
 
-	want := []Report{give[1], give[0], give[2]}
+	want := []PhaseReport{give[1], give[0], give[2]}
 
 	slices.SortFunc(give, SharpeRanker)
 

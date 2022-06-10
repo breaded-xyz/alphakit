@@ -110,10 +110,10 @@ func (app *App) Run() error {
 	print("\n----- Optima Training Result -----\n")
 	validationResult := maps.Values(optimizer.Study().ValidationResults)[0]
 	trainingResult := optimizer.Study().TrainingResults[validationResult.Subject.ID]
-	printSummaryReport(trainingResult)
+	printSummary(trainingResult)
 
 	print("\n----- Optima Validation Result -----\n")
-	printSummaryReport(validationResult)
+	printSummary(validationResult)
 
 	print("\n----- Optima Params -----\n")
 	printParams(validationResult.Subject.Params)
