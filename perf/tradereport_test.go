@@ -57,6 +57,7 @@ func TestTradeReport(t *testing.T) {
 		winningPct:           0.5,
 		losingCount:          2,
 		losingPct:            0.5,
+		Trades:               give,
 	}
 
 	act := NewTradeReport(give)
