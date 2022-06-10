@@ -19,15 +19,17 @@ func MakeApexBotFromConfig(config map[string]any) (trader.Bot, error) {
 
 	bot.Asset = market.NewAsset(util.ToString(config["asset"]))
 
-	bot.EnterLong = util.ToFloat(config["enterlong"])
-	bot.EnterShort = util.ToFloat(config["entershort"])
-	bot.ExitLong = util.ToFloat(config["exitlong"])
-	bot.ExitShort = util.ToFloat(config["exitshort"])
+	bot.EnterLong = util.NNZ(util.ToFloat(config["enterlong"]), 1.0)
+	bot.EnterShort = util.NNZ(util.ToFloat(config["entershort"]), -1.0)
+	bot.ExitLong = util.NNZ(util.ToFloat(config["exitlong"]), -1.0)
+	bot.ExitShort = util.NNZ(util.ToFloat(config["exitshort"]), 1.0)
 
 	maLength := util.ToInt(config["malength"])
 	ma := ta.NewALMA(maLength)
 	mmi := ta.NewMMI(util.ToInt(config["mmilength"]))
-	bot.Predicter = NewApexPredicter(ma, mmi)
+	predicter := NewApexPredicter(ma, mmi)
+	predicter.ApexDelta = util.NNZ(util.ToFloat(config["apexdelta"]), 0.5)
+	bot.Predicter = predicter
 
 	riskSDLength := util.ToInt(config["riskersdlength"])
 	if riskSDLength > 0 {

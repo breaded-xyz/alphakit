@@ -10,10 +10,9 @@ import (
 
 var _ trader.Predicter = (*ApexPredicter)(nil)
 
-// ApexPredicter predicts price direction based on trend turning points
-// with a market meaness index filter.
+// ApexPredicter predicts price direction based on trend turning points with a market meanness index filter.
 // Peak signals the start of a downward price trend.
-// Valley signal the start of an upward price trend.
+// Valley signals the start of an upward price trend.
 type ApexPredicter struct {
 	// PriceSelector is the kline component to use for price. Close by default.
 	PriceSelector ta.PriceSelector
@@ -23,6 +22,9 @@ type ApexPredicter struct {
 
 	// MMI is the trend filter.
 	MMI ta.Indicator[float64]
+
+	// ApexDelta is the series change threshold to detect a peak or valley
+	ApexDelta float64
 
 	prev float64
 }
@@ -74,9 +76,9 @@ func (p *ApexPredicter) Predict() float64 {
 	}
 
 	switch {
-	case ta.Valley(p.MA.History()):
+	case ta.Valley(p.MA.History(), p.ApexDelta):
 		score = (score + 0.9)
-	case ta.Peak(p.MA.History()):
+	case ta.Peak(p.MA.History(), p.ApexDelta):
 		score = -(score + 0.9)
 	}
 

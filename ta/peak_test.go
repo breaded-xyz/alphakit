@@ -65,10 +65,16 @@ func TestPeak(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			act := Peak(tt.giveSeries)
+			act := Peak(tt.giveSeries, 1)
 			assert.Equal(t, tt.want, act)
 		})
 	}
+}
+
+func TestPeakDelta(t *testing.T) {
+	series := []float64{5, 10, 5}
+	assert.True(t, Peak(series, 1))
+	assert.False(t, Peak(series, 6))
 }
 
 func TestValley(t *testing.T) {
@@ -130,8 +136,14 @@ func TestValley(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			act := Valley(tt.giveSeries)
+			act := Valley(tt.giveSeries, 1)
 			assert.Equal(t, tt.want, act)
 		})
 	}
+}
+
+func TestValleyDelta(t *testing.T) {
+	series := []float64{10, 5, 10}
+	assert.True(t, Valley(series, 1))
+	assert.False(t, Valley(series, 6))
 }
