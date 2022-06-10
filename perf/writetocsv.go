@@ -9,6 +9,7 @@ import (
 	"github.com/thecolngroup/util"
 )
 
+// WritePerformanceReportToCSV writes a performance report to a CSV file.
 func WritePeformanceReportToCSV(filename string, report *PerformanceReport) error {
 	encMap := func(m map[string]any) ([]byte, error) {
 		return []byte(fmt.Sprint(m)), nil
@@ -16,6 +17,7 @@ func WritePeformanceReportToCSV(filename string, report *PerformanceReport) erro
 	return util.WriteToCSV(filename, report, encMap)
 }
 
+// WriteTradesToCSV writes a slice of trades to a CSV file.
 func WriteTradesToCSV(filename string, trades []broker.Trade) error {
 	return util.WriteToCSV(filename, trades)
 }
@@ -25,6 +27,7 @@ type equitySeriesRow struct {
 	Amount decimal.Decimal `csv:"amount"`
 }
 
+// WriteEquitySeriesToCSV writes an equity curve to a CSV file.
 func WriteEquitySeriesToCSV(filename string, series broker.EquitySeries) error {
 	rows := make([]equitySeriesRow, len(series))
 	ks := series.SortKeys()
