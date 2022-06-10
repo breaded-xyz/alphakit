@@ -45,6 +45,9 @@ type PortfolioReport struct {
 	// Calmar is the Calmar ratio of the equity curve.
 	Calmar float64
 
+	// EquityCurve is the source from which the report fields are generated.
+	EquityCurve broker.EquitySeries `csv:"-"`
+
 	drawdowns []Drawdown
 	mdd       Drawdown
 }
@@ -59,6 +62,7 @@ func NewPortfolioReport(curve broker.EquitySeries) *PortfolioReport {
 	tStart, tEnd := t[0], t[len(t)-1]
 
 	var report PortfolioReport
+	report.EquityCurve = curve
 	report.PeriodStart, report.StartEquity = tStart.Time(), curve[tStart].InexactFloat64()
 	report.PeriodEnd, report.EndEquity = tEnd.Time(), curve[tEnd].InexactFloat64()
 	report.Period = report.PeriodEnd.Sub(report.PeriodStart)

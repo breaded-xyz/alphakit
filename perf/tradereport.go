@@ -36,6 +36,8 @@ type TradeReport struct {
 	TotalTimeInMarketSec float64
 	AvgHoldSec           float64
 
+	Trades []broker.Trade `csv:"-"`
+
 	winningCount, winningPct float64
 	losingCount, losingPct   float64
 }
@@ -47,6 +49,8 @@ func NewTradeReport(trades []broker.Trade) *TradeReport {
 	}
 
 	var report TradeReport
+	report.Trades = trades
+
 	var lossStreak int
 
 	profits := make([]float64, len(trades))

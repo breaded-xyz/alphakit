@@ -35,26 +35,26 @@ var _summaryReportHeader = []string{
 //
 //-  PorfolioReport reports metrics related to the portfolio equity curve.
 type PerformanceReport struct {
-	ID         string           `csv:"id"`
-	Asset      market.Asset     `csv:"asset_,inline"`
-	Trade      *TradeReport     `csv:",inline"`
-	Portfolio  *PortfolioReport `csv:",inline"`
-	Properties map[string]any   `csv:"properties"`
+	ID              string           `csv:"id"`
+	Asset           market.Asset     `csv:"asset_,inline"`
+	TradeReport     *TradeReport     `csv:",inline"`
+	PortfolioReport *PortfolioReport `csv:",inline"`
+	Properties      map[string]any   `csv:"properties"`
 }
 
 // NewPerformanceReport creates a new PerformanceReport.
 func NewPerformanceReport(trades []broker.Trade, equity broker.EquitySeries) PerformanceReport {
 	return PerformanceReport{
-		ID:         string(util.NewID()),
-		Trade:      NewTradeReport(trades),
-		Portfolio:  NewPortfolioReport(equity),
-		Properties: make(map[string]any),
+		ID:              string(util.NewID()),
+		TradeReport:     NewTradeReport(trades),
+		PortfolioReport: NewPortfolioReport(equity),
+		Properties:      make(map[string]any),
 	}
 }
 
 // PrintSummary prints a summary of the performance report to stdout.
 func PrintSummary(r PerformanceReport) {
-	if r.Trade == nil || r.Portfolio == nil {
+	if r.TradeReport == nil || r.PortfolioReport == nil {
 		println("No trades and/or equity data")
 		return
 	}
@@ -62,15 +62,15 @@ func PrintSummary(r PerformanceReport) {
 	table := tablewriter.NewWriter(os.Stdout)
 	table.SetHeader(_summaryReportHeader)
 	table.Append([]string{
-		r.Portfolio.PeriodStart.UTC().Format(_friendlyReportTimeFormat),
-		r.Portfolio.PeriodEnd.UTC().Format(_friendlyReportTimeFormat),
-		strconv.Itoa(int(r.Trade.TradeCount)),
-		fmt.Sprintf("%.2f%%", r.Trade.PercentProfitable*100),
-		fmt.Sprintf("%.2f%%", r.Portfolio.CAGR*100),
-		fmt.Sprintf("%.2f", r.Trade.PRR),
-		fmt.Sprintf("%.2f%%", r.Portfolio.MaxDrawdown*100),
-		fmt.Sprintf("%.2f", r.Portfolio.Sharpe),
-		fmt.Sprintf("%.2f", r.Portfolio.Calmar),
+		r.PortfolioReport.PeriodStart.UTC().Format(_friendlyReportTimeFormat),
+		r.PortfolioReport.PeriodEnd.UTC().Format(_friendlyReportTimeFormat),
+		strconv.Itoa(int(r.TradeReport.TradeCount)),
+		fmt.Sprintf("%.2f%%", r.TradeReport.PercentProfitable*100),
+		fmt.Sprintf("%.2f%%", r.PortfolioReport.CAGR*100),
+		fmt.Sprintf("%.2f", r.TradeReport.PRR),
+		fmt.Sprintf("%.2f%%", r.PortfolioReport.MaxDrawdown*100),
+		fmt.Sprintf("%.2f", r.PortfolioReport.Sharpe),
+		fmt.Sprintf("%.2f", r.PortfolioReport.Calmar),
 	})
 	table.Render()
 }

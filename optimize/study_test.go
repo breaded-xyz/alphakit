@@ -12,12 +12,12 @@ func TestSummarize(t *testing.T) {
 	give := PhaseReport{
 		Trials: []perf.PerformanceReport{
 			{
-				Trade:     &perf.TradeReport{PRR: 2.0, TradeCount: 5},
-				Portfolio: &perf.PortfolioReport{MaxDrawdown: 0.3, CAGR: 0.8, Sharpe: 1.0, Calmar: 2.0},
+				TradeReport:     &perf.TradeReport{PRR: 2.0, TradeCount: 5},
+				PortfolioReport: &perf.PortfolioReport{MaxDrawdown: 0.3, CAGR: 0.8, Sharpe: 1.0, Calmar: 2.0},
 			},
 			{
-				Trade:     &perf.TradeReport{PRR: 4.0, TradeCount: 10},
-				Portfolio: &perf.PortfolioReport{MaxDrawdown: 0.2, CAGR: 1.5, Sharpe: 2.0, Calmar: 2.0},
+				TradeReport:     &perf.TradeReport{PRR: 4.0, TradeCount: 10},
+				PortfolioReport: &perf.PortfolioReport{MaxDrawdown: 0.2, CAGR: 1.5, Sharpe: 2.0, Calmar: 2.0},
 			},
 		},
 	}
@@ -31,12 +31,12 @@ func TestSummarize(t *testing.T) {
 		TradeCount:  15,
 		Trials: []perf.PerformanceReport{
 			{
-				Trade:     &perf.TradeReport{PRR: 2.0, TradeCount: 5},
-				Portfolio: &perf.PortfolioReport{MaxDrawdown: 0.3, CAGR: 0.8, Sharpe: 1.0, Calmar: 2.0},
+				TradeReport:     &perf.TradeReport{PRR: 2.0, TradeCount: 5},
+				PortfolioReport: &perf.PortfolioReport{MaxDrawdown: 0.3, CAGR: 0.8, Sharpe: 1.0, Calmar: 2.0},
 			},
 			{
-				Trade:     &perf.TradeReport{PRR: 4.0, TradeCount: 10},
-				Portfolio: &perf.PortfolioReport{MaxDrawdown: 0.2, CAGR: 1.5, Sharpe: 2.0, Calmar: 2.0},
+				TradeReport:     &perf.TradeReport{PRR: 4.0, TradeCount: 10},
+				PortfolioReport: &perf.PortfolioReport{MaxDrawdown: 0.2, CAGR: 1.5, Sharpe: 2.0, Calmar: 2.0},
 			},
 		},
 	}

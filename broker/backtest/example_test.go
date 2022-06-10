@@ -54,5 +54,5 @@ func Example() {
 	report := perf.NewPerformanceReport(trades, equity)
 
 	// Output: Your backtest return is 2974.54%
-	fmt.Printf("Your backtest return is %.2f%%", report.Portfolio.EquityReturn*100)
+	fmt.Printf("Your backtest return is %.2f%%", report.PortfolioReport.EquityReturn*100)
 }

@@ -1,29 +1,12 @@
 package studyrun
 
 import (
-	"fmt"
-	"os"
+	"time"
 
-	"github.com/olekukonko/tablewriter"
+	"github.com/thecolngroup/alphakit/broker"
 	"github.com/thecolngroup/alphakit/optimize"
 	"github.com/thecolngroup/alphakit/perf"
-	"github.com/thecolngroup/util"
-	"golang.org/x/exp/maps"
-	"golang.org/x/exp/slices"
 )
-
-var _summaryReportHeader = []string{
-	"PRR",
-	"MDD",
-	"WinPct",
-	"CAGR",
-	"Sharpe",
-	"Calmar",
-	"Kelly",
-	"OptimalF",
-	"Samples",
-	"Trades",
-}
 
 // phaseReport is a wrapper on optimize.PhaseReport that adds a PK for saving to CSV.
 type phaseReport struct {
@@ -38,21 +21,36 @@ type trialReport struct {
 	Backtest      perf.PerformanceReport `csv:"backtest_,inline"`
 }
 
-// prepareStudyForCSV returns data that is ready for saving to CSV.
-func prepareStudyForCSV(study optimize.Study) ([]phaseReport, []trialReport) {
+type tradeDetailRow struct {
+	StudyID       string       `csv:"study_id"`
+	PhaseReportID string       `csv:"phasereport_id"`
+	BacktestID    string       `csv:"backtest_id"`
+	Trade         broker.Trade `csv:"trade_,inline"`
+}
 
-	var summaries []phaseReport
-	var backtests []trialReport
+type curveDetailRow struct {
+	StudyID       string    `csv:"study_id"`
+	PhaseReportID string    `csv:"phasereport_id"`
+	BacktestID    string    `csv:"backtest_id"`
+	Time          time.Time `csv:"time"`
+	Amount        float64   `csv:"amount"`
+}
+
+// prepareStudyForCSV returns data that is ready for saving to CSV.
+func prepareStudyForCSV(study optimize.Study) ([]phaseReport, []trialReport, []tradeDetailRow, []curveDetailRow) {
+
+	var phaseReports []phaseReport
+	var trialReports []trialReport
 
 	flattenResults := func(results map[optimize.ParamSetID]optimize.PhaseReport) {
 		for k := range results {
 			report := results[k]
-			summaries = append(summaries, phaseReport{
+			phaseReports = append(phaseReports, phaseReport{
 				StudyID: study.ID,
 				Report:  report,
 			})
 			for i := range report.Trials {
-				backtests = append(backtests, trialReport{
+				trialReports = append(trialReports, trialReport{
 					StudyID:       study.ID,
 					PhaseReportID: report.ID,
 					Backtest:      report.Trials[i],
@@ -64,34 +62,37 @@ func prepareStudyForCSV(study optimize.Study) ([]phaseReport, []trialReport) {
 	flattenResults(study.TrainingResults)
 	flattenResults(study.ValidationResults)
 
-	return summaries, backtests
-}
-
-// printSummary prints a summary report to stdout.
-func printSummary(report optimize.PhaseReport) {
-	table := tablewriter.NewWriter(os.Stdout)
-	table.SetHeader(_summaryReportHeader)
-	table.Append([]string{
-		fmt.Sprintf("%.2f", report.PRR),
-		fmt.Sprintf("%.2f", report.MDD*100),
-		fmt.Sprintf("%.2f", report.WinPct*100),
-		fmt.Sprintf("%.2f", report.CAGR*100),
-		fmt.Sprintf("%.2f", report.Sharpe),
-		fmt.Sprintf("%.2f", report.Calmar),
-		fmt.Sprintf("%.2f", report.Kelly),
-		fmt.Sprintf("%.2f", report.OptimalF),
-		fmt.Sprintf("%d", report.SampleCount),
-		fmt.Sprintf("%d", report.TradeCount),
-	})
-	table.Render()
-
-}
-
-// printParams pretty prints a map.
-func printParams(params map[string]any) {
-	keys := maps.Keys(params)
-	slices.Sort(keys)
-	for _, k := range keys {
-		fmt.Printf("%s: %s\n", k, util.ToString(params[k]))
+	if len(study.Validation) == 0 || len(study.ValidationResults) == 0 {
+		return phaseReports, trialReports, nil, nil
 	}
+
+	optimaReport := study.ValidationResults[study.Validation[0].ID]
+
+	var tradeRows []tradeDetailRow
+	var curveRows []curveDetailRow
+	for _, trial := range optimaReport.Trials {
+		for _, trade := range trial.TradeReport.Trades {
+			tradeRows = append(tradeRows, tradeDetailRow{
+				StudyID:       study.ID,
+				PhaseReportID: optimaReport.ID,
+				BacktestID:    trial.ID,
+				Trade:         trade,
+			})
+		}
+
+		curve := trial.PortfolioReport.EquityCurve
+		sortedKeys := curve.SortKeys()
+		for _, k := range sortedKeys {
+			curveRows = append(curveRows, curveDetailRow{
+				StudyID:       study.ID,
+				PhaseReportID: optimaReport.ID,
+				BacktestID:    trial.ID,
+				Time:          k.Time(),
+				Amount:        curve[k].InexactFloat64(),
+			})
+		}
+
+	}
+
+	return phaseReports, trialReports, tradeRows, curveRows
 }

@@ -51,26 +51,6 @@ func NewStudy() Study {
 // Typically the symbol of the asset, e.g. btcusdt.
 type AssetID string
 
-// ParamSet is a set of algo parameters to trial.
-type ParamSet struct {
-	ID     ParamSetID
-	Params ParamMap
-}
-
-// ParamSetID is a unique identifier for a ParamSet.
-type ParamSetID string
-
-// ParamMap is a map of algo parameters.
-type ParamMap map[string]any
-
-// NewParamSet returns a new param set with initialized ID
-func NewParamSet() ParamSet {
-	return ParamSet{
-		ID:     ParamSetID(util.NewID()),
-		Params: make(map[string]any),
-	}
-}
-
 // PhaseReport is the aggregated performance of a ParamSet across one or more price samples (trials)
 // The summary method is owned by the Optimizer implementation, but will typically be the mean (avg) of the individual trials.
 type PhaseReport struct {
@@ -112,26 +92,22 @@ func Summarize(report PhaseReport) PhaseReport {
 	for i := range report.Trials {
 		backtest := report.Trials[i]
 
-		if backtest.Trade == nil || backtest.Portfolio == nil {
-			continue
-		}
-
-		if backtest.Trade.TradeCount == 0 {
+		if backtest.TradeReport.TradeCount == 0 {
 			continue
 		}
 
 		report.SampleCount++
-		report.TradeCount += int(backtest.Trade.TradeCount)
+		report.TradeCount += int(backtest.TradeReport.TradeCount)
 
-		report.PRR += backtest.Trade.PRR
-		report.MDD += backtest.Portfolio.MaxDrawdown
-		report.CAGR += backtest.Portfolio.CAGR
-		report.Sharpe += backtest.Portfolio.Sharpe
-		report.Calmar += backtest.Portfolio.Calmar
-		report.WinPct += backtest.Trade.PercentProfitable
+		report.PRR += backtest.TradeReport.PRR
+		report.MDD += backtest.PortfolioReport.MaxDrawdown
+		report.CAGR += backtest.PortfolioReport.CAGR
+		report.Sharpe += backtest.PortfolioReport.Sharpe
+		report.Calmar += backtest.PortfolioReport.Calmar
+		report.WinPct += backtest.TradeReport.PercentProfitable
 
-		report.Kelly += backtest.Trade.Kelly
-		report.OptimalF += backtest.Trade.OptimalF
+		report.Kelly += backtest.TradeReport.Kelly
+		report.OptimalF += backtest.TradeReport.OptimalF
 	}
 
 	if report.TradeCount == 0 {
