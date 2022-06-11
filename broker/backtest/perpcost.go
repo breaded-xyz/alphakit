@@ -33,9 +33,12 @@ func (c *PerpCoster) Slippage(price decimal.Decimal) decimal.Decimal {
 }
 
 // Spread returns the cost of the spread incurred by an order.
-// Spread is a fraction of the order price.
+// Half the SpreadPct field is used, representing the difference from the mid-price to your quote.
 func (c *PerpCoster) Spread(price decimal.Decimal) decimal.Decimal {
-	return price.Mul(c.SpreadPct)
+	if !c.SpreadPct.IsPositive() {
+		return decimal.Zero
+	}
+	return price.Mul(c.SpreadPct.Div(dec.New(2)))
 }
 
 // Transaction returns the cost of a transaction, calculated as a fraction of the order price and size.

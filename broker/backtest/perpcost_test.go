@@ -72,7 +72,7 @@ func TestPerpCostSlippage(t *testing.T) {
 
 func TestPerpCostSpread(t *testing.T) {
 	cost := PerpCoster{
-		SpreadPct: dec.New(0.2),
+		SpreadPct: dec.New(0.4),
 	}
 	exp := dec.New(2)
 	act := cost.Spread(dec.New(10))

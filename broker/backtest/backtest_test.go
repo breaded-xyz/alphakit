@@ -22,7 +22,7 @@ func TestLongTradeWithCosts(t *testing.T) {
 	}
 
 	cost := &PerpCoster{
-		SpreadPct:      dec.New(0.01),
+		SpreadPct:      dec.New(0.02),
 		SlippagePct:    dec.New(0.01),
 		TransactionPct: dec.New(0.1),
 		FundingHourPct: dec.New(0.001),

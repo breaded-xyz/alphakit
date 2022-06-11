@@ -162,7 +162,9 @@ func TestSimulator_fillOrder(t *testing.T) {
 		FilledSize:  dec.New(1),
 	}
 	act := sim.fillOrder(broker.Order{Side: broker.Buy, Size: exp.Size}, exp.FilledPrice)
-	assert.Equal(t, exp, act)
+
+	assert.True(t, act.FilledPrice.Equal(exp.FilledPrice))
+	assert.True(t, act.FilledSize.Equal(exp.FilledSize))
 }
 
 func TestSimulator_closeOrder(t *testing.T) {
