@@ -27,14 +27,14 @@ func (s PositionState) String() string {
 
 // Position represents a position in a market for a given asset.
 type Position struct {
-	ID               DealID
-	OpenedAt         time.Time
-	ClosedAt         time.Time
-	Asset            market.Asset
-	Side             OrderSide
-	Price            decimal.Decimal
-	Size             decimal.Decimal
-	LiquidationPrice decimal.Decimal
+	ID         DealID
+	OpenedAt   time.Time
+	ClosedAt   time.Time
+	Asset      market.Asset
+	Side       OrderSide
+	Price      decimal.Decimal
+	Size       decimal.Decimal
+	ClosePrice decimal.Decimal
 }
 
 // State returns the state of the position based on the position timestamps.

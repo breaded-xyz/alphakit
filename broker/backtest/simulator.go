@@ -320,7 +320,7 @@ func (s *Simulator) openPosition(order broker.Order) broker.Position {
 
 func (s *Simulator) closePosition(position broker.Position, order broker.Order) broker.Position {
 	position.ClosedAt = order.FilledAt
-	position.LiquidationPrice = order.FilledPrice
+	position.ClosePrice = order.FilledPrice
 	return position
 }
 
@@ -331,7 +331,7 @@ func (s *Simulator) createTrade(position broker.Position) broker.Trade {
 		Asset:      position.Asset,
 		Side:       position.Side,
 		Size:       position.Size,
-		Profit:     profit(position, position.LiquidationPrice),
+		Profit:     profit(position, position.ClosePrice),
 		HoldPeriod: position.ClosedAt.Sub(position.OpenedAt),
 	}
 }

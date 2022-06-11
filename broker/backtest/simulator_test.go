@@ -239,13 +239,13 @@ func TestSimulator_processPosition(t *testing.T) {
 			giveOrder:    broker.Order{ID: "2", FilledAt: _fixed, Side: broker.Sell, FilledPrice: dec.New(20), FilledSize: dec.New(1)},
 			givePosition: broker.Position{ID: "1", OpenedAt: _fixed, Side: broker.Buy, Price: dec.New(10), Size: dec.New(1)},
 			wantPosition: broker.Position{
-				ID:               "1",
-				OpenedAt:         _fixed,
-				ClosedAt:         _fixed,
-				Side:             broker.Buy,
-				Price:            dec.New(10),
-				Size:             dec.New(1),
-				LiquidationPrice: dec.New(20),
+				ID:         "1",
+				OpenedAt:   _fixed,
+				ClosedAt:   _fixed,
+				Side:       broker.Buy,
+				Price:      dec.New(10),
+				Size:       dec.New(1),
+				ClosePrice: dec.New(20),
 			},
 			wantState: broker.PositionClosed,
 			wantErr:   nil,
@@ -433,47 +433,47 @@ func TestSimulator_profit(t *testing.T) {
 		{
 			name: "buy side profit",
 			give: broker.Position{
-				Side:             broker.Buy,
-				Price:            dec.New(10),
-				Size:             dec.New(2),
-				LiquidationPrice: dec.New(20),
+				Side:       broker.Buy,
+				Price:      dec.New(10),
+				Size:       dec.New(2),
+				ClosePrice: dec.New(20),
 			},
 			want: dec.New(20),
 		},
 		{
 			name: "sell side profit",
 			give: broker.Position{
-				Side:             broker.Sell,
-				Price:            dec.New(100),
-				Size:             dec.New(2),
-				LiquidationPrice: dec.New(50),
+				Side:       broker.Sell,
+				Price:      dec.New(100),
+				Size:       dec.New(2),
+				ClosePrice: dec.New(50),
 			},
 			want: dec.New(100),
 		},
 		{
 			name: "buy side loss",
 			give: broker.Position{
-				Side:             broker.Buy,
-				Price:            dec.New(10),
-				Size:             dec.New(2),
-				LiquidationPrice: dec.New(5),
+				Side:       broker.Buy,
+				Price:      dec.New(10),
+				Size:       dec.New(2),
+				ClosePrice: dec.New(5),
 			},
 			want: dec.New(-10),
 		},
 		{
 			name: "sell side loss",
 			give: broker.Position{
-				Side:             broker.Sell,
-				Price:            dec.New(10),
-				Size:             dec.New(2),
-				LiquidationPrice: dec.New(20),
+				Side:       broker.Sell,
+				Price:      dec.New(10),
+				Size:       dec.New(2),
+				ClosePrice: dec.New(20),
 			},
 			want: dec.New(-20),
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			act := profit(tt.give, tt.give.LiquidationPrice)
+			act := profit(tt.give, tt.give.ClosePrice)
 			assert.True(t, act.Equal(tt.want))
 		})
 	}
@@ -484,14 +484,14 @@ func TestSimulator_createTrade(t *testing.T) {
 	sim := newSimulatorForTest()
 
 	give := broker.Position{
-		ID:               "1",
-		OpenedAt:         _fixed,
-		ClosedAt:         _fixed.Add(2 * time.Hour),
-		Asset:            market.NewAsset("BTCUSD"),
-		Side:             broker.Sell,
-		Price:            dec.New(10),
-		Size:             dec.New(2),
-		LiquidationPrice: dec.New(20),
+		ID:         "1",
+		OpenedAt:   _fixed,
+		ClosedAt:   _fixed.Add(2 * time.Hour),
+		Asset:      market.NewAsset("BTCUSD"),
+		Side:       broker.Sell,
+		Price:      dec.New(10),
+		Size:       dec.New(2),
+		ClosePrice: dec.New(20),
 	}
 
 	want := broker.Trade{
