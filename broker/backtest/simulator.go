@@ -309,18 +309,18 @@ func (s *Simulator) processPosition(position broker.Position, order broker.Order
 
 func (s *Simulator) openPosition(order broker.Order) broker.Position {
 	return broker.Position{
-		ID:       order.ID,
-		OpenedAt: order.FilledAt,
-		Asset:    order.Asset,
-		Side:     order.Side,
-		Price:    order.FilledPrice,
-		Size:     order.FilledSize,
+		ID:         order.ID,
+		OpenedAt:   order.FilledAt,
+		Asset:      order.Asset,
+		Side:       order.Side,
+		EntryPrice: order.FilledPrice,
+		Size:       order.FilledSize,
 	}
 }
 
 func (s *Simulator) closePosition(position broker.Position, order broker.Order) broker.Position {
 	position.ClosedAt = order.FilledAt
-	position.ClosePrice = order.FilledPrice
+	position.ExitPrice = order.FilledPrice
 	return position
 }
 
@@ -331,7 +331,7 @@ func (s *Simulator) createTrade(position broker.Position) broker.Trade {
 		Asset:      position.Asset,
 		Side:       position.Side,
 		Size:       position.Size,
-		Profit:     profit(position, position.ClosePrice),
+		Profit:     profit(position, position.ExitPrice),
 		HoldPeriod: position.ClosedAt.Sub(position.OpenedAt),
 	}
 }
@@ -360,7 +360,7 @@ func matchOrder(order broker.Order, quote market.Kline) decimal.Decimal {
 }
 
 func profit(position broker.Position, price decimal.Decimal) decimal.Decimal {
-	profit := price.Sub(position.Price).Mul(position.Size)
+	profit := price.Sub(position.EntryPrice).Mul(position.Size)
 	if position.Side == broker.Sell {
 		profit = profit.Neg()
 	}

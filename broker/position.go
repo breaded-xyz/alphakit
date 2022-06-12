@@ -27,14 +27,29 @@ func (s PositionState) String() string {
 
 // Position represents a position in a market for a given asset.
 type Position struct {
-	ID         DealID
-	OpenedAt   time.Time
-	ClosedAt   time.Time
-	Asset      market.Asset
-	Side       OrderSide
-	Price      decimal.Decimal
-	Size       decimal.Decimal
-	ClosePrice decimal.Decimal
+	ID       DealID
+	OpenedAt time.Time
+	ClosedAt time.Time
+	Asset    market.Asset
+	Side     OrderSide
+
+	// EntryPrice is the average cost basis for the current position size
+	EntryPrice decimal.Decimal
+
+	// Size is the number of units of the Asset exposed by the Position
+	Size decimal.Decimal
+
+	// Cost is the EntryPrice * Size
+	Cost decimal.Decimal
+
+	// MarkPrice is the latest marked price for the asset
+	MarkPrice decimal.Decimal
+
+	// UnrealizedPNL is Size * (MarkPrice - EntryPrice)
+	UnrealizedPNL decimal.Decimal
+
+	// Exit price is the price at which the position is closed
+	ExitPrice decimal.Decimal
 }
 
 // State returns the state of the position based on the position timestamps.
