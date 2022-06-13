@@ -43,8 +43,8 @@ func (d *MockDealer) ListPositions(ctx context.Context, opts *web.ListOpts) ([]P
 	return args.Get(0).([]Position), args.Get(1).(*web.Response), args.Error(2)
 }
 
-// ListTrades returns the trades of the account.
-func (d *MockDealer) ListTrades(ctx context.Context, opts *web.ListOpts) ([]Trade, *web.Response, error) {
+// ListRoundTurns returns the round-turns of the account.
+func (d *MockDealer) ListRoundTurns(ctx context.Context, opts *web.ListOpts) ([]RoundTurn, *web.Response, error) {
 	args := d.Called(ctx, opts)
-	return args.Get(0).([]Trade), args.Get(1).(*web.Response), args.Error(2)
+	return args.Get(0).([]RoundTurn), args.Get(1).(*web.Response), args.Error(2)
 }

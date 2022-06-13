@@ -54,8 +54,8 @@ func TestBotWithCrossPredicter(t *testing.T) {
 
 	assert.NoError(t, bot.Close(context.Background()))
 
-	trades, _, _ := dealer.ListTrades(context.Background(), nil)
+	roundturns, _, _ := dealer.ListRoundTurns(context.Background(), nil)
 	equity := dealer.EquityHistory()
-	report := perf.NewPerformanceReport(trades, equity)
+	report := perf.NewPerformanceReport(roundturns, equity)
 	perf.PrintSummary(report)
 }

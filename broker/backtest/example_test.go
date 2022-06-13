@@ -49,9 +49,9 @@ func Example() {
 	dealer.PlaceOrder(context.Background(), broker.NewOrder(asset, broker.Sell, dec.New(1)))
 
 	// Generate a performance report from the dealer execution history
-	trades, _, _ := dealer.ListTrades(context.Background(), nil)
+	roundturns, _, _ := dealer.ListRoundTurns(context.Background(), nil)
 	equity := dealer.EquityHistory()
-	report := perf.NewPerformanceReport(trades, equity)
+	report := perf.NewPerformanceReport(roundturns, equity)
 
 	// Output: Your backtest return is 2974.54%
 	fmt.Printf("Your backtest return is %.2f%%", report.PortfolioReport.EquityReturn*100)

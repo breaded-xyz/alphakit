@@ -42,8 +42,8 @@ func (d *StubDealer) ListPositions(ctx context.Context, opts *web.ListOpts) ([]P
 	return nil, nil, nil
 }
 
-// ListTrades not implemented.
-func (d *StubDealer) ListTrades(ctx context.Context, opts *web.ListOpts) ([]Trade, *web.Response, error) {
+// ListRoundTurns not implemented.
+func (d *StubDealer) ListRoundTurns(ctx context.Context, opts *web.ListOpts) ([]RoundTurn, *web.Response, error) {
 	return nil, nil, nil
 }
 

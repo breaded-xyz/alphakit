@@ -74,8 +74,8 @@ func TestBruteOptimizer_Start(t *testing.T) {
 					{ID: "2", Params: map[string]any{"A": 2, "B": 10}},
 				},
 				TrainingResults: map[ParamSetID]PhaseReport{
-					"1": {PRR: 2, TradeCount: 2, Subject: ParamSet{ID: "1", Params: map[string]any{"A": 1, "B": 10}}},
-					"2": {PRR: 4, TradeCount: 2, Subject: ParamSet{ID: "2", Params: map[string]any{"A": 2, "B": 10}}},
+					"1": {PRR: 2, RoundTurnCount: 2, Subject: ParamSet{ID: "1", Params: map[string]any{"A": 1, "B": 10}}},
+					"2": {PRR: 4, RoundTurnCount: 2, Subject: ParamSet{ID: "2", Params: map[string]any{"A": 2, "B": 10}}},
 				},
 				ValidationResults: make(map[ParamSetID]PhaseReport),
 			},
@@ -85,8 +85,8 @@ func TestBruteOptimizer_Start(t *testing.T) {
 					{ID: "2", Params: map[string]any{"A": 2, "B": 10}},
 				},
 				TrainingResults: map[ParamSetID]PhaseReport{
-					"1": {PRR: 2, TradeCount: 2, Subject: ParamSet{ID: "1", Params: map[string]any{"A": 1, "B": 10}}},
-					"2": {PRR: 4, TradeCount: 2, Subject: ParamSet{ID: "2", Params: map[string]any{"A": 2, "B": 10}}},
+					"1": {PRR: 2, RoundTurnCount: 2, Subject: ParamSet{ID: "1", Params: map[string]any{"A": 1, "B": 10}}},
+					"2": {PRR: 4, RoundTurnCount: 2, Subject: ParamSet{ID: "2", Params: map[string]any{"A": 2, "B": 10}}},
 				},
 				Validation: []ParamSet{
 					{ID: "2", Params: map[string]any{"A": 2, "B": 10}},

@@ -60,9 +60,9 @@ func (d *Dealer) ListPositions(ctx context.Context, opts *web.ListOpts) ([]broke
 	return d.simulator.Positions(), nil, nil
 }
 
-// ListTrades returns all historical trades.
-func (d *Dealer) ListTrades(ctx context.Context, opts *web.ListOpts) ([]broker.Trade, *web.Response, error) {
-	return d.simulator.Trades(), nil, nil
+// ListRoundTurns returns all historical round-turns.
+func (d *Dealer) ListRoundTurns(ctx context.Context, opts *web.ListOpts) ([]broker.RoundTurn, *web.Response, error) {
+	return d.simulator.RoundTurns(), nil, nil
 }
 
 // EquityHistory returns the equity history (equity curve) of the dealer.

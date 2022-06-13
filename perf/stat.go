@@ -56,7 +56,7 @@ func SE(xs []float64) float64 {
 	return se
 }
 
-// PRR (Pessimistic Return Ratio) is the profit factor with a penalty for a lower number of trades.
+// PRR (Pessimistic Return Ratio) is the profit factor with a penalty for a lower number of roundturns.
 func PRR(profit, loss, winningN, losingN float64) float64 {
 	winF := 1 / math.Sqrt(1+winningN)
 	loseF := 1 / math.Sqrt(1+losingN)
@@ -64,7 +64,7 @@ func PRR(profit, loss, winningN, losingN float64) float64 {
 }
 
 // StatN returns the statistically significant number of samples required based on the distribution of a series.
-// From: https://www.elitetrader.com/et/threads/minimum-number-of-trades-required-for-backtesting-results-to-be-trusted.356588/page-2
+// From: https://www.elitetrader.com/et/threads/minimum-number-of-roundturns-required-for-backtesting-results-to-be-trusted.356588/page-2
 func StatN(xs []float64) float64 {
 	sd := stat.StdDev(xs, nil)
 	m := stat.Mean(xs, nil)

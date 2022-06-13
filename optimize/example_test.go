@@ -57,7 +57,7 @@ func Example() {
 	// Inspect the study results following optimization
 	study := optimizer.Study()
 	if len(study.ValidationResults) == 0 {
-		fmt.Println("Optima not found because highest ranked param set made no trades during optimization trials.")
+		fmt.Println("Optima not found because highest ranked param set made no roundturns during optimization trials.")
 		return
 	}
 

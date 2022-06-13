@@ -1,5 +1,5 @@
 // Package perf provides performance metrics for a trading algo,
-// using a record of trades and the equity curve from a Dealer in package broker.
+// using a record of roundturns and the equity curve from a Dealer in package broker.
 package perf
 
 import (
@@ -19,7 +19,7 @@ const _friendlyReportTimeFormat = time.RFC822
 var _summaryReportHeader = []string{
 	"start",
 	"end",
-	"trades",
+	"roundturns",
 	"win",
 	"cagr",
 	"prr",
@@ -31,7 +31,7 @@ var _summaryReportHeader = []string{
 // PerformanceReport is a report on the performance of a trading algo.
 // It contains a TradeReport and a PortfolioReport.
 //
-// - TradeReport reports metrics related to the discrete trades (aka roundrtrip / roundturn).
+// - TradeReport reports metrics related to the discrete roundturns (aka roundrtrip / roundturn).
 //
 //-  PorfolioReport reports metrics related to the portfolio equity curve.
 type PerformanceReport struct {
@@ -43,10 +43,10 @@ type PerformanceReport struct {
 }
 
 // NewPerformanceReport creates a new PerformanceReport.
-func NewPerformanceReport(trades []broker.Trade, equity broker.EquitySeries) PerformanceReport {
+func NewPerformanceReport(roundturns []broker.RoundTurn, equity broker.EquitySeries) PerformanceReport {
 	return PerformanceReport{
 		ID:              string(util.NewID()),
-		TradeReport:     NewTradeReport(trades),
+		TradeReport:     NewTradeReport(roundturns),
 		PortfolioReport: NewPortfolioReport(equity),
 		Properties:      make(map[string]any),
 	}
@@ -55,7 +55,7 @@ func NewPerformanceReport(trades []broker.Trade, equity broker.EquitySeries) Per
 // PrintSummary prints a summary of the performance report to stdout.
 func PrintSummary(r PerformanceReport) {
 	if r.TradeReport == nil || r.PortfolioReport == nil {
-		println("No trades and/or equity data")
+		println("No roundturns and/or equity data")
 		return
 	}
 

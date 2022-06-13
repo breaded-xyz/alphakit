@@ -16,7 +16,7 @@ type Dealer interface {
 	PlaceOrder(context.Context, Order) (*Order, *web.Response, error)
 	CancelOrders(context.Context) (*web.Response, error)
 	ListPositions(context.Context, *web.ListOpts) ([]Position, *web.Response, error)
-	ListTrades(context.Context, *web.ListOpts) ([]Trade, *web.Response, error)
+	ListRoundTurns(context.Context, *web.ListOpts) ([]RoundTurn, *web.Response, error)
 }
 
 // SimulatedDealer is a Dealer that can be used for backtesting.
