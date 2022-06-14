@@ -225,11 +225,14 @@ func TestSimulator_processPosition(t *testing.T) {
 			giveOrder:    broker.Order{ID: "1", Side: broker.Buy, FilledAt: _fixed, FilledPrice: dec.New(10), FilledSize: dec.New(1)},
 			givePosition: broker.Position{},
 			wantPosition: broker.Position{
-				ID:       "1",
-				OpenedAt: _fixed,
-				Side:     broker.Buy,
-				Price:    dec.New(10),
-				Size:     dec.New(1),
+				ID:         "1",
+				OpenedAt:   _fixed,
+				Side:       broker.Buy,
+				EntryPrice: dec.New(10),
+				Size:       dec.New(1),
+				Cost:       dec.New(10),
+				MarkPrice:  dec.New(10),
+				PNL:        decimal.Zero,
 			},
 			wantState: broker.PositionOpen,
 			wantErr:   nil,
@@ -237,15 +240,17 @@ func TestSimulator_processPosition(t *testing.T) {
 		{
 			name:         "close existing position",
 			giveOrder:    broker.Order{ID: "2", FilledAt: _fixed, Side: broker.Sell, FilledPrice: dec.New(20), FilledSize: dec.New(1)},
-			givePosition: broker.Position{ID: "1", OpenedAt: _fixed, Side: broker.Buy, Price: dec.New(10), Size: dec.New(1)},
+			givePosition: broker.Position{ID: "1", OpenedAt: _fixed, Side: broker.Buy, EntryPrice: dec.New(10), Size: dec.New(1)},
 			wantPosition: broker.Position{
 				ID:         "1",
 				OpenedAt:   _fixed,
 				ClosedAt:   _fixed,
 				Side:       broker.Buy,
-				Price:      dec.New(10),
+				EntryPrice: dec.New(10),
 				Size:       dec.New(1),
-				ClosePrice: dec.New(20),
+				ExitPrice:  dec.New(20),
+				MarkPrice:  dec.New(20),
+				PNL:        dec.New(10),
 			},
 			wantState: broker.PositionClosed,
 			wantErr:   nil,
@@ -253,13 +258,13 @@ func TestSimulator_processPosition(t *testing.T) {
 		{
 			name:         "failed attempt to partially increase existing position",
 			giveOrder:    broker.Order{ID: "2", FilledAt: _fixed, Side: broker.Buy, FilledPrice: dec.New(20), FilledSize: dec.New(2)},
-			givePosition: broker.Position{ID: "1", OpenedAt: _fixed, Side: broker.Buy, Price: dec.New(10), Size: dec.New(1)},
+			givePosition: broker.Position{ID: "1", OpenedAt: _fixed, Side: broker.Buy, EntryPrice: dec.New(10), Size: dec.New(1)},
 			wantPosition: broker.Position{
-				ID:       "1",
-				OpenedAt: _fixed,
-				Side:     broker.Buy,
-				Price:    dec.New(10),
-				Size:     dec.New(1),
+				ID:         "1",
+				OpenedAt:   _fixed,
+				Side:       broker.Buy,
+				EntryPrice: dec.New(10),
+				Size:       dec.New(1),
 			},
 			wantState: broker.PositionOpen,
 			wantErr:   ErrRejectedOrder,
@@ -287,14 +292,16 @@ func TestSimulator_processPosition(t *testing.T) {
 func TestSimulator_openPosition(t *testing.T) {
 
 	sim := newSimulatorForTest()
+	sim.marketPrice = market.Kline{C: dec.New(10)}
 
 	exp := broker.Position{
-		ID:       "1",
-		OpenedAt: _fixed,
-		Asset:    market.NewAsset("BTCUSD"),
-		Side:     broker.Buy,
-		Price:    dec.New(10),
-		Size:     dec.New(1),
+		ID:         "1",
+		OpenedAt:   _fixed,
+		Asset:      market.NewAsset("BTCUSD"),
+		Side:       broker.Buy,
+		EntryPrice: dec.New(10),
+		Size:       dec.New(1),
+		Cost:       dec.New(10),
 	}
 
 	act := sim.openPosition(broker.Order{
@@ -302,7 +309,7 @@ func TestSimulator_openPosition(t *testing.T) {
 		FilledAt:    _fixed,
 		Asset:       exp.Asset,
 		Side:        exp.Side,
-		FilledPrice: exp.Price,
+		FilledPrice: exp.EntryPrice,
 		FilledSize:  exp.Size,
 	})
 
@@ -424,62 +431,66 @@ func TestSimulator_matchOrder(t *testing.T) {
 	}
 }
 
-func TestSimulator_profit(t *testing.T) {
+func TestSimulator_positionMarkToMarket(t *testing.T) {
+
+	sim := newSimulatorForTest()
+
 	tests := []struct {
-		name string
-		give broker.Position
-		want decimal.Decimal
+		name          string
+		givePosition  broker.Position
+		giveMarkPrice decimal.Decimal
+		want          decimal.Decimal
 	}{
 		{
 			name: "buy side profit",
-			give: broker.Position{
+			givePosition: broker.Position{
 				Side:       broker.Buy,
-				Price:      dec.New(10),
+				EntryPrice: dec.New(10),
 				Size:       dec.New(2),
-				ClosePrice: dec.New(20),
 			},
-			want: dec.New(20),
+			giveMarkPrice: dec.New(20),
+			want:          dec.New(20),
 		},
 		{
 			name: "sell side profit",
-			give: broker.Position{
+			givePosition: broker.Position{
 				Side:       broker.Sell,
-				Price:      dec.New(100),
+				EntryPrice: dec.New(100),
 				Size:       dec.New(2),
-				ClosePrice: dec.New(50),
 			},
-			want: dec.New(100),
+			giveMarkPrice: dec.New(50),
+			want:          dec.New(100),
 		},
 		{
 			name: "buy side loss",
-			give: broker.Position{
+			givePosition: broker.Position{
 				Side:       broker.Buy,
-				Price:      dec.New(10),
+				EntryPrice: dec.New(10),
 				Size:       dec.New(2),
-				ClosePrice: dec.New(5),
 			},
-			want: dec.New(-10),
+			giveMarkPrice: dec.New(5),
+			want:          dec.New(-10),
 		},
 		{
 			name: "sell side loss",
-			give: broker.Position{
+			givePosition: broker.Position{
 				Side:       broker.Sell,
-				Price:      dec.New(10),
+				EntryPrice: dec.New(10),
 				Size:       dec.New(2),
-				ClosePrice: dec.New(20),
 			},
-			want: dec.New(-20),
+			giveMarkPrice: dec.New(20),
+			want:          dec.New(-20),
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			act := profit(tt.give, tt.give.ClosePrice)
+			act := sim.positionMarkToMarket(tt.givePosition, tt.giveMarkPrice).PNL
 			assert.True(t, act.Equal(tt.want))
 		})
 	}
 }
 
-func TestSimulator_createTrade(t *testing.T) {
+func TestSimulator_createRoundTurn(t *testing.T) {
 
 	sim := newSimulatorForTest()
 
@@ -489,9 +500,10 @@ func TestSimulator_createTrade(t *testing.T) {
 		ClosedAt:   _fixed.Add(2 * time.Hour),
 		Asset:      market.NewAsset("BTCUSD"),
 		Side:       broker.Sell,
-		Price:      dec.New(10),
+		EntryPrice: dec.New(10),
 		Size:       dec.New(2),
-		ClosePrice: dec.New(20),
+		ExitPrice:  dec.New(20),
+		PNL:        dec.New(-20),
 	}
 
 	want := broker.RoundTurn{
@@ -515,19 +527,19 @@ func TestSimulator_markToMarket(t *testing.T) {
 
 	t.Run("open position - unrealized profit", func(t *testing.T) {
 		sim.positions = []broker.Position{{
-			ID: "1", OpenedAt: _fixed, Side: broker.Sell, Price: dec.New(10), Size: dec.New(2)},
+			ID: "1", OpenedAt: _fixed, Side: broker.Sell, EntryPrice: dec.New(10), Size: dec.New(2), PNL: dec.New(-20)},
 		}
 		exp := dec.New(-10)
-		act := sim.markToMarket()
+		act := sim.portfolioMarkToMarket()
 		assert.True(t, act.Equal(exp))
 	})
 
 	t.Run("closed position - just account balance", func(t *testing.T) {
 		sim.positions = []broker.Position{
-			{ID: "1", ClosedAt: _fixed, Side: broker.Sell, Price: dec.New(10), Size: dec.New(2)},
+			{ID: "1", ClosedAt: _fixed, Side: broker.Sell, EntryPrice: dec.New(10), Size: dec.New(2)},
 		}
 		exp := dec.New(10)
-		act := sim.markToMarket()
+		act := sim.portfolioMarkToMarket()
 		assert.True(t, act.Equal(exp))
 	})
 
