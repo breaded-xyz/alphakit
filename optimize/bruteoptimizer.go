@@ -149,7 +149,7 @@ func (o *BruteOptimizer) Start(ctx context.Context) (<-chan OptimizerTrial, erro
 		results := maps.Values(o.study.TrainingResults)
 		slices.SortFunc(results, o.Ranker)
 		optimaReport := results[len(results)-1]
-		if optimaReport.TradeCount == 0 {
+		if optimaReport.RoundTurnCount == 0 {
 			return
 		}
 		optima := optimaReport.Subject
@@ -275,12 +275,12 @@ func runBacktest(ctx context.Context, bot trader.Bot, dealer broker.SimulatedDea
 		return empty, err
 	}
 
-	trades, _, err := dealer.ListTrades(context.Background(), nil)
+	roundturns, _, err := dealer.ListRoundTurns(context.Background(), nil)
 	if err != nil {
 		return empty, err
 	}
 	equity := dealer.EquityHistory()
-	report := perf.NewPerformanceReport(trades, equity)
+	report := perf.NewPerformanceReport(roundturns, equity)
 	report.Asset = asset
 
 	return report, nil

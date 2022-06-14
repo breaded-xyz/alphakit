@@ -7,7 +7,7 @@ import (
 )
 
 func TestOptimalF(t *testing.T) {
-	trades := []float64{10, 20, 50, -10, 40, -40}
-	f := OptimalF(trades)
+	roundturns := []float64{10, 20, 50, -10, 40, -40}
+	f := OptimalF(roundturns)
 	assert.EqualValues(t, 0.45, f)
 }

@@ -11,7 +11,7 @@ import (
 
 func TestTradeReport(t *testing.T) {
 
-	give := []broker.Trade{
+	give := []broker.RoundTurn{
 		{
 			Side:       broker.Buy,
 			Profit:     dec.New(-10),
@@ -35,7 +35,8 @@ func TestTradeReport(t *testing.T) {
 	}
 
 	want := &TradeReport{
-		TradeCount:           4,
+		RoundTurnCount:       4,
+		TradeCount:           8,
 		TotalNetProfit:       80,
 		AvgNetProfit:         20,
 		GrossProfit:          110,
@@ -57,7 +58,7 @@ func TestTradeReport(t *testing.T) {
 		winningPct:           0.5,
 		losingCount:          2,
 		losingPct:            0.5,
-		Trades:               give,
+		RoundTurns:           give,
 	}
 
 	act := NewTradeReport(give)

@@ -21,7 +21,7 @@ var _summaryHeader = []string{
 	"Kelly",
 	"OptimalF",
 	"Samples",
-	"Trades",
+	"RoundTurns",
 }
 
 // printSummary prints a summary report to stdout.
@@ -38,7 +38,7 @@ func printSummary(report optimize.PhaseReport) {
 		fmt.Sprintf("%.2f", report.Kelly),
 		fmt.Sprintf("%.2f", report.OptimalF),
 		fmt.Sprintf("%d", report.SampleCount),
-		fmt.Sprintf("%d", report.TradeCount),
+		fmt.Sprintf("%d", report.RoundTurnCount),
 	})
 	table.Render()
 

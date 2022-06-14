@@ -494,7 +494,7 @@ func TestSimulator_createTrade(t *testing.T) {
 		ExitPrice:  dec.New(20),
 	}
 
-	want := broker.Trade{
+	want := broker.RoundTurn{
 		ID:         give.ID,
 		CreatedAt:  give.ClosedAt,
 		Asset:      give.Asset,
@@ -504,7 +504,7 @@ func TestSimulator_createTrade(t *testing.T) {
 		HoldPeriod: 2 * time.Hour,
 	}
 
-	act := sim.createTrade(give)
+	act := sim.createRoundTurn(give)
 	assert.Equal(t, want, act)
 }
 

@@ -68,8 +68,8 @@ type PhaseReport struct {
 	Kelly    float64 `csv:"kelly"`
 	OptimalF float64 `csv:"optimalf"`
 
-	SampleCount int `csv:"sample_count"`
-	TradeCount  int `csv:"trade_count"`
+	SampleCount    int `csv:"sample_count"`
+	RoundTurnCount int `csv:"roundturn_count"`
 
 	Trials []perf.PerformanceReport `csv:"-"`
 }
@@ -101,7 +101,7 @@ func Summarize(report PhaseReport) PhaseReport {
 		}
 
 		report.SampleCount++
-		report.TradeCount += int(backtest.TradeReport.TradeCount)
+		report.RoundTurnCount += int(backtest.TradeReport.TradeCount)
 
 		report.PRR += backtest.TradeReport.PRR
 		report.MDD += backtest.PortfolioReport.MaxDrawdown
@@ -114,7 +114,7 @@ func Summarize(report PhaseReport) PhaseReport {
 		report.OptimalF += backtest.TradeReport.OptimalF
 	}
 
-	if report.TradeCount == 0 {
+	if report.RoundTurnCount == 0 {
 		return report
 	}
 

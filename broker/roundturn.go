@@ -7,8 +7,8 @@ import (
 	"github.com/thecolngroup/alphakit/market"
 )
 
-// Trade is the result of opening and closing a position i.e. a roundtrip / roundturn.
-type Trade struct {
+// RoundTurn is the result of opening and closing a position aka round-trip.
+type RoundTurn struct {
 	ID         DealID          `csv:"id"`
 	CreatedAt  time.Time       `csv:"created_at"`
 	Asset      market.Asset    `csv:",inline"`

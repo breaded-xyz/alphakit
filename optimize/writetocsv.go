@@ -18,12 +18,12 @@ import (
 //
 // - trialreport.csv: detailed performance of each trial (backtest) in a phase
 //
-// - trades.csv: trades completed for each trial
+// - roundturns.csv: turns completed for each trial
 //
 // - curve.csv: equity curve for each trial
 func WriteStudyResultToCSV(path string, study *Study) error {
 
-	phaseReports, trialReports, trades, curves := prepareStudyForCSV(study)
+	phaseReports, trialReports, roundturns, curves := prepareStudyForCSV(study)
 
 	prefix := study.ID
 
@@ -37,8 +37,8 @@ func WriteStudyResultToCSV(path string, study *Study) error {
 		return err
 	}
 
-	out = filepath.Join(path, fmt.Sprintf("%s-trades.csv", prefix))
-	if err := saveDataToCSV(out, trades); err != nil {
+	out = filepath.Join(path, fmt.Sprintf("%s-roundturns.csv", prefix))
+	if err := saveDataToCSV(out, roundturns); err != nil {
 		return err
 	}
 
@@ -63,11 +63,11 @@ type trialReport struct {
 	Backtest      perf.PerformanceReport `csv:"backtest_,inline"`
 }
 
-type tradeDetailRow struct {
-	StudyID       string       `csv:"study_id"`
-	PhaseReportID string       `csv:"phasereport_id"`
-	BacktestID    string       `csv:"backtest_id"`
-	Trade         broker.Trade `csv:"trade_,inline"`
+type roundturnDetailRow struct {
+	StudyID       string           `csv:"study_id"`
+	PhaseReportID string           `csv:"phasereport_id"`
+	BacktestID    string           `csv:"backtest_id"`
+	RoundTurn     broker.RoundTurn `csv:"roundturn_,inline"`
 }
 
 type curveDetailRow struct {
@@ -79,11 +79,11 @@ type curveDetailRow struct {
 }
 
 // prepareStudyForCSV returns data that is ready for saving to CSV.
-func prepareStudyForCSV(study *Study) ([]phaseReport, []trialReport, []tradeDetailRow, []curveDetailRow) {
+func prepareStudyForCSV(study *Study) ([]phaseReport, []trialReport, []roundturnDetailRow, []curveDetailRow) {
 
 	var phaseReports []phaseReport
 	var trialReports []trialReport
-	var tradeRows []tradeDetailRow
+	var tradeRows []roundturnDetailRow
 	var curveRows []curveDetailRow
 
 	flattenResults := func(results map[ParamSetID]PhaseReport) {
@@ -104,12 +104,12 @@ func prepareStudyForCSV(study *Study) ([]phaseReport, []trialReport, []tradeDeta
 					continue
 				}
 
-				for _, trade := range trial.TradeReport.Trades {
-					tradeRows = append(tradeRows, tradeDetailRow{
+				for _, trade := range trial.TradeReport.RoundTurns {
+					tradeRows = append(tradeRows, roundturnDetailRow{
 						StudyID:       study.ID,
 						PhaseReportID: report.ID,
 						BacktestID:    trial.ID,
-						Trade:         trade,
+						RoundTurn:     trade,
 					})
 				}
 				curve := trial.PortfolioReport.EquityCurve

@@ -22,13 +22,13 @@ func TestSummarize(t *testing.T) {
 		},
 	}
 	want := PhaseReport{
-		PRR:         3.0,
-		MDD:         0.25,
-		CAGR:        1.15,
-		Sharpe:      1.5,
-		Calmar:      2.0,
-		SampleCount: 2,
-		TradeCount:  15,
+		PRR:            3.0,
+		MDD:            0.25,
+		CAGR:           1.15,
+		Sharpe:         1.5,
+		Calmar:         2.0,
+		SampleCount:    2,
+		RoundTurnCount: 15,
 		Trials: []perf.PerformanceReport{
 			{
 				TradeReport:     &perf.TradeReport{PRR: 2.0, TradeCount: 5},

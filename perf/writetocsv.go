@@ -17,9 +17,9 @@ func WritePerformanceReportToCSV(filename string, report *PerformanceReport) err
 	return util.WriteToCSV(filename, report, encMap)
 }
 
-// WriteTradesToCSV writes a slice of trades to a CSV file.
-func WriteTradesToCSV(filename string, trades []broker.Trade) error {
-	return util.WriteToCSV(filename, trades)
+// WriteRoundTurnsToCSV writes a slice of roundturns to a CSV file.
+func WriteRoundTurnsToCSV(filename string, roundturns []broker.RoundTurn) error {
+	return util.WriteToCSV(filename, roundturns)
 }
 
 type equitySeriesRow struct {

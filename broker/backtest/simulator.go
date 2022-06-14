@@ -36,10 +36,10 @@ type Simulator struct {
 
 	cost Coster
 
-	orders    []broker.Order
-	positions []broker.Position
-	trades    []broker.Trade
-	equity    broker.EquitySeries
+	orders     []broker.Order
+	positions  []broker.Position
+	roundturns []broker.RoundTurn
+	equity     broker.EquitySeries
 }
 
 // NewSimulator create a new backtest simulator with zero cost model.
@@ -143,10 +143,10 @@ func (s *Simulator) Positions() []broker.Position {
 	return copied
 }
 
-// Trades returns a copy of all historical trades.
-func (s *Simulator) Trades() []broker.Trade {
-	copied := make([]broker.Trade, len(s.trades))
-	copy(copied, s.trades)
+// RoundTurns returns a copy of all historical roundturns.
+func (s *Simulator) RoundTurns() []broker.RoundTurn {
+	copied := make([]broker.RoundTurn, len(s.roundturns))
+	copy(copied, s.roundturns)
 	return copied
 }
 
@@ -298,10 +298,10 @@ func (s *Simulator) processPosition(position broker.Position, order broker.Order
 
 	case broker.PositionClosed:
 
-		// Create a trade for the closed position and update the account balance with the profit / loss
-		trade := s.createTrade(position)
+		// Create a round-turn for the closed position and update the account balance with the profit / loss
+		trade := s.createRoundTurn(position)
 		s.balance.Trade = s.balance.Trade.Add(trade.Profit)
-		s.trades = append(s.trades, trade)
+		s.roundturns = append(s.roundturns, trade)
 	}
 
 	return position, nil
@@ -324,8 +324,8 @@ func (s *Simulator) closePosition(position broker.Position, order broker.Order) 
 	return position
 }
 
-func (s *Simulator) createTrade(position broker.Position) broker.Trade {
-	return broker.Trade{
+func (s *Simulator) createRoundTurn(position broker.Position) broker.RoundTurn {
+	return broker.RoundTurn{
 		ID:         position.ID,
 		CreatedAt:  position.ClosedAt,
 		Asset:      position.Asset,
