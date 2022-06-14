@@ -58,7 +58,7 @@ func TestShortTradeWithStop(t *testing.T) {
 	start := time.Now()
 	prices := []market.Kline{
 		{Start: start.Add(0 * time.Hour), O: dec.New(10), H: dec.New(20), L: dec.New(5), C: dec.New(8)},
-		{Start: start.Add(1 * time.Hour), O: dec.New(8), H: dec.New(15), L: dec.New(4), C: dec.New(10)},
+		{Start: start.Add(1 * time.Hour), O: dec.New(8), H: dec.New(15), L: dec.New(4), C: dec.New(01)},
 		{Start: start.Add(2 * time.Hour), O: dec.New(10), H: dec.New(26), L: dec.New(10), C: dec.New(20)},
 		{Start: start.Add(3 * time.Hour), O: dec.New(20), H: dec.New(25), L: dec.New(6), C: dec.New(10)},
 		{Start: start.Add(4 * time.Hour), O: dec.New(10), H: dec.New(30), L: dec.New(3), C: dec.New(5)},
@@ -88,6 +88,7 @@ func TestShortTradeWithStop(t *testing.T) {
 	}
 
 	exp := dec.New(-28)
+
 	act := dealer.simulator.Balance().Trade
 	assert.True(t, act.Equal(exp))
 }

@@ -230,6 +230,9 @@ func TestSimulator_processPosition(t *testing.T) {
 				Side:       broker.Buy,
 				EntryPrice: dec.New(10),
 				Size:       dec.New(1),
+				Cost:       dec.New(10),
+				MarkPrice:  dec.New(10),
+				PNL:        decimal.Zero,
 			},
 			wantState: broker.PositionOpen,
 			wantErr:   nil,
@@ -246,6 +249,8 @@ func TestSimulator_processPosition(t *testing.T) {
 				EntryPrice: dec.New(10),
 				Size:       dec.New(1),
 				ExitPrice:  dec.New(20),
+				MarkPrice:  dec.New(20),
+				PNL:        dec.New(10),
 			},
 			wantState: broker.PositionClosed,
 			wantErr:   nil,
@@ -287,6 +292,7 @@ func TestSimulator_processPosition(t *testing.T) {
 func TestSimulator_openPosition(t *testing.T) {
 
 	sim := newSimulatorForTest()
+	sim.marketPrice = market.Kline{C: dec.New(10)}
 
 	exp := broker.Position{
 		ID:         "1",
@@ -295,6 +301,7 @@ func TestSimulator_openPosition(t *testing.T) {
 		Side:       broker.Buy,
 		EntryPrice: dec.New(10),
 		Size:       dec.New(1),
+		Cost:       dec.New(10),
 	}
 
 	act := sim.openPosition(broker.Order{
@@ -424,62 +431,66 @@ func TestSimulator_matchOrder(t *testing.T) {
 	}
 }
 
-func TestSimulator_profit(t *testing.T) {
+func TestSimulator_positionMarkToMarket(t *testing.T) {
+
+	sim := newSimulatorForTest()
+
 	tests := []struct {
-		name string
-		give broker.Position
-		want decimal.Decimal
+		name          string
+		givePosition  broker.Position
+		giveMarkPrice decimal.Decimal
+		want          decimal.Decimal
 	}{
 		{
 			name: "buy side profit",
-			give: broker.Position{
+			givePosition: broker.Position{
 				Side:       broker.Buy,
 				EntryPrice: dec.New(10),
 				Size:       dec.New(2),
-				ExitPrice:  dec.New(20),
 			},
-			want: dec.New(20),
+			giveMarkPrice: dec.New(20),
+			want:          dec.New(20),
 		},
 		{
 			name: "sell side profit",
-			give: broker.Position{
+			givePosition: broker.Position{
 				Side:       broker.Sell,
 				EntryPrice: dec.New(100),
 				Size:       dec.New(2),
-				ExitPrice:  dec.New(50),
 			},
-			want: dec.New(100),
+			giveMarkPrice: dec.New(50),
+			want:          dec.New(100),
 		},
 		{
 			name: "buy side loss",
-			give: broker.Position{
+			givePosition: broker.Position{
 				Side:       broker.Buy,
 				EntryPrice: dec.New(10),
 				Size:       dec.New(2),
-				ExitPrice:  dec.New(5),
 			},
-			want: dec.New(-10),
+			giveMarkPrice: dec.New(5),
+			want:          dec.New(-10),
 		},
 		{
 			name: "sell side loss",
-			give: broker.Position{
+			givePosition: broker.Position{
 				Side:       broker.Sell,
 				EntryPrice: dec.New(10),
 				Size:       dec.New(2),
-				ExitPrice:  dec.New(20),
 			},
-			want: dec.New(-20),
+			giveMarkPrice: dec.New(20),
+			want:          dec.New(-20),
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			act := profit(tt.give, tt.give.ExitPrice)
+			act := sim.positionMarkToMarket(tt.givePosition, tt.giveMarkPrice).PNL
 			assert.True(t, act.Equal(tt.want))
 		})
 	}
 }
 
-func TestSimulator_createTrade(t *testing.T) {
+func TestSimulator_createRoundTurn(t *testing.T) {
 
 	sim := newSimulatorForTest()
 
@@ -492,6 +503,7 @@ func TestSimulator_createTrade(t *testing.T) {
 		EntryPrice: dec.New(10),
 		Size:       dec.New(2),
 		ExitPrice:  dec.New(20),
+		PNL:        dec.New(-20),
 	}
 
 	want := broker.RoundTurn{
@@ -515,10 +527,10 @@ func TestSimulator_markToMarket(t *testing.T) {
 
 	t.Run("open position - unrealized profit", func(t *testing.T) {
 		sim.positions = []broker.Position{{
-			ID: "1", OpenedAt: _fixed, Side: broker.Sell, EntryPrice: dec.New(10), Size: dec.New(2)},
+			ID: "1", OpenedAt: _fixed, Side: broker.Sell, EntryPrice: dec.New(10), Size: dec.New(2), PNL: dec.New(-20)},
 		}
 		exp := dec.New(-10)
-		act := sim.markToMarket()
+		act := sim.portfolioMarkToMarket()
 		assert.True(t, act.Equal(exp))
 	})
 
@@ -527,7 +539,7 @@ func TestSimulator_markToMarket(t *testing.T) {
 			{ID: "1", ClosedAt: _fixed, Side: broker.Sell, EntryPrice: dec.New(10), Size: dec.New(2)},
 		}
 		exp := dec.New(10)
-		act := sim.markToMarket()
+		act := sim.portfolioMarkToMarket()
 		assert.True(t, act.Equal(exp))
 	})
 

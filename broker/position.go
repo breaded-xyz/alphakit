@@ -45,8 +45,8 @@ type Position struct {
 	// MarkPrice is the latest marked price for the asset
 	MarkPrice decimal.Decimal
 
-	// UnrealizedPNL is Size * (MarkPrice - EntryPrice)
-	UnrealizedPNL decimal.Decimal
+	// PNL is Size * (MarkPrice - EntryPrice)
+	PNL decimal.Decimal
 
 	// Exit price is the price at which the position was closed
 	ExitPrice decimal.Decimal
