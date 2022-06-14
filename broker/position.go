@@ -33,7 +33,7 @@ type Position struct {
 	Asset    market.Asset
 	Side     OrderSide
 
-	// EntryPrice is the average cost basis for the current position size
+	// EntryPrice is the average price for the current position size
 	EntryPrice decimal.Decimal
 
 	// Size is the number of units of the Asset exposed by the Position
@@ -48,7 +48,7 @@ type Position struct {
 	// UnrealizedPNL is Size * (MarkPrice - EntryPrice)
 	UnrealizedPNL decimal.Decimal
 
-	// Exit price is the price at which the position is closed
+	// Exit price is the price at which the position was closed
 	ExitPrice decimal.Decimal
 }
 

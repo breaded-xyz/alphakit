@@ -309,13 +309,21 @@ func (s *Simulator) processPosition(position broker.Position, order broker.Order
 
 func (s *Simulator) openPosition(order broker.Order) broker.Position {
 	return broker.Position{
-		ID:         order.ID,
-		OpenedAt:   order.FilledAt,
-		Asset:      order.Asset,
-		Side:       order.Side,
-		EntryPrice: order.FilledPrice,
-		Size:       order.FilledSize,
+		ID:            order.ID,
+		OpenedAt:      order.FilledAt,
+		Asset:         order.Asset,
+		Side:          order.Side,
+		EntryPrice:    order.FilledPrice,
+		Size:          order.FilledSize,
+		Cost:          order.FilledSize.Mul(order.FilledPrice),
+		MarkPrice:     s.marketPrice.C,
+		UnrealizedPNL: order.FilledSize.Mul((s.marketPrice.C.Sub(order.FilledPrice))),
 	}
+}
+
+func (s *Simulator) adjustPosition(order broker.Order) broker.Position {
+	var empty broker.Position
+	return empty
 }
 
 func (s *Simulator) closePosition(position broker.Position, order broker.Order) broker.Position {
