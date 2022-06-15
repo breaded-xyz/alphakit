@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/thecolngroup/dec"
+	"github.com/thecolngroup/gou/dec"
 )
 
 var assertKlineEq = func(t *testing.T, exp, act Kline) {

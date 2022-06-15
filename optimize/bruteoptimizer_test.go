@@ -9,7 +9,7 @@ import (
 	"github.com/thecolngroup/alphakit/market"
 	"github.com/thecolngroup/alphakit/perf"
 	"github.com/thecolngroup/alphakit/trader"
-	"github.com/thecolngroup/dec"
+	"github.com/thecolngroup/gou/dec"
 	"golang.org/x/exp/maps"
 )
 

@@ -5,7 +5,7 @@ import (
 
 	"github.com/shopspring/decimal"
 	"github.com/thecolngroup/alphakit/broker"
-	"github.com/thecolngroup/dec"
+	"github.com/thecolngroup/gou/dec"
 )
 
 // Drawdown is a feature of the equity curve representing a peak to valley bottom and recovery to prior peak.

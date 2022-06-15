@@ -7,7 +7,7 @@ import (
 
 	"github.com/thecolngroup/alphakit/broker"
 	"github.com/thecolngroup/alphakit/perf"
-	"github.com/thecolngroup/util"
+	"github.com/thecolngroup/gou/csv"
 )
 
 // WriteStudyResultToCSV writes the results of a study to CSV.
@@ -143,5 +143,5 @@ func saveDataToCSV(filename string, data interface{}) error {
 		return []byte(fmt.Sprint(m)), nil
 	}
 
-	return util.WriteToCSV(filename, data, encMap, encParamMap)
+	return csv.WriteToCSV(filename, data, encMap, encParamMap)
 }

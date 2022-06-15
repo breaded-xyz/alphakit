@@ -10,14 +10,14 @@ require (
 	github.com/schwarmco/go-cartesian-product v0.0.0-20180515110546-d5ee747a6dc9
 	github.com/shopspring/decimal v1.3.1
 	github.com/spf13/viper v1.12.0
-	github.com/stretchr/testify v1.7.1
-	github.com/thecolngroup/dec v0.0.1
-	github.com/thecolngroup/util v0.0.2
-	golang.org/x/exp v0.0.0-20220518171630-0b5c67f07fdf
+	github.com/stretchr/testify v1.7.2
+	github.com/thecolngroup/gou v0.0.7
+	golang.org/x/exp v0.0.0-20220613132600-b0d781184e0d
 	gonum.org/v1/gonum v0.11.0
 )
 
 require (
+	github.com/google/go-cmp v0.5.8 // indirect
 	github.com/jszwec/csvutil v1.7.0 // indirect
 	github.com/oklog/ulid/v2 v2.0.2 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect

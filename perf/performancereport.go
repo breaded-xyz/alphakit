@@ -11,7 +11,7 @@ import (
 	"github.com/olekukonko/tablewriter"
 	"github.com/thecolngroup/alphakit/broker"
 	"github.com/thecolngroup/alphakit/market"
-	"github.com/thecolngroup/util"
+	"github.com/thecolngroup/gou/id"
 )
 
 const _friendlyReportTimeFormat = time.RFC822
@@ -45,7 +45,7 @@ type PerformanceReport struct {
 // NewPerformanceReport creates a new PerformanceReport.
 func NewPerformanceReport(roundturns []broker.RoundTurn, equity broker.EquitySeries) PerformanceReport {
 	return PerformanceReport{
-		ID:              string(util.NewID()),
+		ID:              string(id.New()),
 		TradeReport:     NewTradeReport(roundturns),
 		PortfolioReport: NewPortfolioReport(equity),
 		Properties:      make(map[string]any),

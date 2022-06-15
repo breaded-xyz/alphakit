@@ -3,10 +3,10 @@ package perf
 import (
 	"math"
 
-	"github.com/thecolngroup/util"
 	"gonum.org/v1/gonum/floats"
 
 	"github.com/thecolngroup/alphakit/broker"
+	"github.com/thecolngroup/gou/num"
 )
 
 // TradeReport is a report on the trade metrics.
@@ -84,11 +84,11 @@ func NewTradeReport(roundturns []broker.RoundTurn) *TradeReport {
 
 	report.TotalNetProfit = report.GrossProfit - report.GrossLoss
 	report.AvgNetProfit = report.TotalNetProfit / report.RoundTurnCount
-	report.ProfitFactor = report.GrossProfit / util.NNZ(report.GrossLoss, 1)
+	report.ProfitFactor = report.GrossProfit / num.NNZ(report.GrossLoss, 1)
 	report.PRR = PRR(report.GrossProfit, report.GrossLoss, report.winningCount, report.losingCount)
 
-	report.AvgProfit = report.GrossProfit / util.NNZ(report.winningCount, 1)
-	report.AvgLoss = report.GrossLoss / util.NNZ(report.losingCount, 1)
+	report.AvgProfit = report.GrossProfit / num.NNZ(report.winningCount, 1)
+	report.AvgLoss = report.GrossLoss / num.NNZ(report.losingCount, 1)
 
 	report.winningPct = report.winningCount / report.RoundTurnCount
 	report.losingPct = 1 - report.winningPct

@@ -13,7 +13,7 @@ import (
 	"github.com/thecolngroup/alphakit/perf"
 	"github.com/thecolngroup/alphakit/risk"
 	"github.com/thecolngroup/alphakit/ta"
-	"github.com/thecolngroup/dec"
+	"github.com/thecolngroup/gou/dec"
 )
 
 func TestBotWithCrossPredicter(t *testing.T) {

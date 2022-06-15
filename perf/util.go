@@ -4,7 +4,7 @@ import (
 	"time"
 
 	"github.com/thecolngroup/alphakit/broker"
-	"github.com/thecolngroup/util"
+	"github.com/thecolngroup/gou/num"
 )
 
 // DiffPctReturns converts an equity curve of absolute amounts
@@ -16,7 +16,7 @@ func DiffPctReturns(curve broker.EquitySeries) []float64 {
 		if i == 0 {
 			continue
 		}
-		t0, t1 := vs[i].InexactFloat64(), util.NNZ(vs[i-1].InexactFloat64(), 1)
+		t0, t1 := vs[i].InexactFloat64(), num.NNZ(vs[i-1].InexactFloat64(), 1)
 		diffs[i-1] = (t0 - t1) / t1
 	}
 	return diffs

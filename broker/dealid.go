@@ -3,7 +3,7 @@ package broker
 import (
 	"time"
 
-	"github.com/thecolngroup/util"
+	"github.com/thecolngroup/gou/id"
 )
 
 // DealID is a unique identifier for a dealer data entity.
@@ -11,10 +11,10 @@ type DealID string
 
 // NewID returns a new DealID seeded with the current time.
 func NewID() DealID {
-	return DealID(util.NewID())
+	return DealID(id.New())
 }
 
 // NewIDWithTime returns a new DealID seeded with the given time.
 func NewIDWithTime(t time.Time) DealID {
-	return DealID(util.NewIDWithTime(t))
+	return DealID(id.NewWithTime(t))
 }

@@ -4,8 +4,8 @@ import (
 	"math"
 
 	"github.com/shopspring/decimal"
-	"github.com/thecolngroup/dec"
-	"github.com/thecolngroup/util"
+	"github.com/thecolngroup/gou/dec"
+	"github.com/thecolngroup/gou/num"
 )
 
 var _ Sizer = (*SafeFSizer)(nil)
@@ -46,7 +46,7 @@ func (s *SafeFSizer) Size(price, capital, risk decimal.Decimal) decimal.Decimal 
 
 	size := margin / risk.InexactFloat64()
 
-	size = util.RoundTo(size, s.StepSize)
+	size = num.RoundTo(size, s.StepSize)
 
-	return dec.New(util.NN(size, 0))
+	return dec.New(num.NN(size, 0))
 }

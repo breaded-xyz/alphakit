@@ -6,7 +6,7 @@ import (
 
 	"github.com/olekukonko/tablewriter"
 	"github.com/thecolngroup/alphakit/optimize"
-	"github.com/thecolngroup/util"
+	"github.com/thecolngroup/gou/conv"
 	"golang.org/x/exp/maps"
 	"golang.org/x/exp/slices"
 )
@@ -49,6 +49,6 @@ func printParams(params map[string]any) {
 	keys := maps.Keys(params)
 	slices.Sort(keys)
 	for _, k := range keys {
-		fmt.Printf("%s: %s\n", k, util.ToString(params[k]))
+		fmt.Printf("%s: %s\n", k, conv.ToString(params[k]))
 	}
 }

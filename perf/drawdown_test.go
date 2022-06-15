@@ -6,7 +6,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/thecolngroup/alphakit/broker"
-	"github.com/thecolngroup/dec"
+	"github.com/thecolngroup/gou/dec"
 )
 
 func TestDrawdowns(t *testing.T) {
