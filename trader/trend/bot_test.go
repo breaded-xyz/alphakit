@@ -10,7 +10,7 @@ import (
 	"github.com/thecolngroup/alphakit/broker"
 	"github.com/thecolngroup/alphakit/market"
 	"github.com/thecolngroup/alphakit/web"
-	"github.com/thecolngroup/dec"
+	"github.com/thecolngroup/gou/dec"
 )
 
 func TestBot_executeExitOrder(t *testing.T) {

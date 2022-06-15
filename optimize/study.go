@@ -3,7 +3,7 @@ package optimize
 import (
 	"github.com/thecolngroup/alphakit/market"
 	"github.com/thecolngroup/alphakit/perf"
-	"github.com/thecolngroup/util"
+	"github.com/thecolngroup/gou/id"
 )
 
 // Study is an optimization experiment, prepared and executed by an Optimizer.
@@ -39,7 +39,7 @@ type Study struct {
 // Use an Optimizer implementation to prepare and execute the study.
 func NewStudy() *Study {
 	return &Study{
-		ID:                string(util.NewID()),
+		ID:                string(id.New()),
 		TrainingSamples:   make(map[AssetID][]market.Kline),
 		TrainingResults:   make(map[ParamSetID]PhaseReport),
 		ValidationSamples: make(map[AssetID][]market.Kline),
@@ -77,7 +77,7 @@ type PhaseReport struct {
 // NewReport returns a new empty report with an initialized ID.
 func NewReport() PhaseReport {
 	return PhaseReport{
-		ID: string(util.NewID()),
+		ID: string(id.New()),
 	}
 }
 

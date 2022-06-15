@@ -6,7 +6,7 @@ import (
 
 	"github.com/shopspring/decimal"
 	"github.com/thecolngroup/alphakit/broker"
-	"github.com/thecolngroup/util"
+	"github.com/thecolngroup/gou/csv"
 )
 
 // WritePerformanceReportToCSV writes a performance report to a CSV file.
@@ -14,12 +14,12 @@ func WritePerformanceReportToCSV(filename string, report *PerformanceReport) err
 	encMap := func(m map[string]any) ([]byte, error) {
 		return []byte(fmt.Sprint(m)), nil
 	}
-	return util.WriteToCSV(filename, report, encMap)
+	return csv.WriteToCSV(filename, report, encMap)
 }
 
 // WriteRoundTurnsToCSV writes a slice of roundturns to a CSV file.
 func WriteRoundTurnsToCSV(filename string, roundturns []broker.RoundTurn) error {
-	return util.WriteToCSV(filename, roundturns)
+	return csv.WriteToCSV(filename, roundturns)
 }
 
 type equitySeriesRow struct {
@@ -37,5 +37,5 @@ func WriteEquitySeriesToCSV(filename string, series broker.EquitySeries) error {
 			Amount: series[ks[i]],
 		}
 	}
-	return util.WriteToCSV(filename, rows)
+	return csv.WriteToCSV(filename, rows)
 }

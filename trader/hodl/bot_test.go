@@ -7,7 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/thecolngroup/alphakit/broker"
 	"github.com/thecolngroup/alphakit/market"
-	"github.com/thecolngroup/dec"
+	"github.com/thecolngroup/gou/dec"
 )
 
 func TestBot_evalAlgo(t *testing.T) {

@@ -8,7 +8,8 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/thecolngroup/alphakit/broker"
 	"github.com/thecolngroup/alphakit/market"
-	"github.com/thecolngroup/dec"
+	"github.com/thecolngroup/gou/dec"
+	"github.com/thecolngroup/gou/test"
 )
 
 func TestLongTradeWithCosts(t *testing.T) {
@@ -51,6 +52,11 @@ func TestLongTradeWithCosts(t *testing.T) {
 
 	exp := dec.New(-13.6913)
 	act := dealer.simulator.Balance().Trade
+
+	test.Dump(dealer.simulator.orders)
+	test.Dump(dealer.simulator.positions)
+	test.Dump(dealer.simulator.roundturns)
+
 	assert.True(t, act.Equal(exp))
 }
 
@@ -88,7 +94,11 @@ func TestShortTradeWithStop(t *testing.T) {
 	}
 
 	exp := dec.New(-28)
-
 	act := dealer.simulator.Balance().Trade
+
+	test.Dump(dealer.simulator.orders)
+	test.Dump(dealer.simulator.positions)
+	test.Dump(dealer.simulator.roundturns)
+
 	assert.True(t, act.Equal(exp))
 }

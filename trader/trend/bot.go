@@ -10,7 +10,7 @@ import (
 	"github.com/thecolngroup/alphakit/money"
 	"github.com/thecolngroup/alphakit/risk"
 	"github.com/thecolngroup/alphakit/trader"
-	"github.com/thecolngroup/dec"
+	"github.com/thecolngroup/gou/dec"
 )
 
 var _ trader.Bot = (*Bot)(nil)

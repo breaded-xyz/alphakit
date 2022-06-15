@@ -95,6 +95,8 @@ type Order struct {
 
 	FilledPrice decimal.Decimal
 	FilledSize  decimal.Decimal
+
+	Fee decimal.Decimal
 }
 
 // NewOrder creates a new order with the minimum required fields to be valid.

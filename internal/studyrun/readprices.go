@@ -6,7 +6,7 @@ import (
 
 	"github.com/thecolngroup/alphakit/market"
 	"github.com/thecolngroup/alphakit/optimize"
-	"github.com/thecolngroup/util"
+	"github.com/thecolngroup/gou/conv"
 )
 
 // readPricesFromConfig reads the price samples from a config file params.
@@ -26,7 +26,7 @@ func readPricesFromConfig(config map[string]any, typeRegistry map[string]any) (m
 		if _, ok := cfg["decoder"]; !ok {
 			return nil, errors.New("'decoder' key not found")
 		}
-		decoder := util.ToString(cfg["decoder"])
+		decoder := conv.ToString(cfg["decoder"])
 		if _, ok := typeRegistry[decoder]; !ok {
 			return nil, fmt.Errorf("'%s' key not found in type registry", decoder)
 		}

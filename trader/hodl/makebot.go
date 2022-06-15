@@ -2,7 +2,7 @@ package hodl
 
 import (
 	"github.com/thecolngroup/alphakit/trader"
-	"github.com/thecolngroup/util"
+	"github.com/thecolngroup/gou/conv"
 )
 
 // MakeBotFromConfig builds a valid Bot from a given set of config params.
@@ -12,12 +12,12 @@ func MakeBotFromConfig(config map[string]any) (trader.Bot, error) {
 	if _, ok := config["buybarindex"]; !ok {
 		return nil, trader.ErrInvalidConfig
 	}
-	buyBarIndex := util.ToInt(config["buybarindex"])
+	buyBarIndex := conv.ToInt(config["buybarindex"])
 
 	if _, ok := config["sellbarindex"]; !ok {
 		return nil, trader.ErrInvalidConfig
 	}
-	sellBarIndex := util.ToInt(config["sellbarindex"])
+	sellBarIndex := conv.ToInt(config["sellbarindex"])
 
 	switch {
 	case buyBarIndex == 0 && sellBarIndex == 0:

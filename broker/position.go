@@ -33,14 +33,17 @@ type Position struct {
 	Asset    market.Asset
 	Side     OrderSide
 
-	// EntryPrice is the average price for the current position size
-	EntryPrice decimal.Decimal
+	// TradeCount is the number of trades (filled orders) applied
+	TradeCount int
 
-	// Size is the number of units of the Asset exposed by the Position
+	// Cost is the net capital invested (inc fees) into the position
+	Cost decimal.Decimal
+
+	// Size is the number of units of the Asset controlled by the Position
 	Size decimal.Decimal
 
-	// Cost is the EntryPrice * Size
-	Cost decimal.Decimal
+	// EntryPrice is the average price paid per unit of the asset (inclusive of fees) i.e. Cost / Size
+	EntryPrice decimal.Decimal
 
 	// MarkPrice is the latest marked price for the asset
 	MarkPrice decimal.Decimal

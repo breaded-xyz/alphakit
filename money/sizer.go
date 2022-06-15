@@ -3,8 +3,8 @@ package money
 
 import (
 	"github.com/shopspring/decimal"
-	"github.com/thecolngroup/dec"
-	"github.com/thecolngroup/util"
+	"github.com/thecolngroup/gou/dec"
+	"github.com/thecolngroup/gou/num"
 )
 
 // DefaultStepSize is the default step size (rounding) for position sizes.
@@ -34,6 +34,6 @@ func NewFixedSizer(capital decimal.Decimal) *FixedSizer {
 // Returns 0 if size is NaN/Inf.
 func (s *FixedSizer) Size(price, capital, risk decimal.Decimal) decimal.Decimal {
 	size := s.FixedCapital.Div(price).InexactFloat64()
-	size = util.RoundTo(size, s.StepSize)
-	return dec.New(util.NN(size, 0))
+	size = num.RoundTo(size, s.StepSize)
+	return dec.New(num.NN(size, 0))
 }

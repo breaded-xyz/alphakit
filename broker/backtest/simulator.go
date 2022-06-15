@@ -7,7 +7,7 @@ import (
 	"github.com/shopspring/decimal"
 	"github.com/thecolngroup/alphakit/broker"
 	"github.com/thecolngroup/alphakit/market"
-	"github.com/thecolngroup/dec"
+	"github.com/thecolngroup/gou/dec"
 	"golang.org/x/exp/maps"
 )
 
@@ -92,16 +92,6 @@ func (s *Simulator) Next(price market.Kline) error {
 	// Set the market price used in this epoch to the received price
 	s.marketPrice = price
 
-	// Get open position and mark to market
-	if position := s.position(); position.State() == broker.OrderOpen {
-		// Mark position PNL to latest price
-		position = s.positionMarkToMarket(position, s.marketPrice.C)
-		// Deduct funding fees from trade balance
-		s.balance.Trade = s.balance.Trade.Sub(s.cost.Funding(s.position(), s.marketPrice.C, s.clock.Elapsed()))
-
-		s.upsertPosition(position)
-	}
-
 	for i := range s.orders {
 		order := s.orders[i]
 		if order.State() != broker.OrderOpen {
@@ -114,8 +104,21 @@ func (s *Simulator) Next(price market.Kline) error {
 		s.orders[i] = order
 	}
 
-	// Add current portfolio equity to the history
-	equity := s.portfolioMarkToMarket()
+	// Init equity balance with trade (realized cash) balance
+	equity := s.balance.Trade
+
+	// Mark open position to market and add unrealized PNL to equity
+	if position := s.getPosition(); position.State() == broker.OrderOpen {
+		// Deduct funding fees from position PNL
+		position.Cost = position.Cost.Add(s.cost.Funding(position, s.marketPrice.C, s.clock.Elapsed()))
+		// Mark position PNL to latest price
+		position = markPositionToMarket(position, s.marketPrice.C)
+		s.upsertPosition(position)
+
+		equity = equity.Add(position.PNL)
+	}
+
+	// Update equity balance
 	s.equity[broker.Timestamp(s.clock.Peek().UnixMilli())] = equity
 	s.balance.Equity = equity
 
@@ -200,12 +203,11 @@ func (s *Simulator) processOrder(order broker.Order) (broker.Order, error) {
 		}
 
 	case broker.OrderFilled:
-		position, err := s.processPosition(s.position(), order)
+		position, err := s.processPosition(s.getPosition(), order)
 		if err != nil {
 			return order, err
 		}
 		s.upsertPosition(position)
-		s.balance.Trade = s.balance.Trade.Sub(s.cost.Transaction(order))
 		order = s.closeOrder(order)
 	}
 	return order, nil
@@ -232,6 +234,7 @@ func (s *Simulator) fillOrder(order broker.Order, matchedPrice decimal.Decimal) 
 
 	order.FilledPrice = fillPrice
 	order.FilledSize = order.Size
+	order.Fee = s.cost.Transaction(order)
 
 	return order
 }
@@ -241,7 +244,7 @@ func (s *Simulator) closeOrder(order broker.Order) broker.Order {
 	return order
 }
 
-func (s *Simulator) position() broker.Position {
+func (s *Simulator) getPosition() broker.Position {
 	var empty, position broker.Position
 	if len(s.positions) == 0 {
 		return empty
@@ -280,7 +283,7 @@ func (s *Simulator) processPosition(position broker.Position, order broker.Order
 		}
 
 		// Transition to open
-		position = s.positionMarkToMarket(s.openPosition(order), order.FilledPrice)
+		position = s.openPosition(order)
 		if position, err = s.processPosition(position, order); err != nil {
 			return position, err
 		}
@@ -294,21 +297,27 @@ func (s *Simulator) processPosition(position broker.Position, order broker.Order
 		}
 
 		// State transition condition:
-		// A new order can only close an opened position in full and never partially reduce or increase
-		if !(order.Side == position.Side.Opposite() && order.FilledSize.Equal(position.Size)) {
+		// A new order can only adjust down an opened position to zero, it cannot be forced negative
+		if order.Side == position.Side.Opposite() && order.FilledSize.GreaterThan(position.Size) {
 			return position, ErrRejectedOrder
 		}
 
-		// Transition to closed
-		position = s.positionMarkToMarket(s.closePosition(position, order), order.FilledPrice)
-		if position, err = s.processPosition(position, order); err != nil {
-			position = s.positionMarkToMarket(position, order.FilledPrice)
-			return position, err
+		position = s.adjustPosition(position, order)
+
+		// Closed position
+		if position.Size.IsZero() {
+			position = s.closePosition(position, order)
+			if position, err = s.processPosition(position, order); err != nil {
+				return position, err
+			}
 		}
 
 	case broker.PositionClosed:
-
-		// Create a round-turn for the closed position and update the account balance with the profit / loss
+		// Create a round-turn for the closed position
+		// Realize the position PNL to the account balance
+		// Mark price is the fill price of the order that closed the position,
+		// note this is a specific edge case for closing a position in order to correctly handle limit orders
+		position = markPositionToMarket(position, order.FilledPrice)
 		roundturn := s.createRoundTurn(position)
 		s.balance.Trade = s.balance.Trade.Add(roundturn.Profit)
 		s.roundturns = append(s.roundturns, roundturn)
@@ -319,20 +328,33 @@ func (s *Simulator) processPosition(position broker.Position, order broker.Order
 
 func (s *Simulator) openPosition(order broker.Order) broker.Position {
 	position := broker.Position{
-		ID:         order.ID,
-		OpenedAt:   order.FilledAt,
-		Asset:      order.Asset,
-		Side:       order.Side,
-		EntryPrice: order.FilledPrice,
-		Size:       order.FilledSize,
-		Cost:       order.FilledSize.Mul(order.FilledPrice),
+		ID:       order.ID,
+		OpenedAt: order.FilledAt,
+		Asset:    order.Asset,
+		Side:     order.Side,
 	}
-	return position
+
+	return s.adjustPosition(position, order)
 }
 
-func (s *Simulator) adjustPosition(order broker.Order) broker.Position {
-	var empty broker.Position
-	return empty
+func (s *Simulator) adjustPosition(position broker.Position, order broker.Order) broker.Position {
+
+	position.TradeCount++
+
+	orderCost := order.FilledSize.Mul(order.FilledPrice)
+
+	switch position.Side {
+	case order.Side:
+		position.Cost = position.Cost.Add(orderCost).Add(order.Fee)
+		position.Size = position.Size.Add(order.FilledSize)
+	case order.Side.Opposite():
+		position.Cost = position.Cost.Sub(orderCost).Add(order.Fee)
+		position.Size = position.Size.Sub(order.FilledSize)
+	}
+
+	position.EntryPrice = position.Cost.Div(dec.NZ(position.Size, dec.New(1))).Abs()
+
+	return position
 }
 
 func (s *Simulator) closePosition(position broker.Position, order broker.Order) broker.Position {
@@ -347,27 +369,19 @@ func (s *Simulator) createRoundTurn(position broker.Position) broker.RoundTurn {
 		CreatedAt:  position.ClosedAt,
 		Asset:      position.Asset,
 		Side:       position.Side,
-		Size:       position.Size,
 		Profit:     position.PNL,
 		HoldPeriod: position.ClosedAt.Sub(position.OpenedAt),
+		TradeCount: position.TradeCount,
 	}
 }
 
-func (s *Simulator) positionMarkToMarket(position broker.Position, markPrice decimal.Decimal) broker.Position {
+func markPositionToMarket(position broker.Position, markPrice decimal.Decimal) broker.Position {
 	position.MarkPrice = markPrice
-	position.PNL = position.Size.Mul(position.MarkPrice.Sub(position.EntryPrice))
+	position.PNL = position.Size.Mul(position.MarkPrice).Sub(position.Cost)
 	if position.Side == broker.Sell {
-		position.PNL = position.PNL.Neg()
+		position.PNL = position.PNL.Mul(dec.New(-1))
 	}
 	return position
-}
-
-func (s *Simulator) portfolioMarkToMarket() decimal.Decimal {
-	equity := s.balance.Trade
-	if position := s.position(); position.State() == broker.PositionOpen {
-		equity = equity.Add(position.PNL)
-	}
-	return equity
 }
 
 func matchOrder(order broker.Order, quote market.Kline) decimal.Decimal {

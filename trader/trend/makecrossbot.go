@@ -6,8 +6,9 @@ import (
 	"github.com/thecolngroup/alphakit/risk"
 	"github.com/thecolngroup/alphakit/ta"
 	"github.com/thecolngroup/alphakit/trader"
-	"github.com/thecolngroup/dec"
-	"github.com/thecolngroup/util"
+	"github.com/thecolngroup/gou/conv"
+	"github.com/thecolngroup/gou/dec"
+	"github.com/thecolngroup/gou/num"
 )
 
 var _ trader.MakeFromConfig = MakeCrossBotFromConfig
@@ -17,33 +18,33 @@ func MakeCrossBotFromConfig(config map[string]any) (trader.Bot, error) {
 
 	var bot Bot
 
-	bot.Asset = market.NewAsset(util.ToString(config["asset"]))
+	bot.Asset = market.NewAsset(conv.ToString(config["asset"]))
 
-	bot.EnterLong = util.NNZ(util.ToFloat(config["enterlong"]), 1.0)
-	bot.EnterShort = util.NNZ(util.ToFloat(config["entershort"]), -1.0)
-	bot.ExitLong = util.NNZ(util.ToFloat(config["exitlong"]), -1.0)
-	bot.ExitShort = util.NNZ(util.ToFloat(config["exitshort"]), 1.0)
+	bot.EnterLong = num.NNZ(conv.ToFloat(config["enterlong"]), 1.0)
+	bot.EnterShort = num.NNZ(conv.ToFloat(config["entershort"]), -1.0)
+	bot.ExitLong = num.NNZ(conv.ToFloat(config["exitlong"]), -1.0)
+	bot.ExitShort = num.NNZ(conv.ToFloat(config["exitshort"]), 1.0)
 
-	maFastLength := util.ToInt(config["mafastlength"])
-	maSlowLength := util.ToInt(config["maslowlength"])
+	maFastLength := conv.ToInt(config["mafastlength"])
+	maSlowLength := conv.ToInt(config["maslowlength"])
 	if maFastLength >= maSlowLength {
 		return nil, trader.ErrInvalidConfig
 	}
 	maOsc := ta.NewOsc(ta.NewALMA(maFastLength), ta.NewALMA(maSlowLength))
-	mmi := ta.NewMMI(util.ToInt(config["mmilength"]))
+	mmi := ta.NewMMI(conv.ToInt(config["mmilength"]))
 	bot.Predicter = NewCrossPredicter(maOsc, mmi)
 
-	riskSDLength := util.ToInt(config["riskersdlength"])
+	riskSDLength := conv.ToInt(config["riskersdlength"])
 	if riskSDLength > 0 {
-		bot.Risker = risk.NewSDRisker(riskSDLength, util.ToFloat(config["riskersdfactor"]))
+		bot.Risker = risk.NewSDRisker(riskSDLength, conv.ToFloat(config["riskersdfactor"]))
 	} else {
 		bot.Risker = risk.NewFullRisker()
 	}
 
-	initialCapital := dec.New(util.NNZ(util.ToFloat(config["initialcapital"]), 1000))
-	sizerF := util.ToFloat(config["sizerf"])
+	initialCapital := dec.New(num.NNZ(conv.ToFloat(config["initialcapital"]), 1000))
+	sizerF := conv.ToFloat(config["sizerf"])
 	if sizerF > 0 {
-		bot.Sizer = money.NewSafeFSizer(initialCapital, sizerF, util.ToFloat(config["sizerscalef"]))
+		bot.Sizer = money.NewSafeFSizer(initialCapital, sizerF, conv.ToFloat(config["sizerscalef"]))
 	} else {
 		bot.Sizer = money.NewFixedSizer(initialCapital)
 	}

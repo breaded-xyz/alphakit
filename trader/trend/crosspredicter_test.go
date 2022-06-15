@@ -7,8 +7,8 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/thecolngroup/alphakit/market"
 	"github.com/thecolngroup/alphakit/ta"
-	"github.com/thecolngroup/dec"
-	"github.com/thecolngroup/util"
+	"github.com/thecolngroup/gou/dec"
+	"github.com/thecolngroup/gou/num"
 )
 
 func TestCrossPredicter_ReceivePrice(t *testing.T) {
@@ -79,7 +79,7 @@ func TestCrossPredicter_Predict(t *testing.T) {
 				&ta.StubIndicator{Values: tt.giveMMIValues},
 			)
 			act := predicter.Predict()
-			assert.Equal(t, tt.want, util.Round2DP(act))
+			assert.Equal(t, tt.want, num.Round2DP(act))
 		})
 	}
 

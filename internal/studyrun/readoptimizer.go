@@ -6,7 +6,7 @@ import (
 
 	"github.com/thecolngroup/alphakit/optimize"
 	"github.com/thecolngroup/alphakit/trader"
-	"github.com/thecolngroup/util"
+	"github.com/thecolngroup/gou/conv"
 )
 
 // readBruteOptimizerFromConfig creates a new brute optimizer from a config file params.
@@ -24,15 +24,15 @@ func readBruteOptimizerFromConfig(config map[string]any, typeRegistry map[string
 	if _, ok := root["bot"]; !ok {
 		return nil, errors.New("'bot' key not found")
 	}
-	bot := util.ToString(root["bot"])
+	bot := conv.ToString(root["bot"])
 	if _, ok := typeRegistry[bot]; !ok {
 		return nil, fmt.Errorf("'%s' key not found in type registry", bot)
 	}
 
 	optimizer = optimize.NewBruteOptimizer()
 	optimizer.MakeBot = typeRegistry[bot].(trader.MakeFromConfig)
-	optimizer.SampleSplitPct = util.ToFloat(root["samplesplitpct"])
-	optimizer.WarmupBarCount = util.ToInt(root["warmupbarcount"])
+	optimizer.SampleSplitPct = conv.ToFloat(root["samplesplitpct"])
+	optimizer.WarmupBarCount = conv.ToInt(root["warmupbarcount"])
 	optimizer.Ranker = optimize.SharpeRanker
 
 	return &optimizer, nil

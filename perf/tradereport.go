@@ -3,10 +3,10 @@ package perf
 import (
 	"math"
 
-	"github.com/thecolngroup/util"
 	"gonum.org/v1/gonum/floats"
 
 	"github.com/thecolngroup/alphakit/broker"
+	"github.com/thecolngroup/gou/num"
 )
 
 // TradeReport is a report on the trade metrics.
@@ -57,10 +57,11 @@ func NewTradeReport(roundturns []broker.RoundTurn) *TradeReport {
 	profits := make([]float64, len(roundturns))
 
 	for i := range roundturns {
-		t := roundturns[i]
-		report.TotalTimeInMarketSec += t.HoldPeriod.Seconds()
+		rt := roundturns[i]
+		report.TotalTimeInMarketSec += rt.HoldPeriod.Seconds()
+		report.TradeCount += float64(rt.TradeCount)
 
-		profit := t.Profit.InexactFloat64()
+		profit := rt.Profit.InexactFloat64()
 		profits[i] = profit
 		switch {
 		case profit > 0:
@@ -80,15 +81,14 @@ func NewTradeReport(roundturns []broker.RoundTurn) *TradeReport {
 	report.MaxLoss = math.Abs(floats.Min(profits))
 
 	report.RoundTurnCount = report.winningCount + report.losingCount
-	report.TradeCount = report.RoundTurnCount * 2
 
 	report.TotalNetProfit = report.GrossProfit - report.GrossLoss
 	report.AvgNetProfit = report.TotalNetProfit / report.RoundTurnCount
-	report.ProfitFactor = report.GrossProfit / util.NNZ(report.GrossLoss, 1)
+	report.ProfitFactor = report.GrossProfit / num.NNZ(report.GrossLoss, 1)
 	report.PRR = PRR(report.GrossProfit, report.GrossLoss, report.winningCount, report.losingCount)
 
-	report.AvgProfit = report.GrossProfit / util.NNZ(report.winningCount, 1)
-	report.AvgLoss = report.GrossLoss / util.NNZ(report.losingCount, 1)
+	report.AvgProfit = report.GrossProfit / num.NNZ(report.winningCount, 1)
+	report.AvgLoss = report.GrossLoss / num.NNZ(report.losingCount, 1)
 
 	report.winningPct = report.winningCount / report.RoundTurnCount
 	report.losingPct = 1 - report.winningPct

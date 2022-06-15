@@ -13,7 +13,7 @@ type RoundTurn struct {
 	CreatedAt  time.Time       `csv:"created_at"`
 	Asset      market.Asset    `csv:",inline"`
 	Side       OrderSide       `csv:"side"`
-	Size       decimal.Decimal `csv:"size"`
 	Profit     decimal.Decimal `csv:"profit"`
 	HoldPeriod time.Duration   `csv:"hold_period"`
+	TradeCount int             `csv:"trade_count"`
 }

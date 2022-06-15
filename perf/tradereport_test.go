@@ -6,7 +6,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/thecolngroup/alphakit/broker"
-	"github.com/thecolngroup/dec"
+	"github.com/thecolngroup/gou/dec"
 )
 
 func TestTradeReport(t *testing.T) {
@@ -16,21 +16,25 @@ func TestTradeReport(t *testing.T) {
 			Side:       broker.Buy,
 			Profit:     dec.New(-10),
 			HoldPeriod: time.Hour * 96,
+			TradeCount: 2,
 		},
 		{
 			Side:       broker.Buy,
 			Profit:     dec.New(-20),
 			HoldPeriod: time.Hour * 24,
+			TradeCount: 4,
 		},
 		{
 			Side:       broker.Sell,
 			Profit:     dec.New(100),
 			HoldPeriod: time.Hour * 192,
+			TradeCount: 1,
 		},
 		{
 			Side:       broker.Sell,
 			Profit:     dec.New(10),
 			HoldPeriod: time.Hour * 48,
+			TradeCount: 1,
 		},
 	}
 

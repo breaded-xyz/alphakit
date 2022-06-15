@@ -10,7 +10,7 @@ import (
 	"github.com/thecolngroup/alphakit/broker"
 	"github.com/thecolngroup/alphakit/market"
 	"github.com/thecolngroup/alphakit/perf"
-	"github.com/thecolngroup/dec"
+	"github.com/thecolngroup/gou/dec"
 )
 
 //nolint
