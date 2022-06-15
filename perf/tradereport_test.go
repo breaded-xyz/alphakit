@@ -16,21 +16,25 @@ func TestTradeReport(t *testing.T) {
 			Side:       broker.Buy,
 			Profit:     dec.New(-10),
 			HoldPeriod: time.Hour * 96,
+			TradeCount: 2,
 		},
 		{
 			Side:       broker.Buy,
 			Profit:     dec.New(-20),
 			HoldPeriod: time.Hour * 24,
+			TradeCount: 4,
 		},
 		{
 			Side:       broker.Sell,
 			Profit:     dec.New(100),
 			HoldPeriod: time.Hour * 192,
+			TradeCount: 1,
 		},
 		{
 			Side:       broker.Sell,
 			Profit:     dec.New(10),
 			HoldPeriod: time.Hour * 48,
+			TradeCount: 1,
 		},
 	}
 
