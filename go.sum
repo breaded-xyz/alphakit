@@ -199,10 +199,6 @@ github.com/stretchr/testify v1.7.2 h1:4jaiDzPyXQvSd7D0EjG45355tLlV3VOECpq10pLC+8
 github.com/stretchr/testify v1.7.2/go.mod h1:R6va5+xMeoiuVRoj+gSkQ7d3FALtqAAGI1FQKckRals=
 github.com/subosito/gotenv v1.3.0 h1:mjC+YW8QpAdXibNi+vNWgzmgBH4+5l5dCXv8cNysBLI=
 github.com/subosito/gotenv v1.3.0/go.mod h1:YzJjq/33h7nrwdY+iHMhEOEEbW0ovIz0tB6t6PwAXzs=
-github.com/thecolngroup/gou v0.0.5 h1:H6R0KtlgEYtiCPfjO3xN6kXr9lqZaSWJ1aKtMCsTtc8=
-github.com/thecolngroup/gou v0.0.5/go.mod h1:lr3RpyYhJm7YLV8h3uuk4GxR7DKl8CputtRvYnhdQCE=
-github.com/thecolngroup/gou v0.0.6 h1:RNPuFugLZB0HLxbxc8v23lhoR+z2gqoqWO0e9F10jHI=
-github.com/thecolngroup/gou v0.0.6/go.mod h1:lr3RpyYhJm7YLV8h3uuk4GxR7DKl8CputtRvYnhdQCE=
 github.com/thecolngroup/gou v0.0.7 h1:zt0J0HUXZJhXVlzrheI6vh5c0DrT1AK5CeVubX2tjiE=
 github.com/thecolngroup/gou v0.0.7/go.mod h1:lr3RpyYhJm7YLV8h3uuk4GxR7DKl8CputtRvYnhdQCE=
 github.com/yuin/goldmark v1.1.25/go.mod h1:3hX8gzYuyVAZsxl0MRgGTJEmQBFcNTphYh9decYSb74=

@@ -1,3 +1,6 @@
+// Copyright 2022 The Coln Group Ltd
+// SPDX-License-Identifier: MIT
+
 // Package broker provides an API for interacting with 3rd party exchanges,
 // and a simulated dealer for backtesting in the child package backtest.
 package broker

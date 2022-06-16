@@ -1,3 +1,6 @@
+// Copyright 2022 The Coln Group Ltd
+// SPDX-License-Identifier: MIT
+
 // Package web provides commons for interacting with 3rd party web services such as those in the broker package.
 package web
 

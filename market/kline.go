@@ -1,3 +1,6 @@
+// Copyright 2022 The Coln Group Ltd
+// SPDX-License-Identifier: MIT
+
 // Package market provides an API to read and process market price data
 package market
 

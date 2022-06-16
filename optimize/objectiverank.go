@@ -1,3 +1,6 @@
+// Copyright 2022 The Coln Group Ltd
+// SPDX-License-Identifier: MIT
+
 package optimize
 
 // ObjectiveRanker is used by an Optimizer to sort the results of backtest trials

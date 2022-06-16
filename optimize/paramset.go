@@ -1,3 +1,6 @@
+// Copyright 2022 The Coln Group Ltd
+// SPDX-License-Identifier: MIT
+
 package optimize
 
 import "github.com/thecolngroup/gou/id"

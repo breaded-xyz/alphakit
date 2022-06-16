@@ -1,3 +1,6 @@
+// Copyright 2022 The Coln Group Ltd
+// SPDX-License-Identifier: MIT
+
 package market
 
 // Asset represents a tradeable asset identified by its symbol, e.g. BTCUSD.

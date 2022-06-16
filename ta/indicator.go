@@ -1,3 +1,6 @@
+// Copyright 2022 The Coln Group Ltd
+// SPDX-License-Identifier: MIT
+
 // Package ta offers technical analysis functions for price series data.
 package ta
 

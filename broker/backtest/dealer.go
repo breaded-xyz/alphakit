@@ -1,3 +1,6 @@
+// Copyright 2022 The Coln Group Ltd
+// SPDX-License-Identifier: MIT
+
 // Package backtest provides a simultated dealer implementation for running backtests.
 package backtest
 

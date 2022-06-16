@@ -1,3 +1,6 @@
+// Copyright 2022 The Coln Group Ltd
+// SPDX-License-Identifier: MIT
+
 // Package optimize provides a set of services for optimizing algo parameters.
 // Parameter optimization is a process of systematically searching for the optimal set of parameters given a target objective.
 // Multiple methods are available, each implementing the Optimizer interface.

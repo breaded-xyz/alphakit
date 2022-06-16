@@ -1,3 +1,6 @@
+// Copyright 2022 The Coln Group Ltd
+// SPDX-License-Identifier: MIT
+
 // Package perf provides performance metrics for a trading algo,
 // using a record of roundturns and the equity curve from a Dealer in package broker.
 package perf

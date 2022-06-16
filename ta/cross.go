@@ -1,3 +1,6 @@
+// Copyright 2022 The Coln Group Ltd
+// SPDX-License-Identifier: MIT
+
 package ta
 
 // CrossUp returns true if the latest series values cross above the given value.

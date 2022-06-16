@@ -1,3 +1,6 @@
+// Copyright 2022 The Coln Group Ltd
+// SPDX-License-Identifier: MIT
+
 // Package risk offers an API to evaluate trade risk.
 // Used in conjunction with the money package to size positions.
 package risk

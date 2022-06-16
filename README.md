@@ -1,3 +1,8 @@
+<!--
+ Copyright 2022 The Coln Group Ltd
+ SPDX-License-Identifier: MIT
+-->
+
 # Alphakit
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -7,7 +12,7 @@
 
 Introducing a framework for algorithmic trading in Go and serverless cloud
 
-```    
+```
            /$$           /$$                 /$$       /$$   /$$    
           | $$          | $$                | $$      |__/  | $$    
   /$$$$$$ | $$  /$$$$$$ | $$$$$$$   /$$$$$$ | $$   /$$ /$$ /$$$$$$  
@@ -24,7 +29,6 @@ Introducing a framework for algorithmic trading in Go and serverless cloud
 Companion code repository for the forthcoming book __Zero to Algo__
 
 > "Master the latest features of Go and learn how to design, validate and deploy sound algorithmic trading strategies."
-
 
 ## Inspiration
 
@@ -58,66 +62,66 @@ The canonical example that brings together many of the framework components is i
 ```go
 
 func Example() {
-	// Verbose error handling omitted for brevity
+ // Verbose error handling omitted for brevity
 
-	// Identify the bot (algo) to optimize by supplying a factory function
-	// Here we're using the classic moving average (MA) cross variant of trend bot
-	bot := trend.MakeCrossBotFromConfig
+ // Identify the bot (algo) to optimize by supplying a factory function
+ // Here we're using the classic moving average (MA) cross variant of trend bot
+ bot := trend.MakeCrossBotFromConfig
 
-	// Define the parameter space to optimize
-	// Param names must match those expected by the MakeBot function passed to optimizer
-	// Here we're optimizing the lookback period of a fast and slow MA
-	// and the Market Meanness Index (MMI) filter
-	paramSpace := ParamMap{
-		"mafastlength": []any{30, 90, 180},
-		"maslowlength": []any{90, 180, 360},
-		"mmilength":    []any{200, 300},
-	}
+ // Define the parameter space to optimize
+ // Param names must match those expected by the MakeBot function passed to optimizer
+ // Here we're optimizing the lookback period of a fast and slow MA
+ // and the Market Meanness Index (MMI) filter
+ paramSpace := ParamMap{
+  "mafastlength": []any{30, 90, 180},
+  "maslowlength": []any{90, 180, 360},
+  "mmilength":    []any{200, 300},
+ }
 
-	// Read price samples to use for optimization
-	btc, _ := market.ReadKlinesFromCSV("testdata/btcusdt-1h/")
-	eth, _ := market.ReadKlinesFromCSV("testdata/ethusdt-1h/")
-	priceSamples := map[AssetID][]market.Kline{"btc": btc, "eth": eth}
+ // Read price samples to use for optimization
+ btc, _ := market.ReadKlinesFromCSV("testdata/btcusdt-1h/")
+ eth, _ := market.ReadKlinesFromCSV("testdata/ethusdt-1h/")
+ priceSamples := map[AssetID][]market.Kline{"btc": btc, "eth": eth}
 
-	// Create a new brute style optimizer with a default simulated dealer (no broker costs)
-	// The default optimization objective is the param set with the highest sharpe ratio
-	optimizer := NewBruteOptimizer()
-	optimizer.SampleSplitPct = 0.5   // Use first 50% as in-sample training data, and remainder for out-of-sample validation
-	optimizer.WarmupBarCount = 360 // Set as maximum lookback of your param space - 360 is the longest lookback for slow MA
-	optimizer.MakeBot = bot        // Tell the optimizer which bot to use
+ // Create a new brute style optimizer with a default simulated dealer (no broker costs)
+ // The default optimization objective is the param set with the highest sharpe ratio
+ optimizer := NewBruteOptimizer()
+ optimizer.SampleSplitPct = 0.5   // Use first 50% as in-sample training data, and remainder for out-of-sample validation
+ optimizer.WarmupBarCount = 360 // Set as maximum lookback of your param space - 360 is the longest lookback for slow MA
+ optimizer.MakeBot = bot        // Tell the optimizer which bot to use
 
-	// Prepare the optimizer and get an estimate on the number of trials (backtests) required
-	trialCount, _ := optimizer.Prepare(paramSpace, priceSamples)
-	fmt.Printf("%d backtest trials to run during optimization\n", trialCount)
+ // Prepare the optimizer and get an estimate on the number of trials (backtests) required
+ trialCount, _ := optimizer.Prepare(paramSpace, priceSamples)
+ fmt.Printf("%d backtest trials to run during optimization\n", trialCount)
 
-	// Start the optimization process and monitor with a receive-only channel
-	// Trials will execute concurrently with a default worker pool matching the num of CPUs
-	trials, _ := optimizer.Start(context.Background())
-	for range trials {
-	  // Monitor for errors and progress
-	}
+ // Start the optimization process and monitor with a receive-only channel
+ // Trials will execute concurrently with a default worker pool matching the num of CPUs
+ trials, _ := optimizer.Start(context.Background())
+ for range trials {
+   // Monitor for errors and progress
+ }
 
-	// Inspect the study results following optimization
-	study := optimizer.Study()
+ // Inspect the study results following optimization
+ study := optimizer.Study()
 
-	// Read out the optimal param set and results
-	optimaPSet := study.Validation[0]
-	fmt.Printf("Optima params: fast: %d slow: %d MMI: %d\n",
-		optimaPSet.Params["mafastlength"], optimaPSet.Params["maslowlength"], optimaPSet.Params["mmilength"])
-	optimaResult := study.ValidationResults[optimaPSet.ID]
-	fmt.Printf("Optima sharpe ratio is %.2f", optimaResult.Sharpe)
+ // Read out the optimal param set and results
+ optimaPSet := study.Validation[0]
+ fmt.Printf("Optima params: fast: %d slow: %d MMI: %d\n",
+  optimaPSet.Params["mafastlength"], optimaPSet.Params["maslowlength"], optimaPSet.Params["mmilength"])
+ optimaResult := study.ValidationResults[optimaPSet.ID]
+ fmt.Printf("Optima sharpe ratio is %.2f", optimaResult.Sharpe)
 
-	// Output:
-	// 38 backtest trials to run during optimization
-	// Optima params: fast: 30 slow: 90 MMI: 200
-	// Optima sharpe ratio is 2.46
+ // Output:
+ // 38 backtest trials to run during optimization
+ // Optima params: fast: 30 slow: 90 MMI: 200
+ // Optima sharpe ratio is 2.46
 }
 
 ```
 
 ## Beware testing bias
 
-Alphakit's aim is to demonstrate best practice when developing algo strategies. This requires a sound approach to backtesting and performance analysis in order to mimimize bias, the most important of which is overfitting whereby you mistake random chance for edge. This is a good summary of the challenges: https://robotwealth.com/backtesting-bias-feels-good-until-you-blow-up/.
+Alphakit's aim is to demonstrate best practice when developing algo strategies. This requires a sound approach to backtesting and performance analysis in order to mimimize bias, the most important of which is overfitting whereby you mistake random chance for edge. This is a good summary of the challenges: <https://robotwealth.com/backtesting-bias-feels-good-until-you-blow-up/>.
 
 To this end, the `BruteOptimizer` implementation enables you to split the given price samples into in-sample and out-of-sample buckets.
 
@@ -130,7 +134,7 @@ optimizer.SampleSplitPct = 0.5
 
 Training is conducted on the in-sample and performance validation on the out-of-sample. However, this is not a pancea and can still result in an overfitted algo if you attempt to optimize too many parameters at the same time.
 
-There are a number of useful articles on https://financial-hacker.com/ that explore the pitfalls of backtesting in more detail.
+There are a number of useful articles on <https://financial-hacker.com/> that explore the pitfalls of backtesting in more detail.
 
 ## Fundamental architecture patterns
 
@@ -144,7 +148,7 @@ In future releases new `Dealer` implementations will enable you to connect to sp
 
 ## Working with price data
 
-The price data used in the unit tests and examples is sourced from Binance. It's a good source of clean crypto data going back to late 2017. See https://github.com/binance/binance-public-data/.
+The price data used in the unit tests and examples is sourced from Binance. It's a good source of clean crypto data going back to late 2017. See <https://github.com/binance/binance-public-data/>.
 
 Alphakit offers an API for price data in the `market` package. The primary representation is in the form of a candlestick (OHLC) - also known as a kline. `CSVKlineReader` reads klines from a .csv file, it can be extended to decode data from various sources with a `CSVKlineDecoder`. The default decoder supports the Binance data format which uses a unix millisecond format. A further decoder is also provided for MetaTrader data files.
 
@@ -174,7 +178,7 @@ The following notes refer to how the bot in the `trend` package operates.
 
 `ApexPredicter` uses peak and valley detection in a smoothed price series with an MMI filter.
 
-To understand more about trend following and MMI this is a great starting point: https://financial-hacker.com/trend-and-exploiting-it/
+To understand more about trend following and MMI this is a great starting point: <https://financial-hacker.com/trend-and-exploiting-it/>
 
 The trend bot interprets the prediction value according to a set of threshold values for opening and closing positions, namely:
 
@@ -215,16 +219,16 @@ Future releases will provide implementations of `broker.Dealer` for specific tra
 
 ## Further reading
 
-- https://financial-hacker.com/
-- https://robotwealth.com/
-- https://quantocracy.com/
-- https://zorro-project.com/manual/
+- <https://financial-hacker.com/>
+- <https://robotwealth.com/>
+- <https://quantocracy.com/>
+- <https://zorro-project.com/manual/>
 
 ## Contributing
 
-Please fork and raise a PR or submit an issue. 
+Please fork and raise a PR or submit an issue.
 
 Contributions should comply with:
 
 - Default golangci linters (see config file in root)
-- Uber style guide: https://github.com/uber-go/guide/blob/master/style.md
+- Uber style guide: <https://github.com/uber-go/guide/blob/master/style.md>
