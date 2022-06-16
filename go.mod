@@ -21,9 +21,6 @@ require (
 	github.com/jszwec/csvutil v1.7.0 // indirect
 	github.com/oklog/ulid/v2 v2.0.2 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
-)
-
-require (
 	github.com/fsnotify/fsnotify v1.5.4 // indirect
 	github.com/gammazero/deque v0.1.1 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
