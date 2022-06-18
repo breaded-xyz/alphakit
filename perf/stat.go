@@ -10,14 +10,15 @@ import (
 )
 
 const (
+	// DailyToAnnualFactor is the factor to scale daily observations to annual.
+	// Commonly defined as the number of public market trading days in a year.
+	DailyToAnnualFactor = 252
+
 	// SharpeDefaultAnnualRiskFreeRate is the default risk free rate for Sharpe Ratio.
 	SharpeDefaultAnnualRiskFreeRate = 0.0
 
-	// SharpeDailyToAnnualFactor is the factor to convert daily Sharpe to annual Sharpe.
-	SharpeDailyToAnnualFactor = 252
-
 	// SharpeDefaultDailyRiskFreeRate is the daily rate based on the default annual rate
-	SharpeDefaultDailyRiskFreeRate = SharpeDefaultAnnualRiskFreeRate / SharpeDailyToAnnualFactor
+	SharpeDefaultDailyRiskFreeRate = SharpeDefaultAnnualRiskFreeRate / DailyToAnnualFactor
 )
 
 // SharpeRatio is the annualised value using a daily risk free rate and daily returns.
@@ -28,10 +29,16 @@ func SharpeRatio(daily []float64, riskFreeRate float64) float64 {
 		xr[i] = daily[i] - riskFreeRate
 	}
 
-	mxr := stat.Mean(xr, nil)                         // Mean excess returns
-	sd := stat.StdDev(xr, nil)                        // SD excess returns
-	dsr := mxr / sd                                   // Daily Sharpe
-	return dsr * math.Sqrt(SharpeDailyToAnnualFactor) // Scale daily to annual
+	mxr := stat.Mean(xr, nil)                   // Mean excess returns
+	sd := stat.StdDev(xr, nil)                  // SD excess returns
+	dsr := mxr / sd                             // Daily Sharpe
+	return dsr * math.Sqrt(DailyToAnnualFactor) // Scale daily to annual
+}
+
+// HistVolAnn is the annualized historic volatility of daily returns.
+func HistVolAnn(daily []float64) float64 {
+	sd := stat.StdDev(daily, nil)
+	return sd * math.Sqrt(DailyToAnnualFactor)
 }
 
 // CAGR Compound Annual Growth Rate

@@ -42,6 +42,9 @@ type PortfolioReport struct {
 	// MDDRecovery is the recovery time of the maximum drawdown of the equity curve.
 	MDDRecovery time.Duration
 
+	// HistVolAnn is the historic volatility of the equity curve as annualized std dev.
+	HistVolAnn float64
+
 	// Sharpe is the Sharpe ratio of the equity curve.
 	Sharpe float64
 
@@ -84,6 +87,8 @@ func NewPortfolioReport(curve broker.EquitySeries) *PortfolioReport {
 	report.MDDRecovery = report.mdd.Recovery
 
 	returns := DiffPctReturns(daily)
+
+	report.HistVolAnn = HistVolAnn(returns)
 	report.Sharpe = SharpeRatio(returns, SharpeDefaultAnnualRiskFreeRate)
 	report.Calmar = CalmarRatio(report.CAGR, report.MaxDrawdown)
 

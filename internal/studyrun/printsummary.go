@@ -16,8 +16,9 @@ import (
 
 var _summaryHeader = []string{
 	"PRR",
+	"Vol",
 	"MDD",
-	"WinPct",
+	"Wins",
 	"CAGR",
 	"Sharpe",
 	"Calmar",
@@ -33,9 +34,10 @@ func printSummary(report optimize.PhaseReport) {
 	table.SetHeader(_summaryHeader)
 	table.Append([]string{
 		fmt.Sprintf("%.2f", report.PRR),
-		fmt.Sprintf("%.2f", report.MDD*100),
-		fmt.Sprintf("%.2f", report.WinPct*100),
-		fmt.Sprintf("%.2f", report.CAGR*100),
+		fmt.Sprintf("%.2f%%", report.HistVolAnn*100),
+		fmt.Sprintf("%.2f%%", report.MDD*100),
+		fmt.Sprintf("%.2f%%", report.WinPct*100),
+		fmt.Sprintf("%.2f%%", report.CAGR*100),
 		fmt.Sprintf("%.2f", report.Sharpe),
 		fmt.Sprintf("%.2f", report.Calmar),
 		fmt.Sprintf("%.2f", report.Kelly),

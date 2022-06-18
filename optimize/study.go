@@ -61,12 +61,13 @@ type PhaseReport struct {
 	Phase   Phase    `csv:"phase"`
 	Subject ParamSet `csv:"paramset_,inline"`
 
-	PRR    float64 `csv:"prr"`
-	MDD    float64 `csv:"mdd"`
-	CAGR   float64 `csv:"cagr"`
-	Sharpe float64 `csv:"sharpe"`
-	Calmar float64 `csv:"calmar"`
-	WinPct float64 `csv:"win_pct"`
+	PRR        float64 `csv:"prr"`
+	MDD        float64 `csv:"mdd"`
+	CAGR       float64 `csv:"cagr"`
+	HistVolAnn float64 `csv:"vol"`
+	Sharpe     float64 `csv:"sharpe"`
+	Calmar     float64 `csv:"calmar"`
+	WinPct     float64 `csv:"win_pct"`
 
 	Kelly    float64 `csv:"kelly"`
 	OptimalF float64 `csv:"optimalf"`
@@ -108,6 +109,7 @@ func Summarize(report PhaseReport) PhaseReport {
 
 		report.PRR += backtest.TradeReport.PRR
 		report.MDD += backtest.PortfolioReport.MaxDrawdown
+		report.HistVolAnn += backtest.PortfolioReport.HistVolAnn
 		report.CAGR += backtest.PortfolioReport.CAGR
 		report.Sharpe += backtest.PortfolioReport.Sharpe
 		report.Calmar += backtest.PortfolioReport.Calmar
@@ -124,6 +126,7 @@ func Summarize(report PhaseReport) PhaseReport {
 	count := float64(report.SampleCount)
 	report.PRR /= count
 	report.MDD /= count
+	report.HistVolAnn /= count
 	report.CAGR /= count
 	report.Sharpe /= count
 	report.Calmar /= count
