@@ -54,6 +54,11 @@ type PortfolioReport struct {
 	// EquityCurve is the source from which the report fields are generated.
 	EquityCurve broker.EquitySeries `csv:"-"`
 
+	// DailyReturns is the series of pct diff returns extracted from the EquityCurve.
+	// This is the series used to calculate Sharpe and HistVolAnn.
+	// Intended for use plotting returns distribution
+	DailyReturns []float64 `csv:"-"`
+
 	drawdowns []Drawdown
 	mdd       Drawdown
 }
@@ -87,6 +92,7 @@ func NewPortfolioReport(curve broker.EquitySeries) *PortfolioReport {
 	report.MDDRecovery = report.mdd.Recovery
 
 	returns := DiffPctReturns(daily)
+	report.DailyReturns = returns
 
 	report.HistVolAnn = HistVolAnn(returns)
 	report.Sharpe = SharpeRatio(returns, SharpeDefaultAnnualRiskFreeRate)
