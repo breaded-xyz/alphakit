@@ -4,7 +4,7 @@ import (
 	"image/color"
 	"io"
 
-	"github.com/gonum/stat/distuv"
+	"gonum.org/v1/gonum/stat/distuv"
 	"gonum.org/v1/plot"
 	"gonum.org/v1/plot/plotter"
 	"gonum.org/v1/plot/vg"
