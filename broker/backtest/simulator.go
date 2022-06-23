@@ -319,7 +319,7 @@ func (s *Simulator) processPosition(position broker.Position, order broker.Order
 		// Create a round-turn for the closed position
 		// Realize the position PNL to the account balance
 		// Mark price is the fill price of the order that closed the position,
-		// note this is a specific edge case for closing a position in order to correctly handle limit orders
+		// note this is to accommodate the case when a limit order has closed the position
 		position = markPositionToMarket(position, order.FilledPrice)
 		roundturn := s.createRoundTurn(position)
 		s.balance.Trade = s.balance.Trade.Add(roundturn.Profit)
