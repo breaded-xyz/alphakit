@@ -14,7 +14,7 @@ import (
 )
 
 // WriteStudyResultToCSV writes the results of a study to CSV.
-// Study results are flattened to separate files with foreign keys added to link rows.
+// Study results are flattened to separate files. Foreign keys are added to link across flat files.
 // Study ID is prefixed to the result filenames.
 //
 // - phasereport.csv: summary performance of each paramset for each phase

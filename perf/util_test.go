@@ -20,7 +20,7 @@ func TestDiffPctReturns(t *testing.T) {
 		4: dec.New(5),  // 5 - 30 = -25 / 30 = -0.8333333333333334
 	}
 	want := []float64{1, 0.5, -0.8333333333333334}
-	act := DiffPctReturns(give)
+	act := SimpleReturns(give)
 	assert.Equal(t, want, act)
 }
 

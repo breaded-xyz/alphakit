@@ -10,9 +10,8 @@ import (
 	"github.com/thecolngroup/gou/num"
 )
 
-// DiffPctReturns converts an equity curve of absolute amounts
-// into a series of percentage differences.
-func DiffPctReturns(curve broker.EquitySeries) []float64 {
+// SimpleReturns converts an equity curve of absolute amounts into a series of percentage differences.
+func SimpleReturns(curve broker.EquitySeries) []float64 {
 	diffs := make([]float64, len(curve)-1)
 	vs := curve.SortValuesByTime()
 	for i := range vs {
