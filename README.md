@@ -3,6 +3,8 @@
  SPDX-License-Identifier: MIT
 -->
 
+__!! Alphakit is now archived and is not maintained. See other repos in the org for our active projects. !!__
+
 # Alphakit
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -25,10 +27,6 @@ Introducing a framework for algorithmic trading in Go and serverless cloud
               | $$                                                  
               |__/                                                  
 ```
-
-Companion code repository for the forthcoming book __Zero to Algo__
-
-> "Master the latest features of Go and learn how to design, validate and deploy sound algorithmic trading strategies."
 
 ## Inspiration
 
